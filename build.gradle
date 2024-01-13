@@ -35,3 +35,13 @@ dependencies {
 tasks.named('test') {
 	useJUnitPlatform()
 }
+
+jar {
+	enabled = false
+}
+
+springBoot {
+	if (project.hasProperty("SPRING_CONFIG_LOCATION")) {
+		systemProperties['spring.config.location'] = project.SPRING_CONFIG_LOCATION
+	}
+}
