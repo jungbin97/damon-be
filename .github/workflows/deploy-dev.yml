@@ -28,7 +28,7 @@ jobs:
         ./gradlew build \
           -Dspring.config.location=$SPRING_CONFIG_LOCATION
       env:
-        SPRING_CONFIG_LOCATION: src/main/resources/application-server.properties
+        SPRING_CONFIG_LOCATION: src/main/resources/application-dev.properties
     - name: 도커허브에 로그인
       uses: docker/login-action@v1
       with:
