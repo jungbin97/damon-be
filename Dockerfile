@@ -10,4 +10,4 @@ COPY build/libs/*.jar app.jar
 # 실행 명령어
 #ENTRYPOINT ["java", "-jar", "app.jar"]
 
-ENTRYPOINT ["java","-jar","-Dspring.profiles.active=server","/app.jar"]
+ENTRYPOINT ["java","-jar","-Dspring.profiles.active=server","app.jar"]
