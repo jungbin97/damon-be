@@ -26,15 +26,9 @@ jobs:
     - name: Gradle로 빌드(CI)
       run: |
         ./gradlew build \
-          -Dspring.config.location=$SPRING_CONFIG_LOCATION \
-          -DDB_URL=$DB_URL \
-          -DDB_USERNAME=$DB_USERNAME \
-          -DDB_PASSWORD=$DB_PASSWORD
+          -Dspring.config.location=$SPRING_CONFIG_LOCATION
       env:
         SPRING_CONFIG_LOCATION: src/main/resources/application-server.properties
-        DB_URL: ${{ secrets.DB_DEV_URL }}
-        DB_USERNAME: ${{ secrets.DB_USERNAME }}
-        DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
     - name: 도커허브에 로그인
       uses: docker/login-action@v1
       with:
