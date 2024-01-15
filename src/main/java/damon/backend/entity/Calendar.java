@@ -2,6 +2,7 @@ package damon.backend.entity;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -33,14 +34,22 @@ public class Calendar{
     @Enumerated(EnumType.STRING)
     private Area area;
 
-    @OneToMany(mappedBy = "calendar")
+    @OneToMany(mappedBy = "calendar", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Travel> travels = new ArrayList<>();
 
+    @Builder
     public Calendar(Member member, String title, LocalDate startDate, LocalDate endDate, Area area) {
         this.member = member;
         this.title = title;
         this.startDate = startDate;
         this.endDate = endDate;
         this.area = area;
+    }
+
+    public void addTravel(Travel travel){
+        this.travels.add(travel);
+        if (travel.getCalendar() != this) {
+            travel.setCalendar(this);
+        }
     }
 }
