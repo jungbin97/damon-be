@@ -7,12 +7,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
+@Table(name = "member")
 @Getter
 public class Member {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "member_id")
-    private String id;
+    private Long id;
+
+    private String nickname;
+
+    private String profileImgUrl;
 
     //리뷰 매핑
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)

@@ -14,6 +14,7 @@ import java.util.List;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Table(name = "review_comment")
 public class ReviewComment {
     //not null 이 너무 많아서 기본값을 not null로 설정
     @Retention(RetentionPolicy.RUNTIME)

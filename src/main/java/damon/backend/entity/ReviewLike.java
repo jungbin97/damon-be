@@ -13,6 +13,7 @@ import java.lang.annotation.Target;
 @Entity
 @Getter
 @Setter
+@Table(name = "review_like")
 public class ReviewLike {
     //not null 이 너무 많아서 기본값을 not null로 설정
     @Retention(RetentionPolicy.RUNTIME)
