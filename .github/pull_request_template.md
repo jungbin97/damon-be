@@ -1,29 +1,31 @@
-## PR Checklist
-Please check if your PR fulfills the following requirements:
+## 이슈 번호
 
-- [ ] The commit message follows our guidelines
-- [ ] Tests for the changes have been added (for bug fixes / features)
-- [ ] Docs have been added / updated (for bug fixes / features)
+JIRA Issue📌: [해당 글을 지우고 이슈 번호를 입력해주세요, e.g., KAN-25]
+
+## PR 체크리스트
+- [ ] 커밋 컨벤션에 맞게 작성했는가?
+- [ ] 현재 작성중인 파일을 업로드 하지 않았는가?
+- [ ] main 브랜치를 pull 받았는가?
 
 
-## PR Type
+## PR 작업 분류
 
 <!-- Please check the one that applies to this PR using "x". -->
 
-- [ ] Bugfix
-- [ ] Feature
-- [ ] Code style update (formatting, local variables)
-- [ ] Refactoring (no functional changes, no api changes)
-- [ ] Build related changes
-- [ ] CI related changes
-- [ ] Documentation content changes
-- [ ] angular.io application / infrastructure changes
-- [ ] Other... Please describe:
+- [ ] 버그 수정
+- [ ] 신규 기능
+- [ ] 리팩토링
+- [ ] 프로젝트 구조 변경
+- [ ] CI 관련 변경사항
+- [ ] 기타
 
+## 작업 상세 내용
+- [최대한 상세하게 작성]
 
-## What is the current behavior?
-<!-- Please describe the current behavior that you are modifying, or link to a relevant issue. -->
+## 다음 할 일
+- 
+## 질문 사항
 
-JIRA Issue: [Please write the issue number here, e.g., KAN-25]
+**💬질문 내용**
 
-## Other information
+**🔴 이건 반드시 확인해 주세요!**
