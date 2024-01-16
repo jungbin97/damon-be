@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 
+
 @Service
 @RequiredArgsConstructor
 public class CalendarService {
@@ -25,7 +26,7 @@ public class CalendarService {
      * @param requestDto : 일정 글 생성에 필요한 정보
      */
     @Transactional
-    public void createCalendar(Long memberId, CalendarCreateRequestDto requestDto) {
+    public void createCalendar(String memberId, CalendarCreateRequestDto requestDto) {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 사용자를 찾을 수 없습니다."));
 
@@ -52,4 +53,16 @@ public class CalendarService {
         });
         calendarRepository.save(calendar);
     }
+
+//    /**
+//     * 내 일정 글 전체 조회합니다.
+//     * @param memberId : 해당 멤버의 아이디
+//     * @return : 일정 글 전체 조회
+//     */
+//    public List<Calendar> getCalendars(String memberId)  {
+//        Member member = memberRepository.findById(memberId)
+//                .orElseThrow(() -> new IllegalArgumentException("해당 사용자를 찾을 수 없습니다."));
+//
+//        List<Calendar> calendars = calendarRepository.findByMember(member);
+//    }
 }
