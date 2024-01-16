@@ -2,6 +2,8 @@ package damon.backend.service;
 
 import damon.backend.dto.request.CalendarCreateRequestDto;
 import damon.backend.dto.request.TravelCreateRequestDto;
+import damon.backend.dto.response.CalendarResponseDto;
+import damon.backend.dto.response.CalendarsResponseDto;
 import damon.backend.entity.Area;
 import damon.backend.entity.Calendar;
 import damon.backend.entity.Member;
@@ -14,11 +16,15 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Optional;
+import java.util.*;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.AdditionalAnswers.returnsFirstArg;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -84,5 +90,66 @@ class CalendarServiceTest {
         verify(memberRepository).findById(member.getId());
         verify(calendarRepository).save(any(Calendar.class));
         verify(travelRepository, times(requestDto.getTravels().size())).save(any(Travel.class));
+    }
+
+    @DisplayName("getCalendars: 멤버의 일정 글 리스트를 조회한다.")
+    @Test
+    public void getCalendarList() throws Exception {
+        int page = 0;
+        int size = 10;
+
+        // 여러개의 캘린더 생성(11개)
+        List<Calendar> calendars = Arrays.asList(
+                Calendar.builder().build(),
+                Calendar.builder().build(),
+                Calendar.builder().build(),
+                Calendar.builder().build(),
+                Calendar.builder().build(),
+                Calendar.builder().build(),
+                Calendar.builder().build(),
+                Calendar.builder().build(),
+                Calendar.builder().build(),
+                Calendar.builder().build(),
+                Calendar.builder().build()
+                );
+
+        // 페이징 처리 수동
+        PageRequest pageRequest = PageRequest.of(page, size);
+        int start = 0;
+        int end = Math.min(start + size, calendars.size());
+
+        List<Calendar> subList = calendars.subList(start, end);
+        Page<Calendar> mockPage = new PageImpl<>(subList, pageRequest, calendars.size());
+        when(calendarRepository.findByMember(any(Member.class), any(PageRequest.class))).thenReturn(mockPage);
+
+        // Action
+        Page<CalendarsResponseDto> result = calendarService.getCalendars(member.getId(), page, size);
+
+        // Verify
+        assertNotNull(result);
+        assertEquals(size, result.getContent().size());
+        verify(calendarRepository).findByMember(any(Member.class), any(PageRequest.class));
+    }
+
+    @DisplayName("getCalendar: 멤버의 일정 글 상세 조회한다.")
+    @Test
+    public void getCalender() throws Exception {
+        Long calendarId = 1L;
+        Calendar calendar = Calendar.builder()
+                .member(member)
+                .title("제주 여행 2박 3일")
+                .startDate(LocalDate.of(2021, 8, 1))
+                .endDate(LocalDate.of(2021, 8, 3))
+                .area(Area.JEJU)
+                .build();
+        when(calendarRepository.findById(any())).thenReturn(Optional.of(calendar));
+
+        // Action
+        CalendarResponseDto result = calendarService.getCalendar(member.getId(), calendarId);
+
+        // Verify
+        assertNotNull(result);
+        verify(memberRepository).findById(member.getId());  // 멤버 조회 확인
+        assertEquals(calendar.getTitle(), result.getTitle());
     }
 }
