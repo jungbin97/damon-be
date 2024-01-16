@@ -12,8 +12,9 @@ public class TravelCreateRequestDto {
     private String latitude;
     private String longitude;
     private int orderNum;
+    private String memo;
 
-    public static TravelCreateRequestDto of(String locationName, String latitude, String longitude, int orderNum) {
-        return new TravelCreateRequestDto(locationName, latitude, longitude, orderNum);
+    public static TravelCreateRequestDto of(String locationName, String latitude, String longitude, int orderNum, String memo) {
+        return new TravelCreateRequestDto(locationName, latitude, longitude, orderNum, memo);
     }
 }
