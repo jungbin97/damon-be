@@ -14,7 +14,7 @@ import java.util.List;
 @Table(name = "calendar")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Calendar{
+public class Calendar extends BaseEntity{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "calendar_id")
