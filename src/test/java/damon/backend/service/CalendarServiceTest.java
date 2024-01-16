@@ -19,7 +19,6 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.AdditionalAnswers.returnsFirstArg;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -47,7 +46,7 @@ class CalendarServiceTest {
     @BeforeEach
     void setUp() {
         member = new Member();
-        member.setId(1L);
+        member.setId("testId");
         member.setNickname("test nickname");
         member.setProfileImgUrl("/test/url");
         ArrayList<TravelCreateRequestDto> travelDtoList = new ArrayList<>();
