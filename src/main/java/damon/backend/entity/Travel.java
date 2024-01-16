@@ -26,15 +26,18 @@ public class Travel {
 
     private String longitude;
 
+    private String memo;
+
     private int orderNum;
 
     @Builder
-    public Travel(Calendar calendar, String locationName, String latitude, String longitude, int orderNum) {
+    public Travel(Calendar calendar, String locationName, String latitude, String longitude, int orderNum, String memo) {
         this.calendar = calendar;
         this.locationName = locationName;
         this.latitude = latitude;
         this.longitude = longitude;
         this.orderNum = orderNum;
+        this.memo = memo;
     }
 
     public void setCalendar(Calendar calendar){

@@ -14,7 +14,7 @@ import java.util.List;
 @Table(name = "calendar")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Calendar{
+public class Calendar extends BaseEntity{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "calendar_id")
@@ -34,7 +34,7 @@ public class Calendar{
     @Enumerated(EnumType.STRING)
     private Area area;
 
-    @OneToMany(mappedBy = "calendar", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "calendar")
     private List<Travel> travels = new ArrayList<>();
 
     @Builder
