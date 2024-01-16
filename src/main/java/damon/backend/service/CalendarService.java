@@ -1,6 +1,9 @@
 package damon.backend.service;
 
 import damon.backend.dto.request.CalendarCreateRequestDto;
+import damon.backend.dto.response.CalendarCreateResponseDto;
+import damon.backend.dto.response.CalendarResponseDto;
+import damon.backend.dto.response.CalendarsResponseDto;
 import damon.backend.entity.Calendar;
 import damon.backend.entity.Member;
 import damon.backend.entity.Travel;
@@ -8,6 +11,10 @@ import damon.backend.repository.CalendarRepository;
 import damon.backend.repository.MemberRepository;
 import damon.backend.repository.TravelRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,7 +33,7 @@ public class CalendarService {
      * @param requestDto : 일정 글 생성에 필요한 정보
      */
     @Transactional
-    public void createCalendar(String memberId, CalendarCreateRequestDto requestDto) {
+    public CalendarCreateResponseDto createCalendar(String memberId, CalendarCreateRequestDto requestDto) {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 사용자를 찾을 수 없습니다."));
 
@@ -46,23 +53,51 @@ public class CalendarService {
                     .locationName(travelDto.getLocationName())
                     .latitude(travelDto.getLatitude())
                     .longitude(travelDto.getLongitude())
+                    .memo(travelDto.getMemo())
                     .orderNum(travelDto.getOrderNum()) // TODO: orderNum 순서를 어떻게 관리 할 것인가?
                     .build();
             // 생명 주기를 수동으로 관리하기 위해 여행지를 저장할 때마다 일정 글에도 저장(추후에 cascade를 고려합니다.)
             travelRepository.save(newTravel);
         });
-        calendarRepository.save(calendar);
+        Calendar savedCalendar = calendarRepository.save(calendar);
+        return CalendarCreateResponseDto.from(savedCalendar.getId());
     }
 
-//    /**
-//     * 내 일정 글 전체 조회합니다.
-//     * @param memberId : 해당 멤버의 아이디
-//     * @return : 일정 글 전체 조회
-//     */
-//    public List<Calendar> getCalendars(String memberId)  {
-//        Member member = memberRepository.findById(memberId)
-//                .orElseThrow(() -> new IllegalArgumentException("해당 사용자를 찾을 수 없습니다."));
-//
-//        List<Calendar> calendars = calendarRepository.findByMember(member);
-//    }
+    /**
+     * 내 일정 글 리스트를 조회합니다.
+     * @param memberId : 해당 멤버의 아이디
+     * @param page : 페이지 번호
+     * @param size : 페이지 사이즈
+     * @return : 요청한 페이징에 맞는 일정 목록을 반환
+     */
+    public Page<CalendarsResponseDto> getCalendars(String memberId, int page, int size)  {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 사용자를 찾을 수 없습니다."));
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdDate"));
+        Page<Calendar> calendarPage = calendarRepository.findByMember(member, pageable);
+
+        return calendarPage.map(CalendarsResponseDto::from);
+    }
+
+    /**
+     * 내 일정 글 상세 조회합니다.
+     * @param memberId : 해당 멤버의 아이디
+     * @param calendarId : 해당 일정 글의 아이디
+     * @return : 요청한 일정 글의 상세 정보를 반환
+     */
+
+    public CalendarResponseDto getCalendar(String memberId, Long calendarId) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 사용자를 찾을 수 없습니다."));
+
+        Calendar calendar = calendarRepository.findById(calendarId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 일정을 찾을 수 없습니다."));
+
+        if (!calendar.getMember().getId().equals(member.getId())) {
+            throw new IllegalArgumentException("해당 일정을 조회할 수 없습니다.");
+        }
+
+        return CalendarResponseDto.from(calendar);
+    }
 }
