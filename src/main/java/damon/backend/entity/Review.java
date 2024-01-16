@@ -16,6 +16,7 @@ import java.util.List;
 @Getter @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Table(name = "review")
 public class Review {
     //not null 이 너무 많아서 기본값을 not null로 설정
     @Retention(RetentionPolicy.RUNTIME)
@@ -32,8 +33,8 @@ public class Review {
     private int view;
 
     private String title;
-    private LocalDate start;
-    private LocalDate end;
+    private LocalDate startDate;
+    private LocalDate endDate;
 
     @Enumerated(EnumType.STRING)
     private Area area;

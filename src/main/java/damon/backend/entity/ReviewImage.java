@@ -15,6 +15,7 @@ import java.lang.annotation.Target;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Table(name = "review_image")
 public class ReviewImage {
     //not null 이 너무 많아서 기본값을 not null로 설정
     @Retention(RetentionPolicy.RUNTIME)
