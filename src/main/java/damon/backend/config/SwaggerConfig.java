@@ -17,8 +17,8 @@ public class SwaggerConfig {
 
     private Info apiInfo() {
         return new Info()
-                .title("springdoc 테스트")
-                .description("springdoc을 사용한 Swagger UI 테스트")
+                .title("Damon")
+                .description("Damon API Swaggger UI")
                 .version("1.0.0");
     }
 }
