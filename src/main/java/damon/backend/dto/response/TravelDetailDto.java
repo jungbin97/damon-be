@@ -13,15 +13,16 @@ import java.util.List;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Getter
 public class TravelDetailDto {
+    private Long calendarId;
     private int day;
     private String localName;
     private String latitude;
     private String longitude;
-
     private String memo;
 
     public static TravelDetailDto form(Travel travel) {
         return new TravelDetailDto(
+                travel.getId(),
                 travel.getOrderNum(),
                 travel.getLocationName(),
                 travel.getLatitude(),

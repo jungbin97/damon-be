@@ -45,6 +45,12 @@ public class Calendar extends BaseEntity{
         this.endDate = endDate;
         this.area = area;
     }
+    public void update(String title, LocalDate startDate, LocalDate endDate, Area area) {
+        this.title = title;
+        this.startDate = startDate;
+        this.endDate = endDate;
+        this.area = area;
+    }
 
     public void addTravel(Travel travel){
         this.travels.add(travel);

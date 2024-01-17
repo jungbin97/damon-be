@@ -46,4 +46,12 @@ public class Travel {
             calendar.getTravels().add(this);
         }
     }
+
+    public void update(String locationName, String latitude, String longitude, String memo, int orderNum) {
+        this.locationName = locationName;
+        this.latitude = latitude;
+        this.longitude = longitude;
+        this.memo = memo;
+        this.orderNum = orderNum;
+    }
 }
