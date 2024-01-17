@@ -3,9 +3,6 @@ name: 운영서버에 배포
 on:
   push:
     branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
-    types: [ "closed" ]
 
 permissions:
   contents: read

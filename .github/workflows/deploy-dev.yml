@@ -3,9 +3,6 @@ name: 개발서버에 배포
 on:
   push:
     branches: [ "develop" ]
-  pull_request:
-    branches: [ "develop" ]
-    types: [ "closed" ]
 
 permissions:
   contents: read
