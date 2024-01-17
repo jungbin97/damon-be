@@ -34,7 +34,7 @@ public class Calendar extends BaseEntity{
     @Enumerated(EnumType.STRING)
     private Area area;
 
-    @OneToMany(mappedBy = "calendar")
+    @OneToMany(mappedBy = "calendar", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<Travel> travels = new ArrayList<>();
 
     @Builder
