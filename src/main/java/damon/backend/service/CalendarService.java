@@ -157,4 +157,24 @@ public class CalendarService {
 
         return CalendarEditResponseDto.from(calendarId);
     }
+
+    /**
+     * 일정 글을 삭제합니다.
+     * @param memberId : 해당 멤버의 아이디
+     * @param calendarId : 해당 일정 글의 아이디
+     */
+    @Transactional
+    public void deleteCalendar(String memberId, Long calendarId) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 사용자를 찾을 수 없습니다."));
+
+        Calendar calendar = calendarRepository.findById(calendarId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 일정을 찾을 수 없습니다."));
+
+        if (!calendar.getMember().getId().equals(member.getId())) {
+            throw new IllegalArgumentException("해당 일정을 삭제할 수 없습니다.");
+        }
+        // cascde로 삭제합니다.
+        calendarRepository.delete(calendar);
+    }
 }
