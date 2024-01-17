@@ -37,4 +37,4 @@ jobs:
         key: ${{ secrets.AWS_KEY }}
         script: |
           docker pull ${{ secrets.DOCKER_USER_NAME }}/${{ secrets.DOCKER_IMAGE_NAME }}-be-dev
-          docker-compose -f docker-compose.dev.yml up -d
+          docker-compose up -d
