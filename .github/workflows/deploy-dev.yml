@@ -4,9 +4,6 @@ on:
   push:
     branches: [ "develop" ]
 
-permissions:
-  contents: read
-
 jobs:
   build:
     runs-on: ubuntu-latest # 작업이 실행될 환경
@@ -21,27 +18,23 @@ jobs:
     - name: Gradle Wrapper 실행 권한 추가
       run: chmod +x gradlew
     - name: Gradle로 빌드(CI)
-      run: |
-        ./gradlew build \
-          -Dspring.config.location=$SPRING_CONFIG_LOCATION
-      env:
-        SPRING_CONFIG_LOCATION: src/main/resources/application-dev.properties
+      run: ./gradlew build
     - name: 도커허브에 로그인
       uses: docker/login-action@v1
       with:
         username: ${{ secrets.DOCKER_USER_NAME }}
         password: ${{ secrets.DOCKER_USER_PW }}
     - name: 이미지 빌드
-      run: docker build -t ${{ secrets.DOCKER_USER_NAME }}/${{ secrets.DOCKER_IMAGE_NAME }}:dev .
+      run: docker build -t ${{ secrets.DOCKER_USER_NAME }}/${{ secrets.DOCKER_IMAGE_NAME }}-be-dev -f Dockerfile.dev .
     - name: 도커허브에 이미지 푸시
-      run: docker push ${{ secrets.DOCKER_USER_NAME }}/${{ secrets.DOCKER_IMAGE_NAME }}:dev
+      run: docker push ${{ secrets.DOCKER_USER_NAME }}/${{ secrets.DOCKER_IMAGE_NAME }}-be-dev
     - name: AWS EC2에 ssh 접속 후 배포
       uses: appleboy/ssh-action@master     
       with:
-        host: ${{ secrets.AWS_DEV_IP }}
-        port: ${{ secrets.AWS_PORT }}
-        username: ${{ secrets.AWS_USER_NAME }}
+        host: ${{ secrets.AWS_IP_DEV }}
+        port: 22
+        username: ubuntu
         key: ${{ secrets.AWS_KEY }}
         script: |
-          docker pull ${{ secrets.DOCKER_USER_NAME }}/${{ secrets.DOCKER_IMAGE_NAME }}:dev
-          docker-compose up -d
+          docker pull ${{ secrets.DOCKER_USER_NAME }}/${{ secrets.DOCKER_IMAGE_NAME }}-be-dev
+          docker-compose -f docker-compose.dev.yml up -d
