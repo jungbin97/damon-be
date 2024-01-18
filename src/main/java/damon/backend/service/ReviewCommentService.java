@@ -87,8 +87,9 @@ public class ReviewCommentService {
         // 댓글 구조를 다시 조직화
         List<ReviewCommentResponse> organizedComments = reviewService.organizeCommentStructure(reviewId);
 
-        // 구조화된 댓글 목록을 포함하여 ReviewResponse 반환
-        return ReviewResponse.from(comment.getReview(), organizedComments);
+
+        // 댓글 구조를 다시 조직화하여 리뷰 전체 상태를 반환
+        return reviewService.searchReview(reviewId);
     }
 
     // 댓글 삭제

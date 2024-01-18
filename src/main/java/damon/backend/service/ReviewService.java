@@ -170,7 +170,7 @@ public class ReviewService {
 
 
     //좋아요 수 계산 (다시 누르면 좋아요 취소)
-    public void toggleLike(Long reviewId) {
+    public ReviewResponse toggleLike(Long reviewId) {
         Review review = reviewRepository.findById(reviewId)
                 .orElseThrow(() -> new RuntimeException("리뷰를 찾을 수 없습니다."));
 
@@ -184,6 +184,8 @@ public class ReviewService {
             // 필요한 속성 설정
             reviewLikeRepository.save(newLike);
         }
+        // 댓글 구조를 다시 조직화하여 리뷰 전체 상태를 반환
+        return searchReview(reviewId);
     }
 
     //태그를 통한 검색
