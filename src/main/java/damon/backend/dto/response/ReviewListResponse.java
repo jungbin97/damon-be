@@ -1,0 +1,50 @@
+package damon.backend.dto.response;
+
+import damon.backend.entity.Area;
+import damon.backend.entity.Review;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+
+import java.time.ZonedDateTime;
+import java.util.List;
+
+@Data
+@AllArgsConstructor
+public class ReviewListResponse {
+
+    private Long id;
+    private Area area;
+    private ZonedDateTime createTime;
+    //private String state;
+
+    private String title;
+
+    private Long cost;
+
+    private List<String> suggests; // 장소 추천
+    private List<String> freeTags; // 자유 태그
+
+     private long commentCount; // 댓글 수
+
+    //정적 메소드
+    public static ReviewListResponse from(Review review) {
+
+        long commentCount = review.getReviewComments().size(); // 댓글수
+
+        return new ReviewListResponse(
+
+                review.getId(),
+                review.getArea(),
+                review.getCreateTime(),
+                review.getTitle(),
+                review.getCost(),
+                review.getSuggests(),
+                review.getFreeTags(),
+//              firstImageUrl,
+
+                commentCount
+
+        );
+    }
+
+}
