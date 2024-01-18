@@ -16,7 +16,6 @@ import java.util.List;
 @Getter @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "review")
 public class Review {
     //not null 이 너무 많아서 기본값을 not null로 설정
     @Retention(RetentionPolicy.RUNTIME)
@@ -30,20 +29,35 @@ public class Review {
     private Long id;
     private ZonedDateTime createTime;
     private ZonedDateTime updateTime;
-    private int view;
+
+    @PrePersist
+    protected void onCreate() {
+        createTime = ZonedDateTime.now();
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        updateTime = ZonedDateTime.now();
+    }
+
+    private long viewCount;
 
     private String title;
     private LocalDate startDate;
     private LocalDate endDate;
 
+
     @Enumerated(EnumType.STRING)
     private Area area;
 
     private Long cost;
-    private String suggest;
 
+    @ElementCollection
+    private List<String> suggests = new ArrayList<>();
+
+    @ElementCollection
     @Column(nullable = true)
-    private String freeTag;
+    private List<String> freeTags = new ArrayList<>();
 
     @Column(columnDefinition = "TEXT")
     private String content;
@@ -68,7 +82,7 @@ public class Review {
     //연관관계 매핑 메서드
     public void setMember(Member member){
         this.member = member;
-        if (member != null) {
+        if (member != null ) {
             member.getReviews().add(this);
         }
     }

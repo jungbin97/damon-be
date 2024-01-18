@@ -1,7 +1,9 @@
 package damon.backend.entity;
 
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -9,12 +11,13 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Getter
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Table(name = "review_comment")
+@Setter
 public class ReviewComment {
     //not null 이 너무 많아서 기본값을 not null로 설정
     @Retention(RetentionPolicy.RUNTIME)
@@ -28,6 +31,16 @@ public class ReviewComment {
     private Long id;
     private ZonedDateTime createTime;
     private ZonedDateTime updateTime;
+
+    @PrePersist
+    protected void onCreate() {
+        createTime = ZonedDateTime.now();
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        updateTime = ZonedDateTime.now();
+    }
 
     @Column(columnDefinition = "TEXT")
     private String content;
@@ -44,7 +57,7 @@ public class ReviewComment {
 
     //자식댓글목록 (대댓글)
     @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<ReviewComment> replies = new ArrayList<>();
+    private Set<ReviewComment> replies = new HashSet<>();
 
 
     public void setReview(Review review){

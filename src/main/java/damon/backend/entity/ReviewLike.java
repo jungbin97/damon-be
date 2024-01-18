@@ -1,6 +1,7 @@
 package damon.backend.entity;
 
 import jakarta.persistence.*;
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -9,11 +10,11 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import static jakarta.persistence.FetchType.LAZY;
 
 @Entity
 @Getter
 @Setter
-@Table(name = "review_like")
 public class ReviewLike {
     //not null 이 너무 많아서 기본값을 not null로 설정
     @Retention(RetentionPolicy.RUNTIME)
