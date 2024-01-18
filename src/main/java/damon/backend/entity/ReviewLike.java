@@ -1,7 +1,6 @@
 package damon.backend.entity;
 
 import jakarta.persistence.*;
-import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -9,8 +8,6 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-
-import static jakarta.persistence.FetchType.LAZY;
 
 @Entity
 @Getter

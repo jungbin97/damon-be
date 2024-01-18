@@ -29,5 +29,9 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
     @Query("SELECT DISTINCT r FROM Review r LEFT JOIN FETCH r.reviewComments c WHERE r.id = :id")
     Optional<Review> findReviewWithCommentsAndRepliesByReviewId(@Param("id")Long id);
 
+    // freeTag 기반 검색 수정
+    @Query("SELECT r FROM Review r WHERE :freeTag MEMBER OF r.freeTags")
+    Page<Review> findByFreeTag(@Param("freeTag") String freeTag, Pageable pageable);
+
 
 }

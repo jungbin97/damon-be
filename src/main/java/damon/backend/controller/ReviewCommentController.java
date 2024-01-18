@@ -22,6 +22,7 @@ public class ReviewCommentController {
         return reviewCommentService.postComment(reviewId, reviewCommentRequest);
     }
 
+
     // 댓글 수정
     @PatchMapping("/{reviewId}/comments/{commentId}")
     public ResponseEntity<Void> updateComment(
@@ -48,9 +49,6 @@ public class ReviewCommentController {
         reviewCommentService.deleteComment(commentId);
         return ResponseEntity.ok().build(); // HTTP 200 OK 응답
     }
-
-
-
 
 
 

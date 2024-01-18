@@ -1,7 +1,10 @@
 package damon.backend.entity;
 
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -33,11 +36,7 @@ public class Review {
     @PrePersist
     protected void onCreate() {
         createTime = ZonedDateTime.now();
-    }
-
-    @PreUpdate
-    protected void onUpdate() {
-        updateTime = ZonedDateTime.now();
+        updateTime = createTime; // 생성 시 updateTime도 초기화
     }
 
     private long viewCount;

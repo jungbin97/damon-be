@@ -1,7 +1,6 @@
 package damon.backend.entity;
 
 import jakarta.persistence.*;
-import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -10,9 +9,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -35,11 +32,7 @@ public class ReviewComment {
     @PrePersist
     protected void onCreate() {
         createTime = ZonedDateTime.now();
-    }
-
-    @PreUpdate
-    protected void onUpdate() {
-        updateTime = ZonedDateTime.now();
+        updateTime = createTime; // 생성 시 updateTime도 초기화
     }
 
     @Column(columnDefinition = "TEXT")

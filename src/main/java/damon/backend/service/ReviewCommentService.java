@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.ZonedDateTime;
 import java.util.List;
 
 @Service
@@ -65,6 +66,8 @@ public class ReviewCommentService {
         return ReviewResponse.from(review, organizedComments);
     }
 
+
+
     // 댓글 수정
     public ReviewResponse updateComment(Long commentId, ReviewCommentRequest request) {
 //        Long memberId = SecurityUtils.getCurrentUserId();
@@ -75,6 +78,7 @@ public class ReviewCommentService {
                 .orElseThrow(() -> new RuntimeException("Comment not found"));
         // 댓글 업데이트 로직
         comment.setContent(request.getContent());
+        comment.setUpdateTime(ZonedDateTime.now()); // 업데이트 시간 수동 설정
         reviewCommentRepository.save(comment);
 
         // 댓글이 속한 리뷰의 ID를 얻음
@@ -105,7 +109,6 @@ public class ReviewCommentService {
             reviewCommentRepository.delete(comment);
         }
     }
-
 
 
 
