@@ -109,5 +109,46 @@ public class ReviewService {
         return topLevelComments;
     }
 
+    // 게시글 수정
+    public ReviewResponse updateReview(Long reviewId, ReviewRequest request) {
+//        Long memberId = SecurityUtils.getCurrentUserId();
+//        if (memberId == null || !isAuthor(reviewId, memberId)) {
+//            throw new RuntimeException("Unauthorized access");
+//        }
+        Review review = reviewRepository.findById(reviewId)
+                .orElseThrow(() -> new RuntimeException("Review not found"));
+
+        // 리뷰 객체의 필드를 request의 데이터로 업데이트
+        review.setTitle(request.getTitle());
+        review.setStartDate(request.getStartDate());
+        review.setEndDate(request.getEndDate());
+        review.setArea(request.getArea());
+        review.setCost(request.getCost());
+        review.setSuggests(request.getSuggests());
+        review.setFreeTags(request.getFreeTags());
+        review.setContent(request.getContent());
+
+        review = reviewRepository.save(review);
+
+        // 댓글 구조를 다시 조직화
+        List<ReviewCommentResponse> organizedComments = organizeCommentStructure(reviewId);
+
+        // 구조화된 댓글 목록을 포함하여 ReviewResponse 반환
+        return ReviewResponse.from(review, organizedComments);
+    }
+
+    //게시글 삭제
+    public void deleteReview(Long reviewId) {
+//        Long memberId = SecurityUtils.getCurrentUserId();
+//        if (memberId == null || !isAuthor(reviewId, memberId)) {
+//            throw new RuntimeException("Unauthorized access");
+//        }
+        Review review = reviewRepository.findById(reviewId)
+                .orElseThrow(() -> new RuntimeException("존재하지 않는 리뷰입니다"));
+
+        reviewRepository.delete(review);
+    }
+
+
 
 }
