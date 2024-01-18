@@ -66,10 +66,11 @@ public class ReviewController {
 
     // 좋아요 토글
     @PatchMapping("/{reviewId}")
-    public ResponseEntity<Void> toggleLike(@PathVariable Long reviewId) {
-        reviewService.toggleLike(reviewId);
-        return ResponseEntity.ok().build(); // HTTP 200 OK 응답
+    public ResponseEntity<ReviewResponse> toggleLike(@PathVariable Long reviewId) {
+        ReviewResponse updatedReview = reviewService.toggleLike(reviewId);
+        return ResponseEntity.ok(updatedReview); // 토글 후 리뷰의 최신 상태 반환 // HTTP 200 OK 응답
     }
+
 
     // freeTag 기반 검색
     @GetMapping("/list/search")

@@ -25,22 +25,18 @@ public class ReviewCommentController {
 
     // 댓글 수정
     @PatchMapping("/{reviewId}/comments/{commentId}")
-    public ResponseEntity<Void> updateComment(
+    public ResponseEntity<ReviewResponse> updateComment(
             @PathVariable Long reviewId,
             @PathVariable Long commentId,
             @RequestBody ReviewCommentRequest request) {
 
         if (request.getContent() != null && !request.getContent().trim().isEmpty()) {
-            reviewCommentService.updateComment(commentId, request);
+            ReviewResponse updatedReview = reviewCommentService.updateComment(commentId, request);
+            return ResponseEntity.ok(updatedReview); // 수정된 리뷰의 최신 상태를 반환
         }
+        return ResponseEntity.badRequest().build();
 
-        // 대댓글의 경우 parentId를 사용하여 추가 로직 처리
-        if (request.getParentId() != null) {
-            // parentId를 사용한 로직
-        }
-
-        return ResponseEntity.ok().build();
-    }
+       }
 
     // 댓글 삭제
     @DeleteMapping("/{reviewId}/comments/{commentId}")
