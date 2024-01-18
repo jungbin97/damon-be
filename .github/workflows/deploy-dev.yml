@@ -17,6 +17,12 @@ jobs:
         distribution: 'temurin'
     - name: Gradle Wrapper 실행 권한 추가
       run: chmod +x gradlew
+    - name: application-dev.properties 덮어쓰기
+      run: |
+        cd ./src/main/resources
+        touch ./application-dev.properties
+        echo "${{ secrets.SETTING_DEV }}" > ./application-dev.properties
+      shell: bash
     - name: Gradle로 빌드(CI)
       run: ./gradlew build
     - name: 도커허브에 로그인
