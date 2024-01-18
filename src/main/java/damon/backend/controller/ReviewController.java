@@ -43,7 +43,9 @@ public class ReviewController {
     //게시글 상세 조회 (댓글 포함)
     @GetMapping("/{reviewId}")
     public ReviewResponse searchReviewDetail(@PathVariable Long reviewId) {
-        return reviewService.searchReview(reviewId);
+        ReviewResponse reviewResponse = reviewService.searchReview(reviewId);
+        reviewService.incrementReviewViewCount(reviewId); // 조회수 증가
+        return reviewResponse;
     }
 
     //게시글 수정
@@ -62,7 +64,22 @@ public class ReviewController {
         return ResponseEntity.ok().build(); // HTTP 200 OK 응답
     }
 
+    // 좋아요 토글
+    @PatchMapping("/{reviewId}")
+    public ResponseEntity<Void> toggleLike(@PathVariable Long reviewId) {
+        reviewService.toggleLike(reviewId);
+        return ResponseEntity.ok().build(); // HTTP 200 OK 응답
+    }
 
+    // freeTag 기반 검색
+    @GetMapping("/list/search")
+    public List<ReviewListResponse> searchReviewsByFreeTag(
+            @RequestParam("freeTag") String freeTag,
+            @RequestParam("page") int page,
+            @RequestParam("pageSize") int pageSize
+    ) {
+        return reviewService.searchReviewsByFreeTag(freeTag, page, pageSize);
+    }
 
 
 

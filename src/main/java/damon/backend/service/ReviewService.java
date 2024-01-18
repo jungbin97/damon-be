@@ -9,6 +9,7 @@ import damon.backend.entity.Review;
 import damon.backend.entity.ReviewComment;
 import damon.backend.entity.ReviewLike;
 import damon.backend.repository.ReviewCommentRepository;
+import damon.backend.repository.ReviewLikeRepository;
 import damon.backend.repository.ReviewRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -18,6 +19,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.ZonedDateTime;
 import java.util.*;
 
 @Service
@@ -26,6 +28,7 @@ import java.util.*;
 public class ReviewService {
 
     private final ReviewRepository reviewRepository;
+    private final ReviewLikeRepository reviewLikeRepository;
     private final ReviewCommentRepository reviewCommentRepository;
 
     //게시글 등록
@@ -63,8 +66,6 @@ public class ReviewService {
         }
     }
 
-
-
     //게시글 상세 내용 조회 (댓글 포함)
     @Transactional(readOnly = true)
     public ReviewResponse searchReview(Long reviewId) {
@@ -78,6 +79,15 @@ public class ReviewService {
         return ReviewResponse.from(review, organizedComments); // 이 부분에서 organizedComments를 DTO에 포함시켜야 합니다.
     }
 
+    // 조회수 로직 (따로 분리시킨 이유는 updateTime 때문에)
+    public void incrementReviewViewCount(Long reviewId) {
+        Review review = reviewRepository.findById(reviewId)
+                .orElseThrow(() -> new RuntimeException("존재하지 않는 리뷰입니다"));
+        review.setViewCount(review.getViewCount() + 1);
+        review.setUpdateTime(review.getUpdateTime()); // updateTime은 변경되지 않도록
+        reviewRepository.save(review);
+
+    }
 
 
     // 댓글, 대댓글 계층적 구조 생성
@@ -109,6 +119,12 @@ public class ReviewService {
         return topLevelComments;
     }
 
+    // 조회수 증가 메소드
+    private void incrementReviewViewCount(Review review) {
+        review.setViewCount(review.getViewCount() + 1);
+        reviewRepository.save(review);
+    }
+
     // 게시글 수정
     public ReviewResponse updateReview(Long reviewId, ReviewRequest request) {
 //        Long memberId = SecurityUtils.getCurrentUserId();
@@ -127,6 +143,9 @@ public class ReviewService {
         review.setSuggests(request.getSuggests());
         review.setFreeTags(request.getFreeTags());
         review.setContent(request.getContent());
+
+        // updateTime을 수동으로 현재 시간으로 설정
+        review.setUpdateTime(ZonedDateTime.now());
 
         review = reviewRepository.save(review);
 
@@ -150,5 +169,34 @@ public class ReviewService {
     }
 
 
+    //좋아요 수 계산 (다시 누르면 좋아요 취소)
+    public void toggleLike(Long reviewId) {
+        Review review = reviewRepository.findById(reviewId)
+                .orElseThrow(() -> new RuntimeException("리뷰를 찾을 수 없습니다."));
+
+        Optional<ReviewLike> existingLike = reviewLikeRepository.findByReviewId(reviewId);
+
+        if (existingLike.isPresent()) {
+            reviewLikeRepository.delete(existingLike.get());
+        } else {
+            ReviewLike newLike = new ReviewLike();
+            newLike.setReview(review); // Review 설정
+            // 필요한 속성 설정
+            reviewLikeRepository.save(newLike);
+        }
+    }
+
+    //태그를 통한 검색
+    @Transactional(readOnly = true)
+    public List<ReviewListResponse> searchReviewsByFreeTag(String freeTag, int page, int pageSize) {
+        Pageable pageable = PageRequest.of(page, pageSize, Sort.by(Sort.Direction.DESC, "createTime"));
+        Page<Review> reviewPage = reviewRepository.findByFreeTag(freeTag, pageable);
+
+        if (reviewPage.hasContent()) {
+            return reviewPage.map(ReviewListResponse::from).toList();
+        } else {
+            return new ArrayList<>();
+        }
+    }
 
 }

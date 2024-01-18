@@ -24,11 +24,15 @@ public class ReviewListResponse {
     private List<String> suggests; // 장소 추천
     private List<String> freeTags; // 자유 태그
 
-     private long commentCount; // 댓글 수
+    private long viewCount; // 조회수
+    private long likeCount; // 좋아요 수
+    private long commentCount; // 댓글 수
 
     //정적 메소드
     public static ReviewListResponse from(Review review) {
 
+        long likeCount = review.getReviewLikes().size(); // 좋아요 수
+        long viewCount = review.getViewCount(); // 조회수
         long commentCount = review.getReviewComments().size(); // 댓글수
 
         return new ReviewListResponse(
@@ -41,7 +45,8 @@ public class ReviewListResponse {
                 review.getSuggests(),
                 review.getFreeTags(),
 //              firstImageUrl,
-
+                review.getViewCount(),
+                likeCount,
                 commentCount
 
         );
