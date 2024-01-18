@@ -65,6 +65,46 @@ public class ReviewCommentService {
         return ReviewResponse.from(review, organizedComments);
     }
 
+    // 댓글 수정
+    public ReviewResponse updateComment(Long commentId, ReviewCommentRequest request) {
+//        Long memberId = SecurityUtils.getCurrentUserId();
+//        if (memberId == null || !isAuthor(reviewId, memberId)) {
+//            throw new RuntimeException("Unauthorized access");
+//        }
+        ReviewComment comment = reviewCommentRepository.findById(commentId)
+                .orElseThrow(() -> new RuntimeException("Comment not found"));
+        // 댓글 업데이트 로직
+        comment.setContent(request.getContent());
+        reviewCommentRepository.save(comment);
+
+        // 댓글이 속한 리뷰의 ID를 얻음
+        Long reviewId = comment.getReview().getId();
+
+        // 댓글 구조를 다시 조직화
+        List<ReviewCommentResponse> organizedComments = reviewService.organizeCommentStructure(reviewId);
+
+        // 구조화된 댓글 목록을 포함하여 ReviewResponse 반환
+        return ReviewResponse.from(comment.getReview(), organizedComments);
+    }
+
+    // 댓글 삭제
+    public void deleteComment(Long commentId) {
+//  //        Long memberId = SecurityUtils.getCurrentUserId();
+////        if (memberId == null || !isAuthor(reviewId, memberId)) {
+////            throw new RuntimeException("Unauthorized access");
+////        }
+        ReviewComment comment = reviewCommentRepository.findById(commentId)
+                .orElseThrow(() -> new RuntimeException("존재하지 않는 댓글입니다"));
+
+        // 부모 댓글 삭제 시 대댓글도 함께 삭제
+        if (comment.getParent() == null) {
+            reviewCommentRepository.delete(comment); // 대댓글 포함 삭제
+        } else {
+            // 대댓글만 삭제, 부모 댓글은 남김
+            comment.getParent().getReplies().remove(comment);
+            reviewCommentRepository.delete(comment);
+        }
+    }
 
 
 

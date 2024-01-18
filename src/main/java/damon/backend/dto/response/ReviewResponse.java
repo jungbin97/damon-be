@@ -16,7 +16,7 @@ public class ReviewResponse {
     private Long id;
 
     private ZonedDateTime createTime;
-
+    private String state;
 
     private String title;
     private LocalDate startDate;
@@ -34,13 +34,19 @@ public class ReviewResponse {
     //정적 팩토리 메서드
     public static ReviewResponse from(Review review,  List<ReviewCommentResponse> organizedComments) {
 
+        String state = ""; // 초기 상태값은 빈 문자열로 설정
+
+        // updateTime이 null이 아니고, createTime과 updateTime이 다를 때 state를 "편집됨"으로 설정
+        if (review.getUpdateTime() != null && !review.getCreateTime().isEqual(review.getUpdateTime())) {
+            state = "편집됨";
+        }
 
 
         return new ReviewResponse(
 
                 review.getId(),
                 review.getCreateTime(),
-
+                state,
                 review.getTitle(),
                 review.getStartDate(),
                 review.getEndDate(),
