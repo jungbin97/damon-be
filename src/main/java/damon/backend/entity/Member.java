@@ -13,11 +13,17 @@ import java.util.List;
 @Setter
 public class Member {
 
-    @Id
     @Column(name = "member_id")
     private String id;
 
+    @Id
+    private Long uid;
+
     private String nickname;
+
+    private String email;
+
+    private String LoginType;
 
     private String profileImgUrl;
 
