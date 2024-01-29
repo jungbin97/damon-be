@@ -48,6 +48,7 @@ public class CalendarService {
                 .area(requestDto.getArea())
                 .build();
 
+        Calendar savedCalendar = calendarRepository.save(calendar);
         // 여행지 추가
         requestDto.getTravels().forEach(travelDto -> {
             Travel newTravel = Travel.builder()
@@ -61,7 +62,6 @@ public class CalendarService {
             // 생명 주기를 수동으로 관리하기 위해 여행지를 저장할 때마다 일정 글에도 저장(추후에 cascade를 고려합니다.)
             travelRepository.save(newTravel);
         });
-        Calendar savedCalendar = calendarRepository.save(calendar);
         return CalendarCreateResponseDto.from(savedCalendar.getId());
     }
 
@@ -72,6 +72,7 @@ public class CalendarService {
      * @param size : 페이지 사이즈
      * @return : 요청한 페이징에 맞는 일정 목록을 반환
      */
+    @Transactional(readOnly = true)
     public Page<CalendarsResponseDto> getCalendars(String memberId, int page, int size)  {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 사용자를 찾을 수 없습니다."));
@@ -88,6 +89,7 @@ public class CalendarService {
      * @param calendarId : 해당 일정 글의 아이디
      * @return : 요청한 일정 글의 상세 정보를 반환
      */
+    @Transactional(readOnly = true)
     public CalendarResponseDto getCalendar(String memberId, Long calendarId) {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 사용자를 찾을 수 없습니다."));
