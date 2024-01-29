@@ -36,6 +36,8 @@ dependencies {
 	testAnnotationProcessor 'org.projectlombok:lombok' // 테스트 의존성 추가
 	implementation 'com.github.gavlyukovskiy:p6spy-spring-boot-starter:1.9.0' // 쿼리 로그
 	implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310' // 커스텀 로그
+	implementation 'org.springframework.boot:spring-boot-starter-actuator'
+	implementation 'io.micrometer:micrometer-registry-prometheus'
 }
 
 tasks.named('test') {
