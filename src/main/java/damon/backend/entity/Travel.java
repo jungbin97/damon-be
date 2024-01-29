@@ -5,6 +5,8 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 @Entity
 @Table(name = "travel")
@@ -18,6 +20,7 @@ public class Travel {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "calendar_id")
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private Calendar calendar;
 
     private String locationName;
