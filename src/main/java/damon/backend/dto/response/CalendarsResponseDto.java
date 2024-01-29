@@ -1,5 +1,6 @@
 package damon.backend.dto.response;
 
+import damon.backend.entity.Area;
 import damon.backend.entity.Calendar;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -17,13 +18,15 @@ public class CalendarsResponseDto {
     private String title;
     private LocalDate startDate;
     private LocalDate endDate;
+    private Area area;
 
     public static CalendarsResponseDto from(Calendar calendar) {
         return new CalendarsResponseDto(
                 calendar.getId(),
                 calendar.getTitle(),
                 calendar.getStartDate(),
-                calendar.getEndDate()
+                calendar.getEndDate(),
+                calendar.getArea()
         );
     }
 
