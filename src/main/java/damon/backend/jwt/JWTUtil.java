@@ -37,8 +37,31 @@ public class JWTUtil {
         return Jwts.builder()
                 .claim("providername", providername)
                 .issuedAt(now)
-                .expiration(new Date(now.getTime() + expiredMs))
+                .expiration(new Date(System.currentTimeMillis() + expiredMs))
                 .signWith(secretKey)
                 .compact();
     }
+
+//    수정필요
+//
+//    JWT 유효성 검증
+//    public boolean validateJwt(String token) {
+//        try {
+//            Jws<Claims> claims = Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token);
+//            return !claims.getPayload().getExpiration().before(new Date());
+//        } catch (Exception e) {
+//            return false;
+//        }
+//    }
+//
+//    리프레시 토큰 생성
+//    public String createRefreshToken(String providername, Long durationMs) {
+//        Date now = new Date();
+//        return Jwts.builder()
+//                .setSubject(providername)
+//                .setIssuedAt(now)
+//                .setExpiration(new Date(now.getTime() + durationMs))
+//                .signWith(secretKey)
+//                .compact();
+//    }
 }
