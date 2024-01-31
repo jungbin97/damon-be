@@ -11,10 +11,11 @@ public class TravelCreateRequestDto {
     private String locationName;
     private String latitude;
     private String longitude;
-    private int orderNum;
+    private int day;
     private String memo;
+    private int order;
 
-    public static TravelCreateRequestDto of(String locationName, String latitude, String longitude, int orderNum, String memo) {
-        return new TravelCreateRequestDto(locationName, latitude, longitude, orderNum, memo);
+    public static TravelCreateRequestDto of(String locationName, String latitude, String longitude, int day, String memo, int order){
+        return new TravelCreateRequestDto(locationName, latitude, longitude, day, memo, order);
     }
 }

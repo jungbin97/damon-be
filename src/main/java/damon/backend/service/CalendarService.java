@@ -57,7 +57,8 @@ public class CalendarService {
                     .latitude(travelDto.getLatitude())
                     .longitude(travelDto.getLongitude())
                     .memo(travelDto.getMemo())
-                    .orderNum(travelDto.getOrderNum()) // orderNum 순서를 어떻게 관리 할 것인가?
+                    .travelDay(travelDto.getDay())
+                    .orderNumber(travelDto.getOrder())
                     .build();
             // 생명 주기를 수동으로 관리하기 위해 여행지를 저장할 때마다 일정 글에도 저장(추후에 cascade를 고려합니다.)
             travelRepository.save(newTravel);
@@ -130,7 +131,7 @@ public class CalendarService {
                 .filter(travelEditRequestDto -> travelEditRequestDto.getTravelId() != null && !travelEditRequestDto.isDeleted())
                 .filter(travelEditRequestDto -> travelEditRequestDto.getTravelId().equals(travel.getId()))
                 .findFirst()
-                .ifPresent(travelEditRequestDto -> travel.update(travelEditRequestDto.getLocationName(), travelEditRequestDto.getLatitude(), travelEditRequestDto.getLongitude(), travelEditRequestDto.getMemo(), travelEditRequestDto.getOrderNum())));
+                .ifPresent(travelEditRequestDto -> travel.update(travelEditRequestDto.getLocationName(), travelEditRequestDto.getLatitude(), travelEditRequestDto.getLongitude(), travelEditRequestDto.getMemo(), travelEditRequestDto.getDay(), travelEditRequestDto.getOrder())));
 
         // 새로운 여행지 추가 로직
         requestDto.getTravels().stream()
@@ -142,7 +143,7 @@ public class CalendarService {
                             .latitude(travelEditRequestDto.getLatitude())
                             .longitude(travelEditRequestDto.getLongitude())
                             .memo(travelEditRequestDto.getMemo())
-                            .orderNum(travelEditRequestDto.getOrderNum()) // orderNum 순서를 어떻게 관리 할 것인가? => day로 관리
+                            .travelDay(travelEditRequestDto.getDay()) // orderNum 순서를 어떻게 관리 할 것인가? => day로 관리
                             .build();
                     // 생명 주기를 수동으로 관리하기 위해 여행지를 저장할 때마다 일정 글에도 저장(추후에 cascade를 고려합니다.)
                     travelRepository.save(newTravel);

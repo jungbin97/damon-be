@@ -57,13 +57,13 @@ class CalendarServiceTest {
         member.setProfileImgUrl("/test/url");
         ArrayList<TravelCreateRequestDto> travelDtoList = new ArrayList<>();
 
-        TravelCreateRequestDto travelDto1 = TravelCreateRequestDto.of("test LocalName1", "38.1231231", "128.123123", 1, "test memo");
-        TravelCreateRequestDto travelDto2 = TravelCreateRequestDto.of("test LocalName2", "38.1231231", "128.123123", 1, "test memo");
-        TravelCreateRequestDto travelDto3 = TravelCreateRequestDto.of("test LocalName3", "38.1231231", "128.123123", 1, "test memo");
+        TravelCreateRequestDto travelDto1 = TravelCreateRequestDto.of("test LocalName1", "38.1231231", "128.123123", 1, "test memo", 1);
+        TravelCreateRequestDto travelDto2 = TravelCreateRequestDto.of("test LocalName2", "38.1231231", "128.123123", 1, "test memo", 2);
+        TravelCreateRequestDto travelDto3 = TravelCreateRequestDto.of("test LocalName3", "38.1231231", "128.123123", 1, "test memo", 3);
 
-        TravelCreateRequestDto travelDto4 = TravelCreateRequestDto.of("test LocalName1", "38.1231231", "128.123123", 2, "test memo");
-        TravelCreateRequestDto travelDto5 = TravelCreateRequestDto.of("test LocalName2", "38.1231231", "128.123123", 2, "test memo");
-        TravelCreateRequestDto travelDto6 = TravelCreateRequestDto.of("test LocalName3", "38.1231231", "128.123123", 2, "test memo");
+        TravelCreateRequestDto travelDto4 = TravelCreateRequestDto.of("test LocalName1", "38.1231231", "128.123123", 2, "test memo", 1);
+        TravelCreateRequestDto travelDto5 = TravelCreateRequestDto.of("test LocalName2", "38.1231231", "128.123123", 2, "test memo",2);
+        TravelCreateRequestDto travelDto6 = TravelCreateRequestDto.of("test LocalName3", "38.1231231", "128.123123", 2, "test memo", 3);
 
         travelDtoList.add(travelDto1);
         travelDtoList.add(travelDto2);
