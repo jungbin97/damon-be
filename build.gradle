@@ -38,6 +38,8 @@ dependencies {
 	implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310' // 커스텀 로그
 	implementation 'org.springframework.boot:spring-boot-starter-actuator'
 	implementation 'io.micrometer:micrometer-registry-prometheus'
+
+	implementation 'org.springframework.boot:spring-boot-starter-aop' // aop
 }
 
 tasks.named('test') {
