@@ -29,7 +29,7 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
         String providername = customOAuth2User.getProvidername();
 
         // 로그인 성공 로그 기록
-        log.info("인가 코드를 성공적으로 받았습니다. 사용자: " + customOAuth2User.getProvidername());
+        log.info("로그인이 성공했습니다. 사용자: " + customOAuth2User.getProvidername());
 
         // jwt 토큰 발급
         String token = jwtUtil.createJwt(providername, 3600000L);
