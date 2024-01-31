@@ -14,7 +14,7 @@ import java.util.List;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Getter
 public class CalendarsResponseDto {
-    private Long id;
+    private Long calendarId;
     private String title;
     private LocalDate startDate;
     private LocalDate endDate;

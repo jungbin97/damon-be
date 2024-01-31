@@ -12,13 +12,14 @@ public class TravelEditRequestDto {
     private String locationName;
     private String latitude;
     private String longitude;
-    private int orderNum;
+    private int day;
+    private int order;
     private String memo;
     private boolean deleted;
 
 
 
-    public static TravelEditRequestDto of(Long travelId, String locationName, String latitude, String longitude, int orderNum, String memo, boolean deleted) {
-        return new TravelEditRequestDto(travelId, locationName, latitude, longitude, orderNum, memo, deleted);
+    public static TravelEditRequestDto of(Long travelId, String locationName, String latitude, String longitude, int day, int order, String memo, boolean deleted) {
+        return new TravelEditRequestDto(travelId, locationName, latitude, longitude, day, order, memo, deleted);
     }
 }
