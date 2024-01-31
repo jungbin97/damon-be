@@ -79,7 +79,7 @@ public class CalendarService {
                 .orElseThrow(() -> new IllegalArgumentException("해당 사용자를 찾을 수 없습니다."));
 
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdDate"));
-        Page<Calendar> calendarPage = calendarRepository.findByMember(member, pageable);
+        Page<Calendar> calendarPage = calendarRepository.findPageByMember(member.getId(), pageable);
 
         return calendarPage.map(CalendarsResponseDto::from);
     }
@@ -95,7 +95,7 @@ public class CalendarService {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 사용자를 찾을 수 없습니다."));
 
-        Calendar calendar = calendarRepository.findById(calendarId)
+        Calendar calendar = calendarRepository.findByIdWithTravel(calendarId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 일정을 찾을 수 없습니다."));
 
         if (!calendar.getMember().getId().equals(member.getId())) {
