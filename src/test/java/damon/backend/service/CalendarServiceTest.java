@@ -142,7 +142,7 @@ class CalendarServiceTest {
                 .endDate(LocalDate.of(2021, 8, 3))
                 .area(Area.JEJU)
                 .build();
-        when(calendarRepository.findById(any())).thenReturn(Optional.of(calendar));
+        when(calendarRepository.findByIdWithTravel(any())).thenReturn(Optional.of(calendar));
 
         // Action
         CalendarResponseDto result = calendarService.getCalendar(member.getId(), calendarId);
