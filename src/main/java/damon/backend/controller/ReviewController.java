@@ -20,7 +20,7 @@ import java.util.Optional;
 @Tag(name = "리뷰 API", description = "리뷰 API")
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/review")
+@RequestMapping("/api/review")
 @CrossOrigin(origins = "*", allowedHeaders = "*")
 public class ReviewController {
     private final ReviewService reviewService;
