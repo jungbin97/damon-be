@@ -2,6 +2,7 @@ package damon.backend.service;
 
 import damon.backend.dto.request.CalendarCreateRequestDto;
 import damon.backend.dto.request.CalendarEditRequestDto;
+import damon.backend.dto.request.TravelEditRequestDto;
 import damon.backend.dto.response.CalendarCreateResponseDto;
 import damon.backend.dto.response.CalendarEditResponseDto;
 import damon.backend.dto.response.CalendarResponseDto;
@@ -20,6 +21,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -116,7 +119,7 @@ public class CalendarService {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 사용자를 찾을 수 없습니다."));
 
-        Calendar calendar = calendarRepository.findById(calendarId)
+        Calendar calendar = calendarRepository.findByIdWithTravel(calendarId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 일정을 찾을 수 없습니다."));
 
         if (!calendar.getMember().getId().equals(member.getId())) {
@@ -134,29 +137,29 @@ public class CalendarService {
                 .ifPresent(travelEditRequestDto -> travel.update(travelEditRequestDto.getLocationName(), travelEditRequestDto.getLatitude(), travelEditRequestDto.getLongitude(), travelEditRequestDto.getMemo(), travelEditRequestDto.getDay(), travelEditRequestDto.getOrder())));
 
         // 새로운 여행지 추가 로직
-        requestDto.getTravels().stream()
+        List<Travel> newTravels = requestDto.getTravels().stream()
                 .filter(travelEditRequestDto -> travelEditRequestDto.getTravelId() == null)
-                .forEach(travelEditRequestDto -> {
-                    Travel newTravel = Travel.builder()
-                            .calendar(calendar) // 여행지와 일정 연결
-                            .locationName(travelEditRequestDto.getLocationName())
-                            .latitude(travelEditRequestDto.getLatitude())
-                            .longitude(travelEditRequestDto.getLongitude())
-                            .memo(travelEditRequestDto.getMemo())
-                            .travelDay(travelEditRequestDto.getDay()) // orderNum 순서를 어떻게 관리 할 것인가? => day로 관리
-                            .build();
-                    // 생명 주기를 수동으로 관리하기 위해 여행지를 저장할 때마다 일정 글에도 저장(추후에 cascade를 고려합니다.)
-                    travelRepository.save(newTravel);
-                });
+                .map(travelEditRequestDto -> Travel.builder()
+                        .calendar(calendar) // 여행지와 일정 연결
+                        .locationName(travelEditRequestDto.getLocationName())
+                        .latitude(travelEditRequestDto.getLatitude())
+                        .longitude(travelEditRequestDto.getLongitude())
+                        .memo(travelEditRequestDto.getMemo())
+                        .travelDay(travelEditRequestDto.getDay()) // orderNum 순서를 어떻게 관리 할 것인가? => day로 관리
+                        .build())
+                .collect(Collectors.toList());
+
+        travelRepository.saveAll(newTravels);
 
         // 삭제된 여행지 로직 처리
-        requestDto.getTravels().stream()
+        List<Long> deletedTravles = requestDto.getTravels().stream()
                 .filter(travelEditRequestDto -> travelEditRequestDto.getTravelId() != null && travelEditRequestDto.isDeleted())
-                .forEach(travelEditRequestDto -> {
-                    Travel travel = travelRepository.findById(travelEditRequestDto.getTravelId())
-                            .orElseThrow(() -> new IllegalArgumentException("해당 여행지를 찾을 수 없습니다."));
-                    travelRepository.delete(travel);
-                });
+                .map(TravelEditRequestDto::getTravelId)
+                .collect(Collectors.toList());
+
+        if(!deletedTravles.isEmpty()) {
+            travelRepository.deleteAllByIdIn(deletedTravles);
+        }
 
         return CalendarEditResponseDto.from(calendarId);
     }
