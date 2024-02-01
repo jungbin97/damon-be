@@ -2,6 +2,7 @@ package damon.backend.service;
 
 import damon.backend.dto.request.CalendarCreateRequestDto;
 import damon.backend.dto.request.CalendarEditRequestDto;
+import damon.backend.dto.request.CalendarsDeleteRequestDto;
 import damon.backend.dto.request.TravelEditRequestDto;
 import damon.backend.dto.response.CalendarCreateResponseDto;
 import damon.backend.dto.response.CalendarEditResponseDto;
@@ -14,6 +15,7 @@ import damon.backend.repository.CalendarRepository;
 import damon.backend.repository.MemberRepository;
 import damon.backend.repository.TravelRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -26,6 +28,7 @@ import java.util.stream.Collectors;
 
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class CalendarService {
     private final CalendarRepository calendarRepository;
@@ -182,5 +185,24 @@ public class CalendarService {
         }
         // cascde로 삭제합니다.
         calendarRepository.delete(calendar);
+    }
+
+    /**
+     * 일정 글을 선택 삭제합니다.
+     * @param memberId : 해당 멤버의 아이디
+     * @param requestDto : 선택 삭제할 일정 글의 아이디
+     */
+    @Transactional
+    public void deleteCalendars(String memberId, CalendarsDeleteRequestDto requestDto) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 사용자를 찾을 수 없습니다."));
+
+        List<Calendar> calendars = calendarRepository.findAllById(requestDto.getCalendarIds());
+
+        if(calendars.size() != requestDto.getCalendarIds().size()) {
+            throw new IllegalArgumentException("요청된 일정 중 일부가 존재하지 않습니다.");
+        }
+
+        calendarRepository.deleteAllByIn(requestDto.getCalendarIds());
     }
 }
