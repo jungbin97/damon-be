@@ -30,8 +30,10 @@ public class JWTFilter extends OncePerRequestFilter {
         String authorization= request.getHeader("Authorization");
 
         //Authorization 헤더 검증
+        log.info(authorization);
+        System.out.println(authorization);
         if (authorization == null || !authorization.startsWith("Bearer ")) {
-
+        
             log.error("권한이 없습니다.");
             filterChain.doFilter(request, response);
 
