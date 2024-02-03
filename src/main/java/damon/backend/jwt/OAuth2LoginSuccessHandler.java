@@ -10,6 +10,7 @@ import org.springframework.security.web.authentication.SimpleUrlAuthenticationSu
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.util.Collections;
 
 @Slf4j
 @Component
@@ -18,6 +19,10 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
 
     //JWTUtil 주입
     private final JWTUtil jwtUtil;
+
+    // 프론트엔드의 리디렉션 URL
+    private final String frontendRedirectUrl = "http://localhost:3000/main";
+
 
     // 로그인 성공 시 Jwt 토큰 발급
     @Override
@@ -32,17 +37,27 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
         // jwt 토큰 발급
         String token = jwtUtil.createJwt(providername, 3600000L);
 
-//      // 리프레시 토큰 발급
-//      String refreshToken = jwtUtil.createRefreshToken(providerName, 28 * 24 * 3600000L); // 28 days
-
         log.info("JWT 토큰 : " + token);
 
-        // 프론트엔드로 리다이렉트하면서 JWT 토큰을 URL 파라미터로 전달
-        String redirectUrl = "http://localhost:3000/oauth2/redirect?token=" + token;
-        getRedirectStrategy().sendRedirect(request, response, redirectUrl);
-    }
-//      response.addHeader("Refresh-Token", "Bearer " + refreshToken);
+        response.addHeader("Authorization", "Bearer " + token);
 
+        // 요청 헤더 로그
+        log.info("요청 헤더로그: ");
+        Collections.list(request.getHeaderNames()).forEach(headerName ->
+                log.info("Header Name: {}, Header Value: {}", headerName, request.getHeader(headerName)));
+
+        // 응답 헤더 로그
+        log.info("응답 헤더로그: ");
+        response.getHeaderNames().forEach(headerName ->
+                log.info("Header Name: {}, Header Value: {}", headerName, response.getHeader(headerName)));
+
+        // 리디렉션 URL에 토큰 추가
+        String redirectUrlWithToken = frontendRedirectUrl;
+
+        // 클라이언트를 리디렉션 URL로 리다이렉트
+        getRedirectStrategy().sendRedirect(request, response, redirectUrlWithToken);
+
+    }
 
 
 

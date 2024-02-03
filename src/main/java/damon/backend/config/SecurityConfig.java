@@ -85,7 +85,7 @@ public class SecurityConfig {
         //oauth2 방식 설정 (client가 아닌 login으로 설정해야 자동으로 필터 구현된다)
         http
                 .oauth2Login((oauth2) -> oauth2
-//                        .loginPage("/login")
+                        .loginPage("/login")
                         .clientRegistrationRepository(customClientRegistrationRepo.clientRegistrationRepository())
                         .userInfoEndpoint((userInfoEndpointConfig) -> userInfoEndpointConfig
                                 .userService(customOauth2UserService)) // 사용자 정보 가져오기
