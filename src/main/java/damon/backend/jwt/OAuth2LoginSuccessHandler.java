@@ -52,7 +52,7 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
                 log.info("Header Name: {}, Header Value: {}", headerName, response.getHeader(headerName)));
 
         // 리디렉션 URL에 토큰 추가
-        String redirectUrlWithToken = frontendRedirectUrl;
+        String redirectUrlWithToken = frontendRedirectUrl + "?token=" + token;
 
         // 클라이언트를 리디렉션 URL로 리다이렉트
         getRedirectStrategy().sendRedirect(request, response, redirectUrlWithToken);
