@@ -52,8 +52,8 @@ class CalendarServiceTest {
     @BeforeEach
     void setUp() {
         member = new Member();
-        member.setId("testId");
-        member.setNickname("test nickname");
+        member.setId(1L);
+        member.setName("test nickname");
         member.setProfileImgUrl("/test/url");
         ArrayList<TravelCreateRequestDto> travelDtoList = new ArrayList<>();
 
