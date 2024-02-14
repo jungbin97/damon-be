@@ -30,7 +30,7 @@ public class CommunityService {
     private final MemberRepository memberRepository;
 
     private Member getMemberEntity(String provider) {
-        return memberRepository.findByProvider(provider).orElseThrow(() -> new EntityNotFoundException("provider", provider));
+        return memberRepository.findByProviderName(provider).orElseThrow(() -> new EntityNotFoundException("provider", provider));
     }
 
     private Community getCommunityEntity(Long communityId) {
