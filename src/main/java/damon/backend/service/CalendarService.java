@@ -35,7 +35,7 @@ public class CalendarService {
      * @param requestDto : 일정 글 생성에 필요한 정보
      */
     @Transactional
-    public CalendarCreateResponseDto createCalendar(String memberId, CalendarCreateRequestDto requestDto) {
+    public CalendarCreateResponseDto createCalendar(Long memberId, CalendarCreateRequestDto requestDto) {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 사용자를 찾을 수 없습니다."));
 
@@ -73,7 +73,7 @@ public class CalendarService {
      * @return : 요청한 페이징에 맞는 일정 목록을 반환
      */
     @Transactional(readOnly = true)
-    public Page<CalendarsResponseDto> getCalendars(String memberId, int page, int size)  {
+    public Page<CalendarsResponseDto> getCalendars(Long memberId, int page, int size)  {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 사용자를 찾을 수 없습니다."));
 
@@ -90,7 +90,7 @@ public class CalendarService {
      * @return : 요청한 일정 글의 상세 정보를 반환
      */
     @Transactional(readOnly = true)
-    public CalendarResponseDto getCalendar(String memberId, Long calendarId) {
+    public CalendarResponseDto getCalendar(Long memberId, Long calendarId) {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 사용자를 찾을 수 없습니다."));
 
@@ -111,7 +111,7 @@ public class CalendarService {
      * @param requestDto : 일정 글 수정에 필요한 정보
      */
     @Transactional
-    public CalendarEditResponseDto updateCalendar(String memberId, Long calendarId, CalendarEditRequestDto requestDto) {
+    public CalendarEditResponseDto updateCalendar(Long memberId, Long calendarId, CalendarEditRequestDto requestDto) {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 사용자를 찾을 수 없습니다."));
 
@@ -166,7 +166,7 @@ public class CalendarService {
      * @param calendarId : 해당 일정 글의 아이디
      */
     @Transactional
-    public void deleteCalendar(String memberId, Long calendarId) {
+    public void deleteCalendar(Long memberId, Long calendarId) {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 사용자를 찾을 수 없습니다."));
 

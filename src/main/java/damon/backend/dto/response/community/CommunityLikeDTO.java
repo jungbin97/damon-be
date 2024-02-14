@@ -8,7 +8,7 @@ public class CommunityLikeDTO {
 
     private Long likeId;
     private Long communityId;
-    private String memberId;
+    private Long memberId;
 
     public CommunityLikeDTO(CommunityLike communityLike) {
         this.likeId = communityLike.getLikeId();

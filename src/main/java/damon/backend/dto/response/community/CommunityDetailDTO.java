@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 public class CommunityDetailDTO {
 
     private Long communityId;
-    private String memberId; // 작성자 본인 여부 판단
+    private Long memberId; // 작성자 본인 여부 판단
     private String memberName;
     private String memberImage;
     private LocalDateTime createdDate;
@@ -27,7 +27,7 @@ public class CommunityDetailDTO {
     public CommunityDetailDTO(Community community) {
         this.communityId = community.getCommunityId();
         this.memberId = community.getMember().getId();
-        this.memberName = community.getMember().getNickname();
+        this.memberName = community.getMember().getName();
         this.memberImage = community.getMember().getProfileImgUrl();
         this.createdDate = community.getCreatedDate();
         this.type = community.getType();

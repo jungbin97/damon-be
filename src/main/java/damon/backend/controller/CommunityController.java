@@ -53,7 +53,7 @@ public class CommunityController {
     @PostMapping("/")
     public Result<CommunitySimpleDTO> addCommunity(@RequestBody CommunityCreateForm createForm) {
         CommunitySimpleDTO addedCommunity = communityService.addCommunity(
-                "1", // 멤버 아이디를 가져올 수 있어야함.
+                1L, // 멤버 아이디를 가져올 수 있어야함.
                 createForm.getType(),
                 createForm.getTitle(),
                 createForm.getContent()
@@ -65,7 +65,7 @@ public class CommunityController {
     @PutMapping("/")
     public Result<CommunitySimpleDTO> setCommunity(@RequestBody CommunityUpdateForm updateForm) {
         CommunitySimpleDTO updatedCommunity = communityService.setCommunity(
-                "1", // 멤버 아이디를 가져올 수 있어야함.
+                1L, // 멤버 아이디를 가져올 수 있어야함.
                 updateForm.getCommunityId(),
                 updateForm.getTitle(),
                 updateForm.getContent(),
@@ -89,7 +89,7 @@ public class CommunityController {
     @PostMapping("/comment")
     public Result<CommunityCommentDTO> addComment(@RequestBody CommunityCommentCreateForm commentCreateForm) {
         CommunityCommentDTO addedComment = communityService.addComment(
-                "1", // 멤버 아이디를 가져올 수 있어야함.
+                1L, // 멤버 아이디를 가져올 수 있어야함.
                 commentCreateForm.getCommunityId(),
                 commentCreateForm.getContent()
         );
@@ -122,7 +122,7 @@ public class CommunityController {
     @PostMapping("/comment/child")
     public Result<CommunityCommentDTO> addChildComment(@RequestBody CommunityChildCommentCreateForm form) {
         CommunityCommentDTO addedChildComment = communityService.addChildComment(
-                "1", // 멤버 아이디를 가져올 수 있어야함.
+                1L, // 멤버 아이디를 가져올 수 있어야함.
                 form.getParentId(),
                 form.getContent()
         );
@@ -147,7 +147,7 @@ public class CommunityController {
             @Schema(description = "커뮤니티 아이디", defaultValue = "1")
             @PathVariable Long communityId
     ) {
-        boolean result = communityService.isLike(communityId, "1");// 멤버 아이디를 가져올 수 있어야함.
+        boolean result = communityService.isLike(communityId, 1L);// 멤버 아이디를 가져올 수 있어야함.
         return Result.success(result);
     }
 
@@ -158,7 +158,7 @@ public class CommunityController {
             @Schema(description = "커뮤니티 아이디", defaultValue = "1")
             @PathVariable Long communityId
     ) {
-        communityService.addLike(communityId, "1"); // 멤버 아이디를 가져올 수 있어야함.
+        communityService.addLike(communityId, 1L); // 멤버 아이디를 가져올 수 있어야함.
         return Result.success("Like added successfully");
     }
 
@@ -169,7 +169,7 @@ public class CommunityController {
             @Schema(description = "커뮤니티 아이디", defaultValue = "1")
             @PathVariable Long communityId
     ) {
-        communityService.removeLike(communityId, "1"); // 멤버 아이디를 가져올 수 있어야함.
+        communityService.removeLike(communityId, 1L); // 멤버 아이디를 가져올 수 있어야함.
         return Result.success("Like removed successfully");
     }
 }

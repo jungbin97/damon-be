@@ -30,7 +30,7 @@ public class CalendarController {
 //    @ApiResponse(responseCode = "400", description = "일정 등록 실패")
     public CalendarCreateResponseDto createCalendar(@RequestBody CalendarCreateRequestDto calendarCreateRequestDto) {
         // 로그인 구현 후 member Id 추후 수정
-        String memberId = "1";
+        Long memberId = 1L;
 
         return calendarService.createCalendar(memberId, calendarCreateRequestDto);
     }
@@ -46,7 +46,7 @@ public class CalendarController {
             @RequestParam(name = "size",defaultValue = "10") int size
     ) {
         // 로그인 구현 후 member Id 추후 수정
-        String memberId = "1";
+        Long memberId = 1L;
         return calendarService.getCalendars(memberId, page, size);
     }
 
@@ -58,7 +58,7 @@ public class CalendarController {
             @PathVariable("calendarId") Long calendarId
     ) {
         // 로그인 구현 후 member Id 추후 수정
-        String memberId = "1";
+        Long memberId = 1L;
         return calendarService.getCalendar(memberId, calendarId);
     }
 
@@ -71,7 +71,7 @@ public class CalendarController {
 
             @RequestBody CalendarEditRequestDto calendarEditRequestDto) {
         // 로그인 구현 후 member Id 추후 수정
-        String memberId = "1";
+        Long memberId = 1L;
         return calendarService.updateCalendar(memberId, calendarId, calendarEditRequestDto);
     }
 
@@ -83,7 +83,7 @@ public class CalendarController {
             @PathVariable("calendarId") Long calendarId
     ) {
         // 로그인 구현 후 member Id 추후 수정
-        String memberId = "1";
+        Long memberId = 1L;
         calendarService.deleteCalendar(memberId, calendarId);
     }
 }

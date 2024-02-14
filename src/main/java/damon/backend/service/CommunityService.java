@@ -55,7 +55,7 @@ public class CommunityService {
     }
 
     // 커뮤니티 추가
-    public CommunitySimpleDTO addCommunity(String memberId, CommunityType type, String title, String content) {
+    public CommunitySimpleDTO addCommunity(Long memberId, CommunityType type, String title, String content) {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new DataNotFoundException("해당 사용자를 찾을 수 없습니다. id : " + memberId));
 
@@ -65,7 +65,7 @@ public class CommunityService {
     }
 
     // 커뮤니티 수정
-    public CommunitySimpleDTO setCommunity(String memberId, Long communityId, String title, String content, List<String> images) {
+    public CommunitySimpleDTO setCommunity(Long memberId, Long communityId, String title, String content, List<String> images) {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new DataNotFoundException("해당 사용자를 찾을 수 없습니다. id : " + memberId));
         Community community = communityRepository.findOneFetch(communityId)
@@ -89,7 +89,7 @@ public class CommunityService {
     }
 
     // 커뮤니티에 댓글 추가
-    public CommunityCommentDTO addComment(String memberId, Long communityId, String content) {
+    public CommunityCommentDTO addComment(Long memberId, Long communityId, String content) {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new DataNotFoundException("해당 사용자를 찾을 수 없습니다. id : " + memberId));
         Community community = communityRepository.findOneFetch(communityId)
@@ -121,7 +121,7 @@ public class CommunityService {
     }
 
     // 커뮤니티에 대댓글 추가
-    public CommunityCommentDTO addChildComment(String memberId, Long parentCommentId, String content) {
+    public CommunityCommentDTO addChildComment(Long memberId, Long parentCommentId, String content) {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new DataNotFoundException("해당 사용자를 찾을 수 없습니다. id : " + memberId));
         CommunityComment parentComment = commentRepository.findOneFetch(parentCommentId)
@@ -144,7 +144,7 @@ public class CommunityService {
     }
 
     // 커뮤니티에 좋아요 여부 확인
-    public boolean isLike(Long communityId, String memberId) {
+    public boolean isLike(Long communityId, Long memberId) {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new DataNotFoundException("해당 사용자를 찾을 수 없습니다. id : " + memberId));
         Community community = communityRepository.findOneFetch(communityId)
@@ -154,7 +154,7 @@ public class CommunityService {
     }
 
     // 커뮤니티에 좋아요 추가
-    public void addLike(Long communityId, String memberId) {
+    public void addLike(Long communityId, Long memberId) {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new DataNotFoundException("해당 사용자를 찾을 수 없습니다. id : " + memberId));
         Community community = communityRepository.findOneFetch(communityId)
@@ -166,7 +166,7 @@ public class CommunityService {
     }
 
     // 커뮤니티에 좋아요 제거
-    public void removeLike(Long communityId, String memberId) {
+    public void removeLike(Long communityId, Long memberId) {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new DataNotFoundException("해당 사용자를 찾을 수 없습니다. id : " + memberId));
         Community community = communityRepository.findOneFetch(communityId)
