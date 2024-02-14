@@ -1,6 +1,6 @@
 package damon.backend.dto.response.community;
 
-import damon.backend.entity.CommunityComment;
+import damon.backend.entity.community.CommunityComment;
 import lombok.Data;
 
 import java.time.LocalDateTime;

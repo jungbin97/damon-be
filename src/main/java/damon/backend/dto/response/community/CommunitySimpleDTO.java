@@ -1,6 +1,6 @@
 package damon.backend.dto.response.community;
 
-import damon.backend.entity.Community;
+import damon.backend.entity.community.Community;
 import damon.backend.enums.CommunityType;
 import lombok.Data;
 
