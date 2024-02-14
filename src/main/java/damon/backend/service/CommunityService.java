@@ -29,8 +29,8 @@ public class CommunityService {
     private final CommunityCommentRepository commentRepository;
     private final MemberRepository memberRepository;
 
-    private Member getMemberEntity(String memberId) {
-        return memberRepository.findById(memberId).orElseThrow(() -> new EntityNotFoundException("member", memberId));
+    private Member getMemberEntity(String provider) {
+        return memberRepository.findByProvider(provider).orElseThrow(() -> new EntityNotFoundException("provider", provider));
     }
 
     private Community getCommunityEntity(Long communityId) {
@@ -74,14 +74,14 @@ public class CommunityService {
                 .collect(Collectors.toList());
     }
 
-    public Page<CommunitySimpleDTO> getMyCommunityPaging(String memberId, CommunityType type, int page) {
-        Page<Community> communities = communityRepository.findMyByPage(memberId, type, PageRequest.of(page, 20));
+    public Page<CommunitySimpleDTO> getMyCommunityPaging(String provider, CommunityType type, int page) {
+        Page<Community> communities = communityRepository.findMyByPage(getMemberEntity(provider).getId(), type, PageRequest.of(page, 20));
         return communities.map(CommunitySimpleDTO::new);
     }
 
     @Transactional
-    public CommunityDetailDTO addCommunity(String memberId, CommunityType type, String title, String content) {
-        Community community = new Community(getMemberEntity(memberId), type, title, content);
+    public CommunityDetailDTO addCommunity(String provider, CommunityType type, String title, String content) {
+        Community community = new Community(getMemberEntity(provider), type, title, content);
         communityRepository.save(community);
         return new CommunityDetailDTO(community);
     }
@@ -108,8 +108,8 @@ public class CommunityService {
     }
 
     @Transactional
-    public CommunityCommentDTO addComment(String memberId, Long communityId, String content) {
-        CommunityComment comment = getCommunityEntity(communityId).addComment(getMemberEntity(memberId), content);
+    public CommunityCommentDTO addComment(String provider, Long communityId, String content) {
+        CommunityComment comment = getCommunityEntity(communityId).addComment(getMemberEntity(provider), content);
         commentRepository.save(comment);
         return new CommunityCommentDTO(comment);
     }
@@ -130,10 +130,10 @@ public class CommunityService {
     }
 
     @Transactional
-    public CommunityCommentDTO addChildComment(String memberId, Long parentCommentId, String content) {
+    public CommunityCommentDTO addChildComment(String provider, Long parentCommentId, String content) {
         CommunityComment parentComment = getCommentEntity(parentCommentId);
         CommunityComment childComment = commentRepository.save(new CommunityComment(
-                getMemberEntity(memberId),
+                getMemberEntity(provider),
                 getCommunityEntity(parentComment.getCommunity().getCommunityId()),
                 content,
                 parentComment
@@ -144,8 +144,8 @@ public class CommunityService {
     }
 
     @Transactional
-    public boolean toggleLike(String memberId, Long communityId) {
-        Member member = getMemberEntity(memberId);
+    public boolean toggleLike(String provider, Long communityId) {
+        Member member = getMemberEntity(provider);
         Community community = getCommunityEntity(communityId);
 
         if (community.isLike(member)) {
@@ -157,7 +157,7 @@ public class CommunityService {
         }
     }
 
-    public boolean isLike(String memberId, Long communityId) {
-        return getCommunityEntity(communityId).isLike(getMemberEntity(memberId));
+    public boolean isLike(String provider, Long communityId) {
+        return getCommunityEntity(communityId).isLike(getMemberEntity(provider));
     }
 }

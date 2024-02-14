@@ -53,14 +53,16 @@ class CommunityServiceTest {
     void beforeEach() {
         // given
         member1 = new Member();
-        member1.setId("1");
-        member1.setNickname("member1");
+        member1.setProvidername("1");
+        member1.setName("member1");
+        member1.setEmail("email1");
         member1.setProfileImgUrl("/member1");
         member1 = memberRepository.save(member1);
 
         member2 = new Member();
-        member2.setId("2");
-        member2.setNickname("member2");
+        member2.setProvidername("2");
+        member2.setName("member2");
+        member1.setEmail("email2");
         member2.setProfileImgUrl("/member2");
         member2 = memberRepository.save(member2);
 
@@ -182,8 +184,8 @@ class CommunityServiceTest {
     @DisplayName("내가 작성한 커뮤니티 페이징 조회")
     void getMyCommunityPaging() {
         // when
-        Page<CommunitySimpleDTO> page1 = communityService.getMyCommunityPaging(member1.getId(), CommunityType.번개, 0);
-        Page<CommunitySimpleDTO> page2 = communityService.getMyCommunityPaging(member1.getId(), CommunityType.자유, 0);
+        Page<CommunitySimpleDTO> page1 = communityService.getMyCommunityPaging(member1.getProvidername(), CommunityType.번개, 0);
+        Page<CommunitySimpleDTO> page2 = communityService.getMyCommunityPaging(member1.getProvidername(), CommunityType.자유, 0);
 
         // then
         assertAll(
@@ -197,7 +199,7 @@ class CommunityServiceTest {
     @DisplayName("커뮤니티 추가")
     void addCommunity() {
         // when
-        Long communityId = communityService.addCommunity(member1.getId(), CommunityType.번개, "community3 title", "community3 content").getCommunityId();
+        Long communityId = communityService.addCommunity(member1.getProvidername(), CommunityType.번개, "community3 title", "community3 content").getCommunityId();
         CommunityDetailDTO dto = communityService.getCommunity(communityId);
 
         // then
@@ -237,9 +239,9 @@ class CommunityServiceTest {
     @DisplayName("커뮤니티 댓글 추가")
     void addComment() {
         // when
-        communityService.addComment(member1.getId(), community1.getCommunityId(), "comment1 content");
-        communityService.addComment(member1.getId(), community1.getCommunityId(), "comment2 content");
-        communityService.addComment(member1.getId(), community1.getCommunityId(), "comment3 content");
+        communityService.addComment(member1.getProvidername(), community1.getCommunityId(), "comment1 content");
+        communityService.addComment(member1.getProvidername(), community1.getCommunityId(), "comment2 content");
+        communityService.addComment(member1.getProvidername(), community1.getCommunityId(), "comment3 content");
         CommunityCommentDTO dto = communityService.getCommunity(community1.getCommunityId()).getComments().getLast();
 
         // then
@@ -250,7 +252,7 @@ class CommunityServiceTest {
     @DisplayName("커뮤니티 댓글 수정")
     void setComment() {
         // when
-        Long commentId = communityService.addComment(member1.getId(), community1.getCommunityId(), "comment1 content").getCommentId();
+        Long commentId = communityService.addComment(member1.getProvidername(), community1.getCommunityId(), "comment1 content").getCommentId();
         communityService.setComment(commentId, "update content");
         CommunityCommentDTO dto = communityService.getCommunity(community1.getCommunityId()).getComments().getLast();
 
@@ -262,7 +264,7 @@ class CommunityServiceTest {
     @DisplayName("커뮤니티 댓글 제거")
     void removeComment() {
         // when
-        Long commentId = communityService.addComment(member1.getId(), community1.getCommunityId(), "comment1 content").getCommentId();
+        Long commentId = communityService.addComment(member1.getProvidername(), community1.getCommunityId(), "comment1 content").getCommentId();
         communityService.removeComment(commentId);
 
         // then
@@ -273,11 +275,11 @@ class CommunityServiceTest {
     @DisplayName("커뮤니티 대댓글 추가")
     void addChildComment() {
         // when
-        Long commentId = communityService.addComment(member1.getId(), community1.getCommunityId(), "comment1 content").getCommentId();
-        Long childCommentId = communityService.addChildComment(member1.getId(), commentId, "childComment1 content").getCommentId(); // 대댓글
-        communityService.addChildComment(member1.getId(), commentId, "childComment2 content");
+        Long commentId = communityService.addComment(member1.getProvidername(), community1.getCommunityId(), "comment1 content").getCommentId();
+        Long childCommentId = communityService.addChildComment(member1.getProvidername(), commentId, "childComment1 content").getCommentId(); // 대댓글
+        communityService.addChildComment(member1.getProvidername(), commentId, "childComment2 content");
 
-        communityService.addChildComment(member1.getId(), childCommentId, "child of child content"); // 대대댓글
+        communityService.addChildComment(member1.getProvidername(), childCommentId, "child of child content"); // 대대댓글
 
         CommunityCommentDTO dto = communityService.getCommunity(community1.getCommunityId()).getComments().getLast();
 
@@ -292,8 +294,8 @@ class CommunityServiceTest {
     @DisplayName("커뮤니티 댓글 제거")
     void removeChildComment() {
         // when
-        Long commentId = communityService.addComment(member1.getId(), community1.getCommunityId(), "comment1 content").getCommentId();
-        communityService.addChildComment(member1.getId(), commentId, "childComment1 content"); // 대댓글
+        Long commentId = communityService.addComment(member1.getProvidername(), community1.getCommunityId(), "comment1 content").getCommentId();
+        communityService.addChildComment(member1.getProvidername(), commentId, "childComment1 content"); // 대댓글
 
         CommunityCommentDTO dto = communityService.getCommunity(community1.getCommunityId()).getComments().getLast().getChildComments().getLast(); // 대댓글
 
@@ -307,16 +309,16 @@ class CommunityServiceTest {
     @DisplayName("커뮤니티 좋아요")
     void like() {
         // when
-        communityService.toggleLike(member1.getId(), community1.getCommunityId());
-        communityService.toggleLike(member1.getId(), community2.getCommunityId());
-        communityService.toggleLike(member1.getId(), community2.getCommunityId());
+        communityService.toggleLike(member1.getProvidername(), community1.getCommunityId());
+        communityService.toggleLike(member1.getProvidername(), community2.getCommunityId());
+        communityService.toggleLike(member1.getProvidername(), community2.getCommunityId());
 
         // then
         assertAll(
-                () -> assertTrue(communityService.isLike(member1.getId(), community1.getCommunityId())),
-                () -> assertFalse(communityService.isLike(member2.getId(), community1.getCommunityId())),
-                () -> assertFalse(communityService.isLike(member1.getId(), community2.getCommunityId())),
-                () -> assertFalse(communityService.isLike(member2.getId(), community2.getCommunityId()))
+                () -> assertTrue(communityService.isLike(member1.getProvidername(), community1.getCommunityId())),
+                () -> assertFalse(communityService.isLike(member2.getProvidername(), community1.getCommunityId())),
+                () -> assertFalse(communityService.isLike(member1.getProvidername(), community2.getCommunityId())),
+                () -> assertFalse(communityService.isLike(member2.getProvidername(), community2.getCommunityId()))
         );
     }
 }

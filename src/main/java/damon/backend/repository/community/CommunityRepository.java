@@ -27,5 +27,5 @@ public interface CommunityRepository extends JpaRepository<Community, Long>  {
     List<Community> findTop5ByList(CommunityType type);
 
     @Query("SELECT c FROM Community c JOIN FETCH c.member m WHERE c.type = :type AND m.id = :memberId ORDER BY c.createdDate DESC")
-    Page<Community> findMyByPage( String memberId, CommunityType type, Pageable pageable);
+    Page<Community> findMyByPage(Long memberId, CommunityType type, Pageable pageable);
 }

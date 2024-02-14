@@ -64,13 +64,13 @@ public class CommunityController {
     @GetMapping("/my")
     public Result<Page<CommunitySimpleDTO>> getMyCommunityPaging(
             @Schema(description = "멤버아이디", defaultValue = "1")
-            @RequestParam String memberId,
+            @RequestParam String provider,
             @Schema(description = "커뮤니티 타입(번개, 자유)", defaultValue = "번개")
             @RequestParam CommunityType type,
             @Schema(description = "페이지 번호(0부터)", defaultValue = "0")
             @RequestParam int page
     ) {
-        Page<CommunitySimpleDTO> communityList = communityService.getMyCommunityPaging(memberId, type, page);
+        Page<CommunitySimpleDTO> communityList = communityService.getMyCommunityPaging(provider, type, page);
         return Result.success(communityList);
     }
 
@@ -90,11 +90,11 @@ public class CommunityController {
     @PostMapping
     public Result<CommunityDetailDTO> addCommunity(
             @Schema(description = "멤버아이디", defaultValue = "1")
-            @RequestParam String memberId,
+            @RequestParam String provider,
             @RequestBody CommunityCreateForm createForm
     ) {
         CommunityDetailDTO addedCommunity = communityService.addCommunity(
-                memberId,
+                provider,
                 createForm.getType(),
                 createForm.getTitle(),
                 createForm.getContent()
@@ -106,10 +106,10 @@ public class CommunityController {
     @PutMapping
     public Result<CommunityDetailDTO> setCommunity(
             @Schema(description = "멤버아이디", defaultValue = "1")
-            @RequestParam String memberId,
+            @RequestParam String provider,
             @RequestBody CommunityUpdateForm updateForm
     ) {
-        if (!communityService.isCommunityWriter(memberId, updateForm.getCommunityId())) {
+        if (!communityService.isCommunityWriter(provider, updateForm.getCommunityId())) {
             throw new PermissionDeniedException();
         }
 
@@ -126,11 +126,11 @@ public class CommunityController {
     @DeleteMapping("/{communityId}")
     public Result<Boolean> removeCommunity(
             @Schema(description = "멤버아이디", defaultValue = "1")
-            @RequestParam String memberId,
+            @RequestParam String provider,
             @Schema(description = "커뮤니티 아이디", defaultValue = "1")
             @PathVariable Long communityId
     ) {
-        if (!communityService.isCommunityWriter(memberId, communityId)) {
+        if (!communityService.isCommunityWriter(provider, communityId)) {
             throw new PermissionDeniedException();
         }
 
@@ -144,11 +144,11 @@ public class CommunityController {
     @PostMapping("/comment")
     public Result<CommunityCommentDTO> addComment(
             @Schema(description = "멤버아이디", defaultValue = "1")
-            @RequestParam String memberId,
+            @RequestParam String provider,
             @RequestBody CommunityCommentCreateForm commentCreateForm
     ) {
         CommunityCommentDTO addedComment = communityService.addComment(
-                memberId,
+                provider,
                 commentCreateForm.getCommunityId(),
                 commentCreateForm.getContent()
         );
@@ -159,10 +159,10 @@ public class CommunityController {
     @PutMapping("/comment")
     public Result<CommunityCommentDTO> setComment(
             @Schema(description = "멤버아이디", defaultValue = "1")
-            @RequestParam String memberId,
+            @RequestParam String provider,
             @RequestBody CommunityCommentUpdateForm updateForm
     ) {
-        if (!communityService.isCommentWriter(memberId, updateForm.getCommentId())) {
+        if (!communityService.isCommentWriter(provider, updateForm.getCommentId())) {
             throw new PermissionDeniedException();
         }
 
@@ -177,11 +177,11 @@ public class CommunityController {
     @DeleteMapping("/comment/{commentId}")
     public Result<Boolean> removeComment(
             @Schema(description = "멤버아이디", defaultValue = "1")
-            @RequestParam String memberId,
+            @RequestParam String provider,
             @Schema(description = "커뮤니티 댓글 아이디", defaultValue = "1")
             @PathVariable Long commentId
     ) {
-        if (!communityService.isCommentWriter(memberId, commentId)) {
+        if (!communityService.isCommentWriter(provider, commentId)) {
             throw new PermissionDeniedException();
         }
 
@@ -193,11 +193,11 @@ public class CommunityController {
     @PostMapping("/comment/child")
     public Result<CommunityCommentDTO> addChildComment(
             @Schema(description = "멤버아이디", defaultValue = "1")
-            @RequestParam String memberId,
+            @RequestParam String provider,
             @RequestBody CommunityChildCommentCreateForm form
     ) {
         CommunityCommentDTO addedChildComment = communityService.addChildComment(
-                memberId,
+                provider,
                 form.getParentId(),
                 form.getContent()
         );
@@ -210,21 +210,21 @@ public class CommunityController {
     @GetMapping("/like/{communityId}")
     public Result<Boolean> isLike(
             @Schema(description = "멤버아이디", defaultValue = "1")
-            @RequestParam String memberId,
+            @RequestParam String provider,
             @Schema(description = "커뮤니티 아이디", defaultValue = "1")
             @PathVariable Long communityId
     ) {
-        return Result.success(communityService.isLike(memberId, communityId));
+        return Result.success(communityService.isLike(provider, communityId));
     }
 
     @Operation(summary = "커뮤니티 좋아요 토글", description = "최종적으로 좋아요 여부를 반환해 줍니다.")
     @PostMapping("/like/{communityId}")
     public Result<Boolean> addLike(
             @Schema(description = "멤버아이디", defaultValue = "1")
-            @RequestParam String memberId,
+            @RequestParam String provider,
             @Schema(description = "커뮤니티 아이디", defaultValue = "1")
             @PathVariable Long communityId
     ) {
-        return Result.success(communityService.toggleLike(memberId, communityId));
+        return Result.success(communityService.toggleLike(provider, communityId));
     }
 }
