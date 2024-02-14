@@ -193,7 +193,7 @@ public class CalendarService {
      * @param requestDto : 선택 삭제할 일정 글의 아이디
      */
     @Transactional
-    public void deleteCalendars(String memberId, CalendarsDeleteRequestDto requestDto) {
+    public void deleteCalendars(Long memberId, CalendarsDeleteRequestDto requestDto) {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 사용자를 찾을 수 없습니다."));
 

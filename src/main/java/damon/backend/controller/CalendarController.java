@@ -96,7 +96,7 @@ public class CalendarController {
             @RequestBody CalendarsDeleteRequestDto calendarsDeleteRequestDto
     ) {
         // 로그인 구현 후 member Id 추후 수정
-        String memberId = "1";
+        Long memberId = 1L;
         calendarService.deleteCalendars(memberId, calendarsDeleteRequestDto);
     }
 }
