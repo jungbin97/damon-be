@@ -20,7 +20,7 @@ public interface CommunityLikeRepository extends JpaRepository<CommunityLike, Lo
 
     @EntityGraph(attributePaths = {"community", "member"})
     @Query("SELECT l FROM CommunityLike l WHERE l.community.communityId = :communityId AND l.member.id = :memberId")
-    Optional<CommunityLike> findOneFetch(@Param("communityId") Long communityId, @Param("memberId") String memberId);
+    Optional<CommunityLike> findOneFetch(@Param("communityId") Long communityId, @Param("memberId") Long memberId);
 
-    boolean existsByCommunityCommunityIdAndMemberId(Long communityId, String memberId);
+    boolean existsByCommunityCommunityIdAndMemberId(Long communityId, Long memberId);
 }
