@@ -56,8 +56,8 @@ public class JWTFilter extends OncePerRequestFilter {
         }
 
         //토큰에서 정보 획득
-        String providername = jwtUtil.getProvidername(token);
-        String[] parts = providername.split(" ");
+        String providerName = jwtUtil.getProviderName(token);
+        String[] parts = providerName.split(" ");
         String provider = parts[0];
         String providerId = parts[1];
 

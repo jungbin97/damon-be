@@ -14,6 +14,8 @@ import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -55,24 +57,19 @@ public class CustomOauth2UserService extends DefaultOAuth2UserService {
 
         // 구현
         // 소셜로그인의 커스텀 아이디를 통해 내가 가진 db에 해당 유저가 있는지 조회
-        String providername = oAuth2Response.getProvider() + " " + oAuth2Response.getProviderId();
-        Member existData = memberRepository.findByProvidername(providername);
+        String providerName = oAuth2Response.getProvider() + " " + oAuth2Response.getProviderId();
+        Optional<Member> optionalExistData = memberRepository.findByProviderName(providerName);
+        Member existData = optionalExistData.orElse(null); // 값이 없으면 null을 반환
 
-        if (existData == null) { // 신규회원 등록
-            Member member = new Member();
-            member.setProvidername(providername);
-            member.setName(oAuth2Response.getName());
-            member.setEmail(oAuth2Response.getEmail());
-            member.setProfileImgUrl(oAuth2Response.getProfileImgUrl());
-
+        if (existData == null) { // 신규 회원 등록
+            // createInfo 메소드를 사용하여 신규 회원 정보 등록
+            Member member = new Member(); // Member 객체 생성
+            member.createInfo(providerName, oAuth2Response.getName(), oAuth2Response.getEmail(), oAuth2Response.getProfileImgUrl());
             memberRepository.save(member);
-        } else { // 기존회원 업데이트
-
-            existData.setName(oAuth2Response.getName());
-            existData.setProfileImgUrl(oAuth2Response.getProfileImgUrl());
-
+        } else { // 기존 회원 업데이트
+            // updateInfo 메소드를 사용하여 기존 회원 정보 업데이트
+            existData.updateInfo(oAuth2Response.getName(), oAuth2Response.getProfileImgUrl());
             memberRepository.save(existData);
-
         }
 
 
