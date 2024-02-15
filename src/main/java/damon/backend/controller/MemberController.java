@@ -19,6 +19,7 @@ import java.util.NoSuchElementException;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/login/oauth2/code")
+@CrossOrigin(origins = "*", allowedHeaders = "*")
 public class MemberController {
 
     private final KakaoService kakaoService;
