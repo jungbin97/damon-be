@@ -19,7 +19,7 @@ public class CustomOAuth2User implements OAuth2User {
     public CustomOAuth2User(OAuth2Response oAuth2Response) {
         this.oAuth2Response = oAuth2Response;
         attributes = new HashMap<>();
-        attributes.put("providername", getProvidername());
+        attributes.put("providerName", getProviderName());
         attributes.put("name", oAuth2Response.getName());
         attributes.put("email", oAuth2Response.getEmail());
         attributes.put("profileImgUrl", oAuth2Response.getProfileImgUrl());
@@ -37,7 +37,7 @@ public class CustomOAuth2User implements OAuth2User {
     }
 
     // 아이디를 강제로 커스텀 (유저네임 = 프로바이더 + 소셜에서 발급받은 코드)
-    public String getProvidername() {
+    public String getProviderName() {
 
         return oAuth2Response.getProvider() + " " + oAuth2Response.getProviderId();
     }
