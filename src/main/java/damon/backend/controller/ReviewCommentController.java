@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "리뷰 댓글 API", description = "리뷰 댓글 API")
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/review")
+@RequestMapping("/api/review")
 @CrossOrigin(origins = "*", allowedHeaders = "*")
 public class ReviewCommentController {
     private final ReviewCommentService reviewCommentService;

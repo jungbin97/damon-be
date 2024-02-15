@@ -5,6 +5,8 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 @Entity
 @Table(name = "travel")
@@ -18,6 +20,7 @@ public class Travel {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "calendar_id")
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private Calendar calendar;
 
     private String locationName;
@@ -28,16 +31,19 @@ public class Travel {
 
     private String memo;
 
-    private int orderNum;
+    private int travelDay;
+
+    private int orderNumber;
 
     @Builder
-    public Travel(Calendar calendar, String locationName, String latitude, String longitude, int orderNum, String memo) {
+    public Travel(Calendar calendar, String locationName, String latitude, String longitude, int travelDay, String memo, int orderNumber) {
         this.calendar = calendar;
         this.locationName = locationName;
         this.latitude = latitude;
         this.longitude = longitude;
-        this.orderNum = orderNum;
+        this.travelDay = travelDay;
         this.memo = memo;
+        this.orderNumber = orderNumber;
     }
 
     public void setCalendar(Calendar calendar){
@@ -47,11 +53,12 @@ public class Travel {
         }
     }
 
-    public void update(String locationName, String latitude, String longitude, String memo, int orderNum) {
+    public void update(String locationName, String latitude, String longitude, String memo, int travelDay, int orderNumber) {
         this.locationName = locationName;
         this.latitude = latitude;
         this.longitude = longitude;
         this.memo = memo;
-        this.orderNum = orderNum;
+        this.travelDay = travelDay;
+        this.orderNumber = orderNumber;
     }
 }

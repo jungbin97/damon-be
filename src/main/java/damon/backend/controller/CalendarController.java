@@ -2,6 +2,7 @@ package damon.backend.controller;
 
 import damon.backend.dto.request.CalendarCreateRequestDto;
 import damon.backend.dto.request.CalendarEditRequestDto;
+import damon.backend.dto.request.CalendarsDeleteRequestDto;
 import damon.backend.dto.response.CalendarCreateResponseDto;
 import damon.backend.dto.response.CalendarEditResponseDto;
 import damon.backend.dto.response.CalendarResponseDto;
@@ -30,7 +31,7 @@ public class CalendarController {
 //    @ApiResponse(responseCode = "400", description = "일정 등록 실패")
     public CalendarCreateResponseDto createCalendar(@RequestBody CalendarCreateRequestDto calendarCreateRequestDto) {
         // 로그인 구현 후 member Id 추후 수정
-        String memberId = "1";
+        Long memberId = 1L;
 
         return calendarService.createCalendar(memberId, calendarCreateRequestDto);
     }
@@ -46,7 +47,7 @@ public class CalendarController {
             @RequestParam(name = "size",defaultValue = "10") int size
     ) {
         // 로그인 구현 후 member Id 추후 수정
-        String memberId = "1";
+        Long memberId = 1L;
         return calendarService.getCalendars(memberId, page, size);
     }
 
@@ -58,7 +59,7 @@ public class CalendarController {
             @PathVariable("calendarId") Long calendarId
     ) {
         // 로그인 구현 후 member Id 추후 수정
-        String memberId = "1";
+        Long memberId = 1L;
         return calendarService.getCalendar(memberId, calendarId);
     }
 
@@ -69,9 +70,10 @@ public class CalendarController {
             @Schema(description = "수정 할 일정 상세 페이지 ID", example="1")
             @PathVariable("calendarId") Long calendarId,
 
-            @RequestBody CalendarEditRequestDto calendarEditRequestDto) {
+            @RequestBody CalendarEditRequestDto calendarEditRequestDto
+    ) {
         // 로그인 구현 후 member Id 추후 수정
-        String memberId = "1";
+        Long memberId = 1L;
         return calendarService.updateCalendar(memberId, calendarId, calendarEditRequestDto);
     }
 
@@ -83,7 +85,18 @@ public class CalendarController {
             @PathVariable("calendarId") Long calendarId
     ) {
         // 로그인 구현 후 member Id 추후 수정
-        String memberId = "1";
+        Long memberId = 1L;
         calendarService.deleteCalendar(memberId, calendarId);
+    }
+
+    @Operation(summary = "내 일정 선택 삭제", description = "내 일정을 선택 삭제합니다.")
+    @ApiResponse(responseCode = "200", description = "일정 선택 삭제 성공")
+    @DeleteMapping("/calendar")
+    public void deleteCalendars(
+            @RequestBody CalendarsDeleteRequestDto calendarsDeleteRequestDto
+    ) {
+        // 로그인 구현 후 member Id 추후 수정
+        Long memberId = 1L;
+        calendarService.deleteCalendars(memberId, calendarsDeleteRequestDto);
     }
 }

@@ -52,18 +52,18 @@ class CalendarServiceTest {
     @BeforeEach
     void setUp() {
         member = new Member();
-        member.setId("testId");
-        member.setNickname("test nickname");
+        member.setId(1L);
+        member.setName("test nickname");
         member.setProfileImgUrl("/test/url");
         ArrayList<TravelCreateRequestDto> travelDtoList = new ArrayList<>();
 
-        TravelCreateRequestDto travelDto1 = TravelCreateRequestDto.of("test LocalName1", "38.1231231", "128.123123", 1, "test memo");
-        TravelCreateRequestDto travelDto2 = TravelCreateRequestDto.of("test LocalName2", "38.1231231", "128.123123", 1, "test memo");
-        TravelCreateRequestDto travelDto3 = TravelCreateRequestDto.of("test LocalName3", "38.1231231", "128.123123", 1, "test memo");
+        TravelCreateRequestDto travelDto1 = TravelCreateRequestDto.of("test LocalName1", "38.1231231", "128.123123", 1, "test memo", 1);
+        TravelCreateRequestDto travelDto2 = TravelCreateRequestDto.of("test LocalName2", "38.1231231", "128.123123", 1, "test memo", 2);
+        TravelCreateRequestDto travelDto3 = TravelCreateRequestDto.of("test LocalName3", "38.1231231", "128.123123", 1, "test memo", 3);
 
-        TravelCreateRequestDto travelDto4 = TravelCreateRequestDto.of("test LocalName1", "38.1231231", "128.123123", 2, "test memo");
-        TravelCreateRequestDto travelDto5 = TravelCreateRequestDto.of("test LocalName2", "38.1231231", "128.123123", 2, "test memo");
-        TravelCreateRequestDto travelDto6 = TravelCreateRequestDto.of("test LocalName3", "38.1231231", "128.123123", 2, "test memo");
+        TravelCreateRequestDto travelDto4 = TravelCreateRequestDto.of("test LocalName1", "38.1231231", "128.123123", 2, "test memo", 1);
+        TravelCreateRequestDto travelDto5 = TravelCreateRequestDto.of("test LocalName2", "38.1231231", "128.123123", 2, "test memo",2);
+        TravelCreateRequestDto travelDto6 = TravelCreateRequestDto.of("test LocalName3", "38.1231231", "128.123123", 2, "test memo", 3);
 
         travelDtoList.add(travelDto1);
         travelDtoList.add(travelDto2);
@@ -120,7 +120,7 @@ class CalendarServiceTest {
 
         List<Calendar> subList = calendars.subList(start, end);
         Page<Calendar> mockPage = new PageImpl<>(subList, pageRequest, calendars.size());
-        when(calendarRepository.findByMember(any(Member.class), any(PageRequest.class))).thenReturn(mockPage);
+        when(calendarRepository.findPageByMember(any(Long.class), any(PageRequest.class))).thenReturn(mockPage);
 
         // Action
         Page<CalendarsResponseDto> result = calendarService.getCalendars(member.getId(), page, size);
@@ -128,7 +128,7 @@ class CalendarServiceTest {
         // Verify
         assertNotNull(result);
         assertEquals(size, result.getContent().size());
-        verify(calendarRepository).findByMember(any(Member.class), any(PageRequest.class));
+        verify(calendarRepository).findPageByMember(any(Long.class), any(PageRequest.class));
     }
 
     @DisplayName("getCalendar: 멤버의 일정 글 상세 조회한다.")
@@ -142,7 +142,7 @@ class CalendarServiceTest {
                 .endDate(LocalDate.of(2021, 8, 3))
                 .area(Area.JEJU)
                 .build();
-        when(calendarRepository.findById(any())).thenReturn(Optional.of(calendar));
+        when(calendarRepository.findByIdWithTravel(any())).thenReturn(Optional.of(calendar));
 
         // Action
         CalendarResponseDto result = calendarService.getCalendar(member.getId(), calendarId);
