@@ -18,14 +18,14 @@ public class AuthTokensGenerator {
     private final JwtTokenProvider jwtTokenProvider;
 
     //id 받아 Access Token 생성
-    public AuthTokens generate(String uid) {
+    public AuthTokens generate(String id) {
         log.info("AuthTokensGenerator의 generate 실행");
         long now = (new Date()).getTime();
         Date accessTokenExpiredAt = new Date(now + ACCESS_TOKEN_EXPIRE_TIME);
         Date refreshTokenExpiredAt = new Date(now + REFRESH_TOKEN_EXPIRE_TIME);
 
         //String subject = email.toString();
-        String accessToken = jwtTokenProvider.accessTokenGenerate(uid, accessTokenExpiredAt);
+        String accessToken = jwtTokenProvider.accessTokenGenerate(id, accessTokenExpiredAt);
         String refreshToken = jwtTokenProvider.refreshTokenGenerate(refreshTokenExpiredAt);
 
         return AuthTokens.of(accessToken, refreshToken, BEARER_TYPE, ACCESS_TOKEN_EXPIRE_TIME / 1000L);

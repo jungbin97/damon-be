@@ -43,9 +43,9 @@ public class CommunityDetailDTO {
                 .map(CommunityLikeDTO::new)
                 .collect(Collectors.toList());
 
-        this.comments = community.getComments().reversed() // 역순으로 정렬
-                .stream()
-                .map(CommunityCommentDTO::new)
-                .collect(Collectors.toList());
+//        this.comments = community.getComments().reversed() // 역순으로 정렬
+//                .stream()
+//                .map(CommunityCommentDTO::new)
+//                .collect(Collectors.toList());
     }
 }
