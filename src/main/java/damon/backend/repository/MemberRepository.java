@@ -9,7 +9,6 @@ import java.util.Optional;
 
 @Repository
 public interface MemberRepository extends JpaRepository<Member, Long> {
-    Member findByProvidername(String providername);
 
     @Query("SELECT m FROM Member m WHERE m.providerName = :providerName")
     Optional<Member> findByProviderName(String providerName);
