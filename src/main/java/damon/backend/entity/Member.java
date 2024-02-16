@@ -4,7 +4,6 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -15,7 +14,6 @@ import java.util.Set;
 @Entity
 @Table(name = "member")
 @Getter
-@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 
@@ -30,14 +28,13 @@ public class Member {
     private String profileImgUrl; // 사용자 프로필 이미지
     private String refreshToken;
 
-
     //리뷰 매핑
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Review> reviews = new ArrayList<>();
 
-//    //리뷰 댓글 매핑
-//    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
-//    private Set<ReviewComment> reviewComments = new HashSet<>();
+    //리뷰 댓글 매핑
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<ReviewComment> reviewComments = new HashSet<>();
 
     //리뷰 좋아요 매핑
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
