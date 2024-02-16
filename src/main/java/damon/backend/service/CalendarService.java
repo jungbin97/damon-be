@@ -81,8 +81,8 @@ public class CalendarService {
      */
     @Transactional(readOnly = true)
     public Page<CalendarsResponseDto> getCalendars(Long memberId, int page, int size)  {
-        Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 사용자를 찾을 수 없습니다."));
+//        Member member = memberRepository.findById(memberId)
+//                .orElseThrow(() -> new IllegalArgumentException("해당 사용자를 찾을 수 없습니다."));
 
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdDate"));
         Page<Calendar> calendarPage = calendarRepository.findPageByMember(pageable);
