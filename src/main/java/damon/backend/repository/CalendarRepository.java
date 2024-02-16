@@ -15,8 +15,8 @@ import java.util.Optional;
 
 @Repository
 public interface CalendarRepository extends JpaRepository<Calendar, Long> {
-    @Query("SELECT c FROM Calendar c WHERE c.member.id = :memberId")
-    Page<Calendar> findPageByMember(@Param("memberId") Long memberId, Pageable pageable);
+    @Query("SELECT c FROM Calendar c")
+    Page<Calendar> findPageByMember(Pageable pageable);
 
     @Query("SELECT distinct c FROM Calendar c JOIN FETCH c.travels WHERE c.id = :calendarId")
     Optional<Calendar> findByIdWithTravel(@Param("calendarId") Long calendarId);

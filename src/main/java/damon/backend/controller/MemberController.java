@@ -26,13 +26,14 @@ public class MemberController {
 //    private final NaverService naverService;
 
     @GetMapping("/kakao")
-    public ResponseEntity<?> kakaoLogin(@RequestParam String code, HttpServletRequest request) {
+    public String kakaoLogin(@RequestParam String code) {
         try {
             LoginResponse loginResponse = kakaoService.kakaoLogin(code);
-            HttpHeaders headers = new HttpHeaders();
-            headers.setLocation(URI.create("http://localhost:3000")); // 클라이언트 주소
-            headers.add("Authorization", "Bearer " + loginResponse.getToken().getAccessToken()); // 토큰을 헤더에 추가
-            return new ResponseEntity<>(headers, HttpStatus.SEE_OTHER); // 303 SEE_OTHER 상태 코드 사용
+//            HttpHeaders headers = new HttpHeaders();
+//            headers.setLocation(URI.create("http://localhost:3000")); // 클라이언트 주소
+//            headers.add("Authorization", "Bearer " + loginResponse.getToken().getAccessToken()); // 토큰을 헤더에 추가
+//            return new ResponseEntity<>(headers, HttpStatus.SEE_OTHER); // 303 SEE_OTHER 상태 코드 사용
+            return loginResponse.getToken().getAccessToken();
         } catch (NoSuchElementException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
         }
