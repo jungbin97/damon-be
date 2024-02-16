@@ -81,17 +81,20 @@ public class UserService {
     }
 
     // 카카오 엑세스 토큰으로 카카오 유저 정보 조회
-    public KakaoUserDto getKakaoUser(String access_Token) {
+    public KakaoUserDto getKakaoUser(String accessToken) {
         String reqURL = "https://kapi.kakao.com/v2/user/me";
         try {
-            JsonObject jsonObject = getJsonObject(access_Token, reqURL);
+            JsonObject jsonObject = getJsonObject(accessToken, reqURL);
             String id = jsonObject.get("id").getAsString();
 
             JsonObject properties = jsonObject.getAsJsonObject("properties");
             String nickname = properties.get("nickname").getAsString();
             String profile = properties.get("profile_image").getAsString();
 
-            KakaoUserDto kakaoUser = new KakaoUserDto(id, nickname, "", profile);
+            JsonObject kakaoAccount = jsonObject.getAsJsonObject("kakao_account");
+            String email = kakaoAccount.get("email").getAsString();
+
+            KakaoUserDto kakaoUser = new KakaoUserDto(id, nickname, email, profile);
             return kakaoUser;
         } catch (IOException e) {
             return null;
@@ -115,11 +118,11 @@ public class UserService {
         return kakaoUser;
     }
 
-    private JsonObject getJsonObject(String access_Token, String reqURL) throws IOException {
+    private JsonObject getJsonObject(String accessToken, String reqURL) throws IOException {
         URL url = new URL(reqURL);
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
         conn.setRequestMethod("POST");
-        conn.setRequestProperty("Authorization", "Bearer " + access_Token);
+        conn.setRequestProperty("Authorization", "Bearer " + accessToken);
 
         BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream(), "UTF-8"));
         StringBuilder result = new StringBuilder();
