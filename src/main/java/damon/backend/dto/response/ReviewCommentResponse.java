@@ -42,7 +42,7 @@ public class ReviewCommentResponse {
 
         return new ReviewCommentResponse(
                 reviewComment.getId(),
-                reviewComment.getMember() != null ? reviewComment.getMember().getName() : null,
+                reviewComment.getUser() != null ? reviewComment.getUser().getNickname() : null,
                 state,
                 reviewComment.getCreatedDate(),
                 reviewComment.getReview() != null ? reviewComment.getReview().getId() : null, // 리뷰 ID

@@ -18,7 +18,7 @@ public class Log {
     public static <T> void trace(T object) {
         try {
             String jsonString = prettyPrinter.writeValueAsString(object);
-            log.trace("{} as json\n{}", object.getClass().getSimpleName(), jsonString);
+            log.trace("\n\n{}\n{}\n\n", object.getClass().getSimpleName(), jsonString);
         } catch (JsonProcessingException e) {
             log.error("Error converting object to json", e);
         }
@@ -27,7 +27,7 @@ public class Log {
     public static <T> void debug(T object) {
         try {
             String jsonString = prettyPrinter.writeValueAsString(object);
-            log.debug("{} as json\n{}", object.getClass().getSimpleName(), jsonString);
+            log.debug("\n\n{}\n{}\n\n", object.getClass().getSimpleName(), jsonString);
         } catch (JsonProcessingException e) {
             log.error("Error converting object to json", e);
         }
@@ -36,7 +36,7 @@ public class Log {
     public static <T> void info(T object) {
         try {
             String jsonString = prettyPrinter.writeValueAsString(object);
-            log.info("{} as json\n{}", object.getClass().getSimpleName(), jsonString);
+            log.info("\n\n{}\n{}\n\n", object.getClass().getSimpleName(), jsonString);
         } catch (JsonProcessingException e) {
             log.error("Error converting object to json", e);
         }
@@ -45,7 +45,7 @@ public class Log {
     public static <T> void warn(T object) {
         try {
             String jsonString = prettyPrinter.writeValueAsString(object);
-            log.warn("{} as json\n{}", object.getClass().getSimpleName(), jsonString);
+            log.warn("\n\n{}\n{}\n\n", object.getClass().getSimpleName(), jsonString);
         } catch (JsonProcessingException e) {
             log.error("Error converting object to json", e);
         }
@@ -54,7 +54,7 @@ public class Log {
     public static <T> void error(T object) {
         try {
             String jsonString = prettyPrinter.writeValueAsString(object);
-            log.error("{} as json\n{}", object.getClass().getSimpleName(), jsonString);
+            log.error("\n\n{}\n{}\n\n", object.getClass().getSimpleName(), jsonString);
         } catch (JsonProcessingException e) {
             log.error("Error converting object to json", e);
         }

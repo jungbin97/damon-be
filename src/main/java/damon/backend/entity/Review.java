@@ -1,6 +1,7 @@
 package damon.backend.entity;
 
 import damon.backend.dto.request.ReviewRequest;
+import damon.backend.entity.user.User;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -44,8 +45,8 @@ public class Review extends BaseEntity {
 
     //멤버id 매핑
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_id")
-    private Member member;
+    @JoinColumn(name = "user_id")
+    private User user;
 
     //리뷰이미지 매핑
     @OneToMany(mappedBy = "review", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -60,10 +61,10 @@ public class Review extends BaseEntity {
     private List<ReviewComment> reviewComments = new ArrayList<>();
 
     //연관관계 매핑 메서드
-    public void setMember(Member member) {
-        this.member = member;
-        if (member != null) {
-            member.getReviews().add(this);
+    public void setUser(User user) {
+        this.user = user;
+        if (user != null) {
+            user.getReviews().add(this);
         }
     }
 
@@ -74,10 +75,10 @@ public class Review extends BaseEntity {
     }
 
     // 생성자 메서드
-    public static Review create(ReviewRequest request, Member member) {
+    public static Review create(ReviewRequest request, User user) {
         Review review = new Review();
         populateReviewFields(review, request);
-        review.member = member; // Member 설정은 create 시에만 수행
+        review.user = user; // Member 설정은 create 시에만 수행
         return review;
     }
 

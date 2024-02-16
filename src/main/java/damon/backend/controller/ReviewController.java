@@ -1,12 +1,13 @@
 package damon.backend.controller;
 
 
-import damon.backend.dto.login.CustomOAuth2User;
 import damon.backend.dto.request.ReviewRequest;
 import damon.backend.dto.response.ReviewListResponse;
 import damon.backend.dto.response.ReviewResponse;
+import damon.backend.dto.response.user.KakaoUserDto;
 import damon.backend.entity.Area;
 import damon.backend.service.ReviewService;
+import damon.backend.util.auth.AuthToken;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -14,7 +15,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -38,9 +38,9 @@ public class ReviewController {
             @Valid
             @RequestBody ReviewRequest reviewRequest,
             @RequestParam("images") Optional<List<MultipartFile>> images,
-            @AuthenticationPrincipal CustomOAuth2User user
+            @AuthToken KakaoUserDto kakaoUserDto
     ){
-        return reviewService.postReview(reviewRequest, images.orElse(new ArrayList<>()), user.getProviderName());
+        return reviewService.postReview(reviewRequest, images.orElse(new ArrayList<>()), kakaoUserDto.getIdentifier());
     }
 
 
@@ -66,10 +66,9 @@ public class ReviewController {
     @ApiResponse(responseCode = "200", description = "리뷰 상세 조회 성공")
     public ReviewResponse searchReviewDetail(
             @Schema(description = "리뷰 인덱스", example="1")
-            @PathVariable Long reviewId,
-            @AuthenticationPrincipal CustomOAuth2User user
+            @PathVariable Long reviewId
     ) {
-        ReviewResponse reviewResponse = reviewService.searchReview(reviewId,  user.getProviderName());
+        ReviewResponse reviewResponse = reviewService.searchReview(reviewId);
         reviewService.incrementReviewViewCount(reviewId); // 조회수 증가
         return reviewResponse;
     }
@@ -85,8 +84,13 @@ public class ReviewController {
             @RequestParam("images") Optional<List<MultipartFile>> newImages,
             @RequestParam("deleteImages") Optional<List<Long>> deleteImageIds,
             @RequestBody ReviewRequest reviewRequest,
-            @AuthenticationPrincipal CustomOAuth2User user){
-        ReviewResponse updatedReview = reviewService.updateReview(reviewId, reviewRequest, newImages.orElse(new ArrayList<>()), deleteImageIds.orElse(new ArrayList<>()), user.getProviderName()); //memberId 추후에 추가
+            @AuthToken KakaoUserDto kakaoUserDto){
+        ReviewResponse updatedReview = reviewService.updateReview(
+                reviewId,
+                reviewRequest,
+                newImages.orElse(new ArrayList<>()), deleteImageIds.orElse(new ArrayList<>()),
+                kakaoUserDto.getIdentifier()
+        ); //memberId 추후에 추가
         return ResponseEntity.ok(updatedReview);
     }
 
@@ -97,9 +101,9 @@ public class ReviewController {
     public ResponseEntity<Void> deleteReview(
             @Schema(description = "리뷰 인덱스", example="1")
             @PathVariable Long reviewId,
-            @AuthenticationPrincipal CustomOAuth2User user
+            @AuthToken KakaoUserDto kakaoUserDto
     ) {
-        reviewService.deleteReview(reviewId, user.getProviderName()); // memberId 추가
+        reviewService.deleteReview(reviewId, kakaoUserDto.getIdentifier()); // memberId 추가
         return ResponseEntity.ok().build(); // HTTP 200 OK 응답
     }
 
@@ -110,9 +114,9 @@ public class ReviewController {
     public ResponseEntity<ReviewResponse> toggleLike(
             @Schema(description = "리뷰 인덱스", example="1")
             @PathVariable Long reviewId,
-            @AuthenticationPrincipal CustomOAuth2User user
+            @AuthToken KakaoUserDto kakaoUserDto
     ) {
-        reviewService.toggleLike(reviewId, user.getProviderName());
+        reviewService.toggleLike(reviewId, kakaoUserDto.getIdentifier());
         return ResponseEntity.ok().build(); // 토글 후 리뷰의 최신 상태 반환 // HTTP 200 OK 응답
     }
 
@@ -138,5 +142,4 @@ public class ReviewController {
         List<ReviewListResponse> topReviews = reviewService.findTopReviewsForMainPage(5);
         return ResponseEntity.ok(topReviews);
     }
-
 }

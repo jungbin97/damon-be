@@ -41,7 +41,7 @@ public class ReviewListResponse {
         return new ReviewListResponse(
 
                 review.getId(),
-                review.getMember() != null ? review.getMember().getName() : null,
+                review.getUser() != null ? review.getUser().getNickname() : null,
                 state,
                 review.getCreatedDate(),
                 review.getViewCount(),

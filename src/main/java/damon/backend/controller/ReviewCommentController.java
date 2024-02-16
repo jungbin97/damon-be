@@ -1,9 +1,10 @@
 package damon.backend.controller;
 
-import damon.backend.dto.login.CustomOAuth2User;
 import damon.backend.dto.request.ReviewCommentRequest;
 import damon.backend.dto.response.ReviewResponse;
+import damon.backend.dto.response.user.KakaoUserDto;
 import damon.backend.service.ReviewCommentService;
+import damon.backend.util.auth.AuthToken;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -11,7 +12,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @Tag(name = "리뷰 댓글 API", description = "리뷰 댓글 API")
@@ -31,8 +31,8 @@ public class ReviewCommentController {
             @Valid
             @PathVariable Long reviewId,
             @RequestBody ReviewCommentRequest request,
-            @AuthenticationPrincipal CustomOAuth2User user) {
-        return reviewCommentService.postComment(reviewId, request, user.getProviderName());
+            @AuthToken KakaoUserDto kakaoUserDto) {
+        return reviewCommentService.postComment(reviewId, request, kakaoUserDto.getIdentifier());
     }
 
 
@@ -47,10 +47,10 @@ public class ReviewCommentController {
             @Valid
             @PathVariable Long commentId,
             @RequestBody ReviewCommentRequest request,
-            @AuthenticationPrincipal CustomOAuth2User user) {
+            @AuthToken KakaoUserDto kakaoUserDto) {
 
         if (request.getContent() != null && !request.getContent().trim().isEmpty()) {
-            ReviewResponse updatedReview = reviewCommentService.updateComment(commentId, request, user.getProviderName());
+            ReviewResponse updatedReview = reviewCommentService.updateComment(commentId, request, kakaoUserDto.getIdentifier());
             return ResponseEntity.ok(updatedReview); // 수정된 리뷰의 최신 상태를 반환
         }
         return ResponseEntity.badRequest().build();
@@ -64,9 +64,9 @@ public class ReviewCommentController {
     public ResponseEntity<Void> deleteComment(
             @Schema(description = "댓글 인덱스", example="1")
             @PathVariable Long commentId,
-            @AuthenticationPrincipal CustomOAuth2User user
+            @AuthToken KakaoUserDto kakaoUserDto
     ) {
-        reviewCommentService.deleteComment(commentId, user.getProviderName());
+        reviewCommentService.deleteComment(commentId, kakaoUserDto.getIdentifier());
         return ResponseEntity.ok().build(); // HTTP 200 OK 응답
     }
 

@@ -3,7 +3,6 @@ package damon.backend.util;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import damon.backend.dto.response.user.KakaoUserDto;
-import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;

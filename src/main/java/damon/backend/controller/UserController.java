@@ -5,10 +5,12 @@ import damon.backend.dto.response.user.KakaoUserDto;
 import damon.backend.exception.KakaoLoginException;
 import damon.backend.service.UserService;
 import damon.backend.util.auth.AuthToken;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
+@Tag(name = "회원 API", description = "회원 API")
 @Slf4j
 @RestController
 @RequiredArgsConstructor

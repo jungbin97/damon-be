@@ -5,9 +5,11 @@ import damon.backend.dto.request.community.*;
 import damon.backend.dto.response.community.CommunityCommentDTO;
 import damon.backend.dto.response.community.CommunityDetailDTO;
 import damon.backend.dto.response.community.CommunitySimpleDTO;
+import damon.backend.dto.response.user.KakaoUserDto;
 import damon.backend.enums.CommunityType;
 import damon.backend.exception.PermissionDeniedException;
 import damon.backend.service.CommunityService;
+import damon.backend.util.auth.AuthToken;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -89,12 +91,11 @@ public class CommunityController {
     @Operation(summary = "커뮤니티 추가")
     @PostMapping
     public Result<CommunityDetailDTO> addCommunity(
-            @Schema(description = "멤버아이디", defaultValue = "1")
-            @RequestParam String provider,
-            @RequestBody CommunityCreateForm createForm
+            @RequestBody CommunityCreateForm createForm,
+            @AuthToken KakaoUserDto kakaoUserDto
     ) {
         CommunityDetailDTO addedCommunity = communityService.addCommunity(
-                provider,
+                kakaoUserDto.getIdentifier(),
                 createForm.getType(),
                 createForm.getTitle(),
                 createForm.getContent()
@@ -105,11 +106,10 @@ public class CommunityController {
     @Operation(summary = "커뮤니티 수정")
     @PutMapping
     public Result<CommunityDetailDTO> setCommunity(
-            @Schema(description = "멤버아이디", defaultValue = "1")
-            @RequestParam String provider,
-            @RequestBody CommunityUpdateForm updateForm
+            @RequestBody CommunityUpdateForm updateForm,
+            @AuthToken KakaoUserDto kakaoUserDto
     ) {
-        if (!communityService.isCommunityWriter(provider, updateForm.getCommunityId())) {
+        if (!communityService.isCommunityWriter(kakaoUserDto.getIdentifier(), updateForm.getCommunityId())) {
             throw new PermissionDeniedException();
         }
 
@@ -125,12 +125,11 @@ public class CommunityController {
     @Operation(summary = "커뮤니티 삭제", description = "정상적으로 제거 되었는지 여부를 반환해 줍니다.")
     @DeleteMapping("/{communityId}")
     public Result<Boolean> removeCommunity(
-            @Schema(description = "멤버아이디", defaultValue = "1")
-            @RequestParam String provider,
             @Schema(description = "커뮤니티 아이디", defaultValue = "1")
-            @PathVariable Long communityId
+            @PathVariable Long communityId,
+            @AuthToken KakaoUserDto kakaoUserDto
     ) {
-        if (!communityService.isCommunityWriter(provider, communityId)) {
+        if (!communityService.isCommunityWriter(kakaoUserDto.getIdentifier(), communityId)) {
             throw new PermissionDeniedException();
         }
 
@@ -143,12 +142,11 @@ public class CommunityController {
     @Operation(summary = "커뮤니티 댓글 추가")
     @PostMapping("/comment")
     public Result<CommunityCommentDTO> addComment(
-            @Schema(description = "멤버아이디", defaultValue = "1")
-            @RequestParam String provider,
-            @RequestBody CommunityCommentCreateForm commentCreateForm
+            @RequestBody CommunityCommentCreateForm commentCreateForm,
+            @AuthToken KakaoUserDto kakaoUserDto
     ) {
         CommunityCommentDTO addedComment = communityService.addComment(
-                provider,
+                kakaoUserDto.getIdentifier(),
                 commentCreateForm.getCommunityId(),
                 commentCreateForm.getContent()
         );
@@ -158,11 +156,10 @@ public class CommunityController {
     @Operation(summary = "커뮤니티 댓글 수정")
     @PutMapping("/comment")
     public Result<CommunityCommentDTO> setComment(
-            @Schema(description = "멤버아이디", defaultValue = "1")
-            @RequestParam String provider,
-            @RequestBody CommunityCommentUpdateForm updateForm
+            @RequestBody CommunityCommentUpdateForm updateForm,
+            @AuthToken KakaoUserDto kakaoUserDto
     ) {
-        if (!communityService.isCommentWriter(provider, updateForm.getCommentId())) {
+        if (!communityService.isCommentWriter(kakaoUserDto.getIdentifier(), updateForm.getCommentId())) {
             throw new PermissionDeniedException();
         }
 
@@ -176,12 +173,11 @@ public class CommunityController {
     @Operation(summary = "커뮤니티 댓글 제거", description = "정상적으로 제거 되었는지 여부를 반환해 줍니다.")
     @DeleteMapping("/comment/{commentId}")
     public Result<Boolean> removeComment(
-            @Schema(description = "멤버아이디", defaultValue = "1")
-            @RequestParam String provider,
             @Schema(description = "커뮤니티 댓글 아이디", defaultValue = "1")
-            @PathVariable Long commentId
+            @PathVariable Long commentId,
+            @AuthToken KakaoUserDto kakaoUserDto
     ) {
-        if (!communityService.isCommentWriter(provider, commentId)) {
+        if (!communityService.isCommentWriter(kakaoUserDto.getIdentifier(), commentId)) {
             throw new PermissionDeniedException();
         }
 
@@ -192,12 +188,11 @@ public class CommunityController {
     @Operation(summary = "커뮤니티 대댓글 추가")
     @PostMapping("/comment/child")
     public Result<CommunityCommentDTO> addChildComment(
-            @Schema(description = "멤버아이디", defaultValue = "1")
-            @RequestParam String provider,
-            @RequestBody CommunityChildCommentCreateForm form
+            @RequestBody CommunityChildCommentCreateForm form,
+            @AuthToken KakaoUserDto kakaoUserDto
     ) {
         CommunityCommentDTO addedChildComment = communityService.addChildComment(
-                provider,
+                kakaoUserDto.getIdentifier(),
                 form.getParentId(),
                 form.getContent()
         );
@@ -209,22 +204,20 @@ public class CommunityController {
     @Operation(summary = "커뮤니티 좋아요 확인")
     @GetMapping("/like/{communityId}")
     public Result<Boolean> isLike(
-            @Schema(description = "멤버아이디", defaultValue = "1")
-            @RequestParam String provider,
             @Schema(description = "커뮤니티 아이디", defaultValue = "1")
-            @PathVariable Long communityId
+            @PathVariable Long communityId,
+            @AuthToken KakaoUserDto kakaoUserDto
     ) {
-        return Result.success(communityService.isLike(provider, communityId));
+        return Result.success(communityService.isLike(kakaoUserDto.getIdentifier(), communityId));
     }
 
     @Operation(summary = "커뮤니티 좋아요 토글", description = "최종적으로 좋아요 여부를 반환해 줍니다.")
     @PostMapping("/like/{communityId}")
     public Result<Boolean> addLike(
-            @Schema(description = "멤버아이디", defaultValue = "1")
-            @RequestParam String provider,
             @Schema(description = "커뮤니티 아이디", defaultValue = "1")
-            @PathVariable Long communityId
+            @PathVariable Long communityId,
+            @AuthToken KakaoUserDto kakaoUserDto
     ) {
-        return Result.success(communityService.toggleLike(provider, communityId));
+        return Result.success(communityService.toggleLike(kakaoUserDto.getIdentifier(), communityId));
     }
 }

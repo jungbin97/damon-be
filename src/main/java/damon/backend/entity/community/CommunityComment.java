@@ -1,12 +1,11 @@
 package damon.backend.entity.community;
 
 import damon.backend.entity.BaseEntity;
-import damon.backend.entity.Member;
+import damon.backend.entity.user.User;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,20 +21,17 @@ public class CommunityComment extends BaseEntity {
     @Column(name = "community_comment_id")
     private Long commentId;
 
-//    @Setter
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "community_id")
     private Community community;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_id")
-    private Member member;
+    @JoinColumn(name = "user_id")
+    private User user;
 
-//    @Setter
     @Column(name = "community_comment_content")
     private String content;
 
-//    @Setter
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "community_comment_parent_id")
     private CommunityComment parentComment;
@@ -43,14 +39,14 @@ public class CommunityComment extends BaseEntity {
     @OneToMany(mappedBy = "parentComment", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<CommunityComment> childComments = new ArrayList<>();
 
-    public CommunityComment(Member member, Community community, String content) {
-        this.member = member;
+    public CommunityComment(User user, Community community, String content) {
+        this.user = user;
         this.community = community;
         this.content = content;
     }
 
-    public CommunityComment(Member member, Community community, String content, CommunityComment parentComment) {
-        this.member = member;
+    public CommunityComment(User user, Community community, String content, CommunityComment parentComment) {
+        this.user = user;
         this.community = community;
         this.content = content;
         this.parentComment = parentComment;

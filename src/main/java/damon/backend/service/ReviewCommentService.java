@@ -3,13 +3,13 @@ package damon.backend.service;
 import damon.backend.dto.request.ReviewCommentRequest;
 import damon.backend.dto.response.ReviewCommentResponse;
 import damon.backend.dto.response.ReviewResponse;
-import damon.backend.entity.Member;
 import damon.backend.entity.Review;
 import damon.backend.entity.ReviewComment;
+import damon.backend.entity.user.User;
 import damon.backend.exception.ReviewException;
-import damon.backend.repository.MemberRepository;
 import damon.backend.repository.ReviewCommentRepository;
 import damon.backend.repository.ReviewRepository;
+import damon.backend.repository.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,15 +23,15 @@ import java.util.Map;
 @RequiredArgsConstructor
 @Transactional
 public class ReviewCommentService implements CommentStructureOrganizer {
+
     private final ReviewRepository reviewRepository;
     private final ReviewCommentRepository reviewCommentRepository;
-    private final MemberRepository memberRepository;
+    private final UserRepository userRepository;
 
     // 댓글 등록
-    public ReviewResponse postComment(Long reviewId, ReviewCommentRequest request, String providerName) {
+    public ReviewResponse postComment(Long reviewId, ReviewCommentRequest request, String identifier) {
         // 사용자 조회
-        Member member = memberRepository.findByProviderName(providerName)
-                .orElseThrow(ReviewException::memberNotFound);
+        User user = userRepository.findByIdentifier(identifier).orElseThrow(ReviewException::memberNotFound);
 
         // 리뷰 조회
         Review review = reviewRepository.findById(reviewId)
@@ -46,7 +46,7 @@ public class ReviewCommentService implements CommentStructureOrganizer {
 
         }
 
-        ReviewComment newComment = ReviewComment.createContent(request.getContent(), review, member, parentComment);
+        ReviewComment newComment = ReviewComment.createContent(request.getContent(), review, user, parentComment);
 
         reviewCommentRepository.save(newComment);
 
@@ -58,15 +58,14 @@ public class ReviewCommentService implements CommentStructureOrganizer {
     }
 
     // 댓글 수정
-    public ReviewResponse updateComment(Long commentId, ReviewCommentRequest request, String providerName) {
+    public ReviewResponse updateComment(Long commentId, ReviewCommentRequest request, String identifier) {
         ReviewComment comment = reviewCommentRepository.findById(commentId)
                 .orElseThrow(ReviewException::commentNotFound);
 
         // 사용자 조회
-        Member member = memberRepository.findByProviderName(providerName)
-                .orElseThrow(ReviewException::memberNotFound);
+        User user = userRepository.findByIdentifier(identifier).orElseThrow(ReviewException::memberNotFound);
 
-        if (!comment.getReview().getMember().getProviderName().equals(providerName)) {
+        if (!comment.getReview().getUser().getIdentifier().equals(identifier)) {
             throw ReviewException.unauthorized();
         }
 
@@ -90,15 +89,14 @@ public class ReviewCommentService implements CommentStructureOrganizer {
     }
 
     // 댓글 삭제
-    public void deleteComment(Long commentId, String providerName) {
+    public void deleteComment(Long commentId, String identifier) {
         ReviewComment comment = reviewCommentRepository.findById(commentId)
                 .orElseThrow(ReviewException::commentNotFound);
 
         // 사용자 조회
-        Member member = memberRepository.findByProviderName(providerName)
-                .orElseThrow(ReviewException::memberNotFound);
+        User user = userRepository.findByIdentifier(identifier).orElseThrow(ReviewException::memberNotFound);
 
-        if (!comment.getReview().getMember().getProviderName().equals(providerName)) {
+        if (!comment.getReview().getUser().getIdentifier().equals(identifier)) {
             throw ReviewException.unauthorized();
         }
 

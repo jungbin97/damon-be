@@ -1,13 +1,10 @@
 package damon.backend.dto.response.community;
 
 import damon.backend.entity.community.Community;
-import damon.backend.entity.community.CommunityComment;
 import damon.backend.enums.CommunityType;
 import lombok.Data;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -16,7 +13,7 @@ import java.util.stream.Collectors;
 public class CommunityDetailDTO {
 
     private Long communityId;
-    private Long memberId; // 작성자 본인 여부 판단
+    private Long userId; // 작성자 본인 여부 판단
     private String memberName;
     private String memberImage;
     private LocalDateTime createdDate;
@@ -31,9 +28,9 @@ public class CommunityDetailDTO {
     public CommunityDetailDTO(Community community) {
 
         this.communityId = community.getCommunityId();
-        this.memberId = community.getMember().getId();
-        this.memberName = community.getMember().getName();
-        this.memberImage = community.getMember().getProfileImgUrl();
+        this.userId = community.getUser().getId();
+        this.memberName = community.getUser().getNickname();
+        this.memberImage = community.getUser().getProfile();
         this.createdDate = community.getCreatedDate();
         this.type = community.getType();
         this.title = community.getTitle();

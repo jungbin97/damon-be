@@ -13,6 +13,6 @@ public class CommunityLikeDTO {
     public CommunityLikeDTO(CommunityLike communityLike) {
         this.likeId = communityLike.getLikeId();
         this.communityId = communityLike.getCommunity().getCommunityId();
-        this.memberId = communityLike.getMember().getId();
+        this.memberId = communityLike.getUser().getId();
     }
 }

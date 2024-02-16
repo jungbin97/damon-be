@@ -1,6 +1,7 @@
 package damon.backend.controller;
 
 import damon.backend.service.AwsS3Service;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -12,6 +13,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+@Tag(name = "리뷰 이미지 API", description = "리뷰 이미지 API")
 @RestController
 @RequiredArgsConstructor
 public class ReviewImageController {

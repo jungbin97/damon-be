@@ -1,5 +1,6 @@
 package damon.backend.entity;
 
+import damon.backend.entity.user.User;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -21,8 +22,8 @@ public class Calendar extends BaseEntity{
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_id")
-    private Member member;
+    @JoinColumn(name = "user_id")
+    private User user;
 
 
     private String title;
@@ -38,8 +39,8 @@ public class Calendar extends BaseEntity{
     private List<Travel> travels = new ArrayList<>();
 
     @Builder
-    public Calendar(Member member, String title, LocalDate startDate, LocalDate endDate, Area area) {
-        this.member = member;
+    public Calendar(User user, String title, LocalDate startDate, LocalDate endDate, Area area) {
+        this.user = user;
         this.title = title;
         this.startDate = startDate;
         this.endDate = endDate;

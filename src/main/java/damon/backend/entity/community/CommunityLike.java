@@ -1,7 +1,7 @@
 package damon.backend.entity.community;
 
 import damon.backend.entity.BaseEntity;
-import damon.backend.entity.Member;
+import damon.backend.entity.user.User;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -23,11 +23,11 @@ public class CommunityLike extends BaseEntity {
     private Community community;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_id")
-    private Member member;
+    @JoinColumn(name = "user_id")
+    private User user;
 
-    public CommunityLike(Community community, Member member) {
+    public CommunityLike(Community community, User user) {
         this.community = community;
-        this.member = member;
+        this.user = user;
     }
 }

@@ -10,15 +10,10 @@ import org.springframework.context.annotation.Configuration;
 public class SwaggerConfig {
     @Bean
     public OpenAPI openAPI() {
-        return new OpenAPI()
-                .components(new Components())
-                .info(apiInfo());
+        return new OpenAPI().components(new Components()).info(apiInfo());
     }
 
     private Info apiInfo() {
-        return new Info()
-                .title("Damon")
-                .description("Damon API Swaggger UI")
-                .version("1.0.0");
+        return new Info().title("Damon").description("Damon API Swaggger UI").version("1.0.0");
     }
 }
