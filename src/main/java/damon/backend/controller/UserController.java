@@ -3,11 +3,10 @@ package damon.backend.controller;
 import damon.backend.dto.Result;
 import damon.backend.dto.response.user.KakaoUserDto;
 import damon.backend.exception.KakaoLoginException;
-import damon.backend.exception.PermissionDeniedException;
 import damon.backend.service.UserService;
+import damon.backend.util.auth.AuthToken;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @Slf4j
@@ -28,7 +27,12 @@ public class UserController {
     }
 
     @GetMapping("/api/user/info")
-    public Result<KakaoUserDto> getKakaoUser(@RequestHeader("Authorization") String token) {
-        return Result.success(userService.getKakaoUserDtoByServerToken(token));
+    public Result<KakaoUserDto> getKakaoUser(@AuthToken KakaoUserDto kakaoUserDto) {
+        return Result.success(kakaoUserDto);
     }
+
+//    @GetMapping("/api/user/info")
+//    public Result<KakaoUserDto> getKakaoUser(@RequestHeader("Authorization") String token) {
+//        return Result.success(userService.getKakaoUserDtoByServerToken(token));
+//    }
 }
