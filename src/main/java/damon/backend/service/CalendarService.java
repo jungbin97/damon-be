@@ -72,22 +72,29 @@ public class CalendarService {
     }
 
     /**
-     * 내 일정 글 리스트를 조회합니다.
+     * 상위 5개의 일정 글 리스트를 조회합니다.
 //     * @param identifier : 카카오에서 지정해 준 유저의 식별자
+     * @return : 상위 5개의 일정 목록을 반환
+     */
+    @Transactional(readOnly = true)
+    public List<CalendarsResponseDto> getCalendarsTop5()  {
+        List<Calendar> calendarList = calendarRepository.findTop5();
+
+        return CalendarsResponseDto.listFrom(calendarList);
+    }
+
+    /**
+     * 내 일정 글 리스트를 조회합니다.
+     //     * @param identifier : 카카오에서 지정해 준 유저의 식별자
      * @param page : 페이지 번호
      * @param size : 페이지 사이즈
      * @return : 요청한 페이징에 맞는 일정 목록을 반환
      */
     @Transactional(readOnly = true)
-    public Page<CalendarsResponseDto> getCalendars(int page, int size)  {
-//    public Page<CalendarsResponseDto> getCalendars(String identifier, int page, int size)  {
-        // 프론트 메인페이지에서 해당 api를 호출하고 있는데(사실 프론트 쪽에서 고쳐야합니다.)
-        // 그 때문에 페이지 에러가 나 calendarRepository.findPageByUser 안에 쿼리 수정하였습니다.
-        // 죄송합니다. 나중에 수정할게요.
-//        User user = userRepository.findByIdentifier(identifier).orElseThrow(() -> new IllegalArgumentException("해당 사용자를 찾을 수 없습니다."));
-
+    public Page<CalendarsResponseDto> getCalendars(String identifier, int page, int size)  {
+        User user = userRepository.findByIdentifier(identifier).orElseThrow(() -> new IllegalArgumentException("해당 사용자를 찾을 수 없습니다."));
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdDate"));
-        Page<Calendar> calendarPage = calendarRepository.findPageByUser(pageable);
+        Page<Calendar> calendarPage = calendarRepository.findPageByUser(user.getId(), pageable);
 
         return calendarPage.map(CalendarsResponseDto::from);
     }

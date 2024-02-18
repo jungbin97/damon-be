@@ -18,6 +18,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @Tag(name = "일정 API", description = "일정 API")
 @RestController
 @RequestMapping("/api")
@@ -38,6 +40,15 @@ public class CalendarController {
         return calendarService.createCalendar(kakaoUserDto.getIdentifier(), calendarCreateRequestDto);
     }
 
+    @Operation(summary = "상위 5개 리스트 조회", description = "상위 5개 일정리스트를 조회합니다.")
+    @ApiResponse(responseCode = "200", description = "일정 리스트 조회 성공")
+    @GetMapping("/top5/calendar")
+    public List<CalendarsResponseDto> getCalendarsTop5(
+            @AuthToken KakaoUserDto kakaoUserDto
+    ) {
+        return calendarService.getCalendarsTop5();
+    }
+
     @Operation(summary = "내 일정 리스트 조회", description = "내 일정리스트를 조회합니다.")
     @ApiResponse(responseCode = "200", description = "일정 리스트 조회 성공")
     @GetMapping("/my/calendar")
@@ -49,11 +60,7 @@ public class CalendarController {
             @RequestParam(name = "size",defaultValue = "10") int size,
             @AuthToken KakaoUserDto kakaoUserDto
     ) {
-        // 프론트 메인페이지에서 해당 api를 호출하고 있는데(사실 프론트 쪽에서 고쳐야합니다.)
-        // 그 때문에 페이지 에러가 나 calendarRepository.findPageByUser 안에 쿼리 수정하였습니다.
-        // 죄송합니다. 나중에 수정할게요.
-//        return calendarService.getCalendars(kakaoUserDto.getIdentifier(), page, size);
-        return calendarService.getCalendars(page, size);
+        return calendarService.getCalendars(kakaoUserDto.getIdentifier(), page, size);
     }
 
     @Operation(summary = "내 일정 상세 조회", description = "내 일정 상세 정보를 조회합니다.")
