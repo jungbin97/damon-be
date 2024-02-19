@@ -2,7 +2,8 @@ package damon.backend.util;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import damon.backend.dto.response.user.KakaoUserDto;
+import damon.backend.dto.response.user.TokenDto;
+import damon.backend.dto.response.user.UserDto;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
@@ -21,23 +22,20 @@ public class Jwt {
     private static final long EXPIRATION_TIME = 30 * 60 * 1000;
 
     // JWT 토큰 생성
-    public static String generateServerToken(String userId, String nickname, String email, String profileUrl) {
+    public static String generateToken(UserDto userDto) {
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + EXPIRATION_TIME);
 
         return Jwts.builder()
-                .setSubject(userId) // 사용자 아이디를 subject로 설정
-                .claim("nickname", nickname) // 닉네임을 클레임에 추가
-                .claim("email", email) // 이메일을 클레임에 추가
-                .claim("profileUrl", profileUrl) // 프로필 URL을 클레임에 추가
+                .setSubject(userDto.getIdentifier())
                 .setIssuedAt(now)
                 .setExpiration(expiryDate)
                 .signWith(SignatureAlgorithm.HS512, SECRET_KEY)
                 .compact();
     }
 
-    // JWT 토큰에서 사용자 정보 추출하여 KakaoUserDto 객체로 반환
-    public static KakaoUserDto getKakaoUserDtoByServerToken(String token) {
+    public static TokenDto getUserDtoByToken(String token) {
+
         // 토큰을 점으로 나누어 Header, Payload, Signature로 분리
         String[] parts = token.split("\\.");
 
@@ -49,12 +47,9 @@ public class Jwt {
         JsonObject payloadJson = new JsonParser().parse(payload).getAsJsonObject();
 
         // 클레임에서 필요한 정보 추출
-        String id = payloadJson.get("sub").getAsString(); // 사용자 아이디
-        String nickname = payloadJson.get("nickname").getAsString(); // 닉네임
-        String email = payloadJson.get("email").getAsString(); // 이메일
-        String profileUrl = payloadJson.get("profileUrl").getAsString(); // 프로필 URL
+        String identifier = payloadJson.get("sub").getAsString(); // 사용자 아이디
         Long expiryDate = payloadJson.get("exp").getAsLong(); // 프로필 URL
 
-        return new KakaoUserDto(id, nickname, email, profileUrl, new Date(expiryDate));
+        return new TokenDto(identifier, expiryDate);
     }
 }

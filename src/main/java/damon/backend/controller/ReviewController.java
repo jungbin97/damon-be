@@ -4,7 +4,7 @@ package damon.backend.controller;
 import damon.backend.dto.request.ReviewRequest;
 import damon.backend.dto.response.ReviewListResponse;
 import damon.backend.dto.response.ReviewResponse;
-import damon.backend.dto.response.user.KakaoUserDto;
+import damon.backend.dto.response.user.TokenDto;
 import damon.backend.entity.Area;
 import damon.backend.service.ReviewService;
 import damon.backend.util.auth.AuthToken;
@@ -38,9 +38,9 @@ public class ReviewController {
             @Valid
             @RequestBody ReviewRequest reviewRequest,
             @RequestParam("images") Optional<List<MultipartFile>> images,
-            @AuthToken KakaoUserDto kakaoUserDto
+            @AuthToken TokenDto tokenDto
     ){
-        return reviewService.postReview(reviewRequest, images.orElse(new ArrayList<>()), kakaoUserDto.getIdentifier());
+        return reviewService.postReview(reviewRequest, images.orElse(new ArrayList<>()), tokenDto.getIdentifier());
     }
 
 
@@ -84,12 +84,12 @@ public class ReviewController {
             @RequestParam("images") Optional<List<MultipartFile>> newImages,
             @RequestParam("deleteImages") Optional<List<Long>> deleteImageIds,
             @RequestBody ReviewRequest reviewRequest,
-            @AuthToken KakaoUserDto kakaoUserDto){
+            @AuthToken TokenDto tokenDto){
         ReviewResponse updatedReview = reviewService.updateReview(
                 reviewId,
                 reviewRequest,
                 newImages.orElse(new ArrayList<>()), deleteImageIds.orElse(new ArrayList<>()),
-                kakaoUserDto.getIdentifier()
+                tokenDto.getIdentifier()
         ); //memberId 추후에 추가
         return ResponseEntity.ok(updatedReview);
     }
@@ -101,9 +101,9 @@ public class ReviewController {
     public ResponseEntity<Void> deleteReview(
             @Schema(description = "리뷰 인덱스", example="1")
             @PathVariable Long reviewId,
-            @AuthToken KakaoUserDto kakaoUserDto
+            @AuthToken TokenDto tokenDto
     ) {
-        reviewService.deleteReview(reviewId, kakaoUserDto.getIdentifier()); // memberId 추가
+        reviewService.deleteReview(reviewId, tokenDto.getIdentifier()); // memberId 추가
         return ResponseEntity.ok().build(); // HTTP 200 OK 응답
     }
 
@@ -114,9 +114,9 @@ public class ReviewController {
     public ResponseEntity<ReviewResponse> toggleLike(
             @Schema(description = "리뷰 인덱스", example="1")
             @PathVariable Long reviewId,
-            @AuthToken KakaoUserDto kakaoUserDto
+            @AuthToken TokenDto tokenDto
     ) {
-        reviewService.toggleLike(reviewId, kakaoUserDto.getIdentifier());
+        reviewService.toggleLike(reviewId, tokenDto.getIdentifier());
         return ResponseEntity.ok().build(); // 토글 후 리뷰의 최신 상태 반환 // HTTP 200 OK 응답
     }
 

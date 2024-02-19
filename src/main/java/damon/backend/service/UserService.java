@@ -4,8 +4,9 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import damon.backend.dto.response.user.KakaoTokenDto;
-import damon.backend.dto.response.user.KakaoUserDto;
+import damon.backend.dto.response.user.UserDto;
 import damon.backend.entity.user.User;
+import damon.backend.exception.EntityNotFoundException;
 import damon.backend.repository.user.UserRepository;
 import damon.backend.util.Jwt;
 import lombok.RequiredArgsConstructor;
@@ -41,25 +42,25 @@ public class UserService {
 
     public String kakaoLogin(String code) {
         KakaoTokenDto token = getKakaoToken(code); // 인가 코드로 카카오 토큰 발급
-        KakaoUserDto kakaoUser = getKakaoUser(token.getAccess_token()); // 카카오 엑세스 토큰으로 카카오 유저 정보 조회
+        UserDto userDto = getKakaoUser(token.getAccess_token()); // 카카오 엑세스 토큰으로 유저 정보 조회
 
         // DB에 없으면 회원가입
-        if (userRepository.findByIdentifier(kakaoUser.getIdentifier()).orElse(null) == null) {
-            kakaoSignUp(kakaoUser);
+        if (userRepository.findByIdentifier(userDto.getIdentifier()).orElse(null) == null) {
+            signUp(userDto);
         }
 
-        String serverToken = Jwt.generateServerToken(
-                kakaoUser.getIdentifier(),
-                kakaoUser.getNickname(),
-                kakaoUser.getEmail(),
-                kakaoUser.getProfile()
-        );
+        String serverToken = Jwt.generateToken(userDto);
 
         log.info("kakaoLogin code={}", code);
         log.info("kakaoLogin KakaoTokenDto={}", token);
-        log.info("kakaoLogin KakaoUserDto={}", kakaoUser);
+        log.info("kakaoLogin userDto={}", userDto);
         log.info("kakaoLogin serverToken={}", serverToken);
         return serverToken;
+    }
+
+    public UserDto getUserDto(String identifier) {
+        return new UserDto(userRepository.findByIdentifier(identifier).orElseThrow(() -> new EntityNotFoundException("identifier", identifier)));
+
     }
 
     // 인가 코드로 카카오 토큰 발급
@@ -80,12 +81,11 @@ public class UserService {
         // 400 Bad Request: "{"error":"invalid_grant","error_description":"authorization code not found for code=","error_code":"KOE320"}"
     }
 
-    // 카카오 엑세스 토큰으로 카카오 유저 정보 조회
-    public KakaoUserDto getKakaoUser(String accessToken) {
+    public UserDto getKakaoUser(String accessToken) {
         String reqURL = "https://kapi.kakao.com/v2/user/me";
         try {
             JsonObject jsonObject = getJsonObject(accessToken, reqURL);
-            String id = jsonObject.get("id").getAsString();
+            String identifier = jsonObject.get("id").getAsString();
 
             JsonObject properties = jsonObject.getAsJsonObject("properties");
             String nickname = properties.get("nickname").getAsString();
@@ -94,28 +94,21 @@ public class UserService {
             JsonObject kakaoAccount = jsonObject.getAsJsonObject("kakao_account");
             String email = kakaoAccount.get("email").getAsString();
 
-            KakaoUserDto kakaoUser = new KakaoUserDto(id, nickname, email, profile);
-            return kakaoUser;
+            UserDto userDto = new UserDto(identifier, nickname, email, profile);
+            return userDto;
         } catch (IOException e) {
             return null;
         }
     }
 
-    public void kakaoSignUp(KakaoUserDto kakaoUser) {
+    public void signUp(UserDto userDto) {
         User user = userRepository.save(new User(
-                kakaoUser.getIdentifier(),
-                kakaoUser.getNickname(),
-                kakaoUser.getEmail(),
-                kakaoUser.getProfile()
+                userDto.getIdentifier(),
+                userDto.getNickname(),
+                userDto.getEmail(),
+                userDto.getProfile()
         ));
-        log.info("kakaoSignUp {}", user);
-    }
-
-    public KakaoUserDto getKakaoUserDtoByServerToken(String serverToken) {
-        KakaoUserDto kakaoUser = Jwt.getKakaoUserDtoByServerToken(serverToken);
-        log.info("kakaoLogin serverToken={}", serverToken);
-        log.info("kakaoLogin KakaoUserDto={}", kakaoUser);
-        return kakaoUser;
+        log.info("signUp {}", user);
     }
 
     private JsonObject getJsonObject(String accessToken, String reqURL) throws IOException {

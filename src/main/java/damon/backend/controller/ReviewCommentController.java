@@ -2,7 +2,7 @@ package damon.backend.controller;
 
 import damon.backend.dto.request.ReviewCommentRequest;
 import damon.backend.dto.response.ReviewResponse;
-import damon.backend.dto.response.user.KakaoUserDto;
+import damon.backend.dto.response.user.TokenDto;
 import damon.backend.service.ReviewCommentService;
 import damon.backend.util.auth.AuthToken;
 import io.swagger.v3.oas.annotations.Operation;
@@ -31,8 +31,8 @@ public class ReviewCommentController {
             @Valid
             @PathVariable Long reviewId,
             @RequestBody ReviewCommentRequest request,
-            @AuthToken KakaoUserDto kakaoUserDto) {
-        return reviewCommentService.postComment(reviewId, request, kakaoUserDto.getIdentifier());
+            @AuthToken TokenDto tokenDto) {
+        return reviewCommentService.postComment(reviewId, request, tokenDto.getIdentifier());
     }
 
 
@@ -47,10 +47,10 @@ public class ReviewCommentController {
             @Valid
             @PathVariable Long commentId,
             @RequestBody ReviewCommentRequest request,
-            @AuthToken KakaoUserDto kakaoUserDto) {
+            @AuthToken TokenDto tokenDto) {
 
         if (request.getContent() != null && !request.getContent().trim().isEmpty()) {
-            ReviewResponse updatedReview = reviewCommentService.updateComment(commentId, request, kakaoUserDto.getIdentifier());
+            ReviewResponse updatedReview = reviewCommentService.updateComment(commentId, request, tokenDto.getIdentifier());
             return ResponseEntity.ok(updatedReview); // 수정된 리뷰의 최신 상태를 반환
         }
         return ResponseEntity.badRequest().build();
@@ -64,9 +64,9 @@ public class ReviewCommentController {
     public ResponseEntity<Void> deleteComment(
             @Schema(description = "댓글 인덱스", example="1")
             @PathVariable Long commentId,
-            @AuthToken KakaoUserDto kakaoUserDto
+            @AuthToken TokenDto tokenDto
     ) {
-        reviewCommentService.deleteComment(commentId, kakaoUserDto.getIdentifier());
+        reviewCommentService.deleteComment(commentId, tokenDto.getIdentifier());
         return ResponseEntity.ok().build(); // HTTP 200 OK 응답
     }
 

@@ -26,8 +26,7 @@ public class AuthTokenArgumentResolver implements HandlerMethodArgumentResolver 
         String token = request.getHeader("Authorization");
         if (token != null && token.startsWith("Bearer ")) {
             token = token.substring(7); // "Bearer " 부분을 제외한 토큰 추출
-            // userService.getKakaoUserDtoByServerToken(token)을 호출하여 KakaoUserDto를 반환
-            return Jwt.getKakaoUserDtoByServerToken(token);
+            return Jwt.getUserDtoByToken(token);
         }
         return null;
     }

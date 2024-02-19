@@ -5,7 +5,7 @@ import damon.backend.dto.request.community.*;
 import damon.backend.dto.response.community.CommunityCommentDTO;
 import damon.backend.dto.response.community.CommunityDetailDTO;
 import damon.backend.dto.response.community.CommunitySimpleDTO;
-import damon.backend.dto.response.user.KakaoUserDto;
+import damon.backend.dto.response.user.TokenDto;
 import damon.backend.enums.CommunityType;
 import damon.backend.exception.PermissionDeniedException;
 import damon.backend.service.CommunityService;
@@ -92,10 +92,10 @@ public class CommunityController {
     @PostMapping
     public Result<CommunityDetailDTO> addCommunity(
             @RequestBody CommunityCreateForm createForm,
-            @AuthToken KakaoUserDto kakaoUserDto
+            @AuthToken TokenDto tokenDto
     ) {
         CommunityDetailDTO addedCommunity = communityService.addCommunity(
-                kakaoUserDto.getIdentifier(),
+                tokenDto.getIdentifier(),
                 createForm.getType(),
                 createForm.getTitle(),
                 createForm.getContent()
@@ -107,9 +107,9 @@ public class CommunityController {
     @PutMapping
     public Result<CommunityDetailDTO> setCommunity(
             @RequestBody CommunityUpdateForm updateForm,
-            @AuthToken KakaoUserDto kakaoUserDto
+            @AuthToken TokenDto tokenDto
     ) {
-        if (!communityService.isCommunityWriter(kakaoUserDto.getIdentifier(), updateForm.getCommunityId())) {
+        if (!communityService.isCommunityWriter(tokenDto.getIdentifier(), updateForm.getCommunityId())) {
             throw new PermissionDeniedException();
         }
 
@@ -127,9 +127,9 @@ public class CommunityController {
     public Result<Boolean> removeCommunity(
             @Schema(description = "커뮤니티 아이디", defaultValue = "1")
             @PathVariable Long communityId,
-            @AuthToken KakaoUserDto kakaoUserDto
+            @AuthToken TokenDto tokenDto
     ) {
-        if (!communityService.isCommunityWriter(kakaoUserDto.getIdentifier(), communityId)) {
+        if (!communityService.isCommunityWriter(tokenDto.getIdentifier(), communityId)) {
             throw new PermissionDeniedException();
         }
 
@@ -143,10 +143,10 @@ public class CommunityController {
     @PostMapping("/comment")
     public Result<CommunityCommentDTO> addComment(
             @RequestBody CommunityCommentCreateForm commentCreateForm,
-            @AuthToken KakaoUserDto kakaoUserDto
+            @AuthToken TokenDto tokenDto
     ) {
         CommunityCommentDTO addedComment = communityService.addComment(
-                kakaoUserDto.getIdentifier(),
+                tokenDto.getIdentifier(),
                 commentCreateForm.getCommunityId(),
                 commentCreateForm.getContent()
         );
@@ -157,9 +157,9 @@ public class CommunityController {
     @PutMapping("/comment")
     public Result<CommunityCommentDTO> setComment(
             @RequestBody CommunityCommentUpdateForm updateForm,
-            @AuthToken KakaoUserDto kakaoUserDto
+            @AuthToken TokenDto tokenDto
     ) {
-        if (!communityService.isCommentWriter(kakaoUserDto.getIdentifier(), updateForm.getCommentId())) {
+        if (!communityService.isCommentWriter(tokenDto.getIdentifier(), updateForm.getCommentId())) {
             throw new PermissionDeniedException();
         }
 
@@ -175,9 +175,9 @@ public class CommunityController {
     public Result<Boolean> removeComment(
             @Schema(description = "커뮤니티 댓글 아이디", defaultValue = "1")
             @PathVariable Long commentId,
-            @AuthToken KakaoUserDto kakaoUserDto
+            @AuthToken TokenDto tokenDto
     ) {
-        if (!communityService.isCommentWriter(kakaoUserDto.getIdentifier(), commentId)) {
+        if (!communityService.isCommentWriter(tokenDto.getIdentifier(), commentId)) {
             throw new PermissionDeniedException();
         }
 
@@ -189,10 +189,10 @@ public class CommunityController {
     @PostMapping("/comment/child")
     public Result<CommunityCommentDTO> addChildComment(
             @RequestBody CommunityChildCommentCreateForm form,
-            @AuthToken KakaoUserDto kakaoUserDto
+            @AuthToken TokenDto tokenDto
     ) {
         CommunityCommentDTO addedChildComment = communityService.addChildComment(
-                kakaoUserDto.getIdentifier(),
+                tokenDto.getIdentifier(),
                 form.getParentId(),
                 form.getContent()
         );
@@ -206,9 +206,9 @@ public class CommunityController {
     public Result<Boolean> isLike(
             @Schema(description = "커뮤니티 아이디", defaultValue = "1")
             @PathVariable Long communityId,
-            @AuthToken KakaoUserDto kakaoUserDto
+            @AuthToken TokenDto tokenDto
     ) {
-        return Result.success(communityService.isLike(kakaoUserDto.getIdentifier(), communityId));
+        return Result.success(communityService.isLike(tokenDto.getIdentifier(), communityId));
     }
 
     @Operation(summary = "커뮤니티 좋아요 토글", description = "최종적으로 좋아요 여부를 반환해 줍니다.")
@@ -216,8 +216,8 @@ public class CommunityController {
     public Result<Boolean> addLike(
             @Schema(description = "커뮤니티 아이디", defaultValue = "1")
             @PathVariable Long communityId,
-            @AuthToken KakaoUserDto kakaoUserDto
+            @AuthToken TokenDto tokenDto
     ) {
-        return Result.success(communityService.toggleLike(kakaoUserDto.getIdentifier(), communityId));
+        return Result.success(communityService.toggleLike(tokenDto.getIdentifier(), communityId));
     }
 }
