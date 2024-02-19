@@ -1,5 +1,6 @@
 package damon.backend.entity;
 
+import damon.backend.entity.user.User;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -40,8 +41,8 @@ public class ReviewComment extends BaseEntity{
 
     //멤버id 매핑
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_id")
-    private Member member;
+    @JoinColumn(name = "user_id")
+    private User user;
 
     public void setReview(Review review){
         this.review = review;
@@ -49,10 +50,10 @@ public class ReviewComment extends BaseEntity{
             review.getReviewComments().add(this);
         }
     }
-    public void setMember(Member member){
-        this.member = member;
-        if (member != null ) {
-            member.getReviewComments().add(this);
+    public void setUser(User user){
+        this.user = user;
+        if (user != null ) {
+            user.getReviewComments().add(this);
         }
     }
     //연관관계 매핑 메서드
@@ -78,11 +79,11 @@ public class ReviewComment extends BaseEntity{
     }
 
     // 내용과 부모 댓글 설정 메서드
-    public static ReviewComment createContent(String content, Review review, Member member, ReviewComment parent) {
+    public static ReviewComment createContent(String content, Review review, User user, ReviewComment parent) {
         ReviewComment comment = new ReviewComment(); // 직접 인스턴스 생성을 위한 변경 필요
         comment.setContent(content);
         comment.setReview(review);
-        comment.setMember(member);
+        comment.setUser(user);
         comment.setParent(parent);
         return comment;
     }

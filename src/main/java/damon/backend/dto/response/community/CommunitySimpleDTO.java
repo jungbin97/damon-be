@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 public class CommunitySimpleDTO {
 
     private Long communityId;
-    private Long memberId; // 작성자 본인 여부 판단
+    private Long userId; // 작성자 본인 여부 판단
     private String memberName;
     private String memberImage;
     private LocalDateTime createdDate;
@@ -22,9 +22,9 @@ public class CommunitySimpleDTO {
 
     public CommunitySimpleDTO(Community community) {
         this.communityId = community.getCommunityId();
-        this.memberId = community.getMember().getId();
-        this.memberName = community.getMember().getName();
-        this.memberImage = community.getMember().getProfileImgUrl();
+        this.userId = community.getUser().getId();
+        this.memberName = community.getUser().getNickname();
+        this.memberImage = community.getUser().getProfile();
         this.createdDate = community.getCreatedDate();
         this.type = community.getType();
         this.title = community.getTitle();

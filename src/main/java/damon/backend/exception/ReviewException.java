@@ -1,14 +1,5 @@
 package damon.backend.exception;
 
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.multipart.MaxUploadSizeExceededException;
-
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-
 public class ReviewException extends RuntimeException{
     // 에러 타입을 구분하는 열거형
     public enum ErrorType {

@@ -5,12 +5,12 @@ import damon.backend.dto.response.community.CommunityDetailDTO;
 import damon.backend.dto.response.community.CommunitySimpleDTO;
 import damon.backend.entity.community.Community;
 import damon.backend.entity.community.CommunityComment;
-import damon.backend.entity.Member;
+import damon.backend.entity.user.User;
 import damon.backend.enums.CommunityType;
 import damon.backend.exception.EntityNotFoundException;
-import damon.backend.repository.MemberRepository;
 import damon.backend.repository.community.CommunityCommentRepository;
 import damon.backend.repository.community.CommunityRepository;
+import damon.backend.repository.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -27,10 +27,10 @@ public class CommunityService {
 
     private final CommunityRepository communityRepository;
     private final CommunityCommentRepository commentRepository;
-    private final MemberRepository memberRepository;
+    private final UserRepository userRepository;
 
-    private Member getMemberEntity(String provider) {
-        return memberRepository.findByProviderName(provider).orElseThrow(() -> new EntityNotFoundException("provider", provider));
+    private User getUserEntity(String identifier) {
+        return userRepository.findByIdentifier(identifier).orElseThrow(() -> new EntityNotFoundException("provider", identifier));
     }
 
     private Community getCommunityEntity(Long communityId) {
@@ -41,12 +41,12 @@ public class CommunityService {
         return commentRepository.findById(commentId).orElseThrow(() -> new EntityNotFoundException("comment", commentId));
     }
 
-    public boolean isCommunityWriter(String memberId, Long communityId) {
-        return memberId.equals(getCommunityEntity(communityId).getMember().getId());
+    public boolean isCommunityWriter(String identifier, Long communityId) {
+        return identifier.equals(getCommunityEntity(communityId).getUser().getIdentifier());
     }
 
-    public boolean isCommentWriter(String memberId, Long commentId) {
-        return memberId.equals(getCommentEntity(commentId).getMember().getId());
+    public boolean isCommentWriter(String identifier, Long commentId) {
+        return identifier.equals(getCommentEntity(commentId).getUser().getIdentifier());
     }
 
     public CommunityDetailDTO getCommunity(Long communityId) {
@@ -74,14 +74,14 @@ public class CommunityService {
                 .collect(Collectors.toList());
     }
 
-    public Page<CommunitySimpleDTO> getMyCommunityPaging(String provider, CommunityType type, int page) {
-        Page<Community> communities = communityRepository.findMyByPage(getMemberEntity(provider).getId(), type, PageRequest.of(page, 20));
+    public Page<CommunitySimpleDTO> getMyCommunityPaging(String identifier, CommunityType type, int page) {
+        Page<Community> communities = communityRepository.findMyByPage(getUserEntity(identifier).getId(), type, PageRequest.of(page, 20));
         return communities.map(CommunitySimpleDTO::new);
     }
 
     @Transactional
-    public CommunityDetailDTO addCommunity(String provider, CommunityType type, String title, String content) {
-        Community community = new Community(getMemberEntity(provider), type, title, content);
+    public CommunityDetailDTO addCommunity(String identifier, CommunityType type, String title, String content) {
+        Community community = new Community(getUserEntity(identifier), type, title, content);
         communityRepository.save(community);
         return new CommunityDetailDTO(community);
     }
@@ -108,8 +108,8 @@ public class CommunityService {
     }
 
     @Transactional
-    public CommunityCommentDTO addComment(String provider, Long communityId, String content) {
-        CommunityComment comment = getCommunityEntity(communityId).addComment(getMemberEntity(provider), content);
+    public CommunityCommentDTO addComment(String identifier, Long communityId, String content) {
+        CommunityComment comment = getCommunityEntity(communityId).addComment(getUserEntity(identifier), content);
         commentRepository.save(comment);
         return new CommunityCommentDTO(comment);
     }
@@ -130,10 +130,10 @@ public class CommunityService {
     }
 
     @Transactional
-    public CommunityCommentDTO addChildComment(String provider, Long parentCommentId, String content) {
+    public CommunityCommentDTO addChildComment(String identifier, Long parentCommentId, String content) {
         CommunityComment parentComment = getCommentEntity(parentCommentId);
         CommunityComment childComment = commentRepository.save(new CommunityComment(
-                getMemberEntity(provider),
+                getUserEntity(identifier),
                 getCommunityEntity(parentComment.getCommunity().getCommunityId()),
                 content,
                 parentComment
@@ -144,20 +144,20 @@ public class CommunityService {
     }
 
     @Transactional
-    public boolean toggleLike(String provider, Long communityId) {
-        Member member = getMemberEntity(provider);
+    public boolean toggleLike(String identifier, Long communityId) {
+        User user = getUserEntity(identifier);
         Community community = getCommunityEntity(communityId);
 
-        if (community.isLike(member)) {
-            community.removeLike(member);
+        if (community.isLike(user)) {
+            community.removeLike(user);
             return false;
         } else {
-            community.addLike(member);
+            community.addLike(user);
             return true;
         }
     }
 
-    public boolean isLike(String provider, Long communityId) {
-        return getCommunityEntity(communityId).isLike(getMemberEntity(provider));
+    public boolean isLike(String identifier, Long communityId) {
+        return getCommunityEntity(communityId).isLike(getUserEntity(identifier));
     }
 }

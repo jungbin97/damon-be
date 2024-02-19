@@ -5,13 +5,13 @@ import damon.backend.dto.response.ReviewCommentResponse;
 import damon.backend.dto.response.ReviewListResponse;
 import damon.backend.dto.response.ReviewResponse;
 import damon.backend.entity.Area;
-import damon.backend.entity.Member;
 import damon.backend.entity.Review;
 import damon.backend.entity.ReviewLike;
+import damon.backend.entity.user.User;
 import damon.backend.exception.ReviewException;
-import damon.backend.repository.MemberRepository;
 import damon.backend.repository.ReviewLikeRepository;
 import damon.backend.repository.ReviewRepository;
+import damon.backend.repository.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -21,7 +21,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -34,20 +33,18 @@ public class ReviewService {
 
     private final ReviewRepository reviewRepository;
     private final ReviewLikeRepository reviewLikeRepository;
-    private final MemberRepository memberRepository;
+    private final UserRepository userRepository;
     private final CommentStructureOrganizer commentStructureOrganizer;
     private final ReviewImageService reviewImageService;
 
     //게시글 등록
-    public ReviewResponse postReview(ReviewRequest request, List<MultipartFile> images, String providerName) {
-        Member member = memberRepository.findByProviderName(providerName)
-                .orElseThrow(ReviewException::memberNotFound);
-        ;
+    public ReviewResponse postReview(ReviewRequest request, List<MultipartFile> images, String identifier) {
+        User user = userRepository.findByIdentifier(identifier).orElseThrow(ReviewException::memberNotFound);
 
-        Review review = Review.create(request, member);
+        Review review = Review.create(request, user);
         review = reviewRepository.save(review); // 리뷰 저장
 
-// 이미지 처리
+        // 이미지 처리
         if (!images.isEmpty()) {
             reviewImageService.postImage(review, images);
         }
@@ -76,7 +73,7 @@ public class ReviewService {
 
     //게시글 상세 내용 조회 (댓글 포함)
     @Transactional(readOnly = true)
-    public ReviewResponse searchReview(Long reviewId, String providerName) {
+    public ReviewResponse searchReview(Long reviewId) {
         Review review = reviewRepository.findReviewWithCommentsAndRepliesByReviewId(reviewId)
                 .orElseThrow(ReviewException::reviewNotFound);
 
@@ -99,15 +96,14 @@ public class ReviewService {
 
 
     // 게시글 수정
-    public ReviewResponse updateReview(Long reviewId, ReviewRequest request, List<MultipartFile> newImages, List<Long> imageIdsToDelete, String providerName)  {
+    public ReviewResponse updateReview(Long reviewId, ReviewRequest request, List<MultipartFile> newImages, List<Long> imageIdsToDelete, String identifier)  {
 
         Review review = reviewRepository.findById(reviewId)
                 .orElseThrow(ReviewException::reviewNotFound);
 
-        Member member = memberRepository.findByProviderName(providerName)
-                .orElseThrow(ReviewException::memberNotFound);
+        User user = userRepository.findByIdentifier(identifier).orElseThrow(ReviewException::memberNotFound);
 
-        if (!review.getMember().getProviderName().equals(providerName)) {
+        if (!review.getUser().getIdentifier().equals(identifier)) {
             throw ReviewException.unauthorized();
         }
 
@@ -127,13 +123,12 @@ public class ReviewService {
     }
 
     //게시글 삭제
-    public void deleteReview(Long reviewId, String providerName) {
+    public void deleteReview(Long reviewId, String identifier) {
         Review review = reviewRepository.findById(reviewId)
                 .orElseThrow(ReviewException::reviewNotFound);
-        Member member = memberRepository.findByProviderName(providerName)
-                .orElseThrow(ReviewException::memberNotFound);
+        User user = userRepository.findByIdentifier(identifier).orElseThrow(ReviewException::memberNotFound);
 
-        if (!review.getMember().getProviderName().equals(providerName)) {
+        if (!review.getUser().getIdentifier().equals(identifier)) {
             throw ReviewException.unauthorized();
         }
         reviewRepository.delete(review);
@@ -142,20 +137,19 @@ public class ReviewService {
 
     //좋아요 수 계산 (다시 누르면 좋아요 취소)
     @Transactional
-    public void toggleLike(Long reviewId, String providerName) {
-        Member member = memberRepository.findByProviderName(providerName)
-                .orElseThrow(ReviewException::memberNotFound);
+    public void toggleLike(Long reviewId, String identifier) {
+        User user = userRepository.findByIdentifier(identifier).orElseThrow(ReviewException::memberNotFound);
         Review review = reviewRepository.findById(reviewId)
                 .orElseThrow(ReviewException::reviewNotFound);
 
-        Optional<ReviewLike> existingLike = reviewLikeRepository.findByReviewAndMember(review, member);
+        Optional<ReviewLike> existingLike = reviewLikeRepository.findByReviewAndUser(review, user);
         if (existingLike.isPresent()) {
             reviewLikeRepository.delete(existingLike.get()); // 좋아요 제거
             review.decrementLikeCount(); // Review 엔티티 내 좋아요 수 감소 메서드
         } else {
             ReviewLike newLike = new ReviewLike();
             newLike.setReview(review);
-            newLike.setMember(member);
+            newLike.setUser(user);
             reviewLikeRepository.save(newLike); // 좋아요 추가
             review.incrementLikeCount(); // Review 엔티티 내 좋아요 수 증가 메서드
         }

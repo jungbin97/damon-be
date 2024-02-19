@@ -32,7 +32,7 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
     Page<Review> findByTag(@Param("tag") String tag, Pageable pageable);
 
     // 좋아요 수가 많은 순으로 리뷰 조회
-    @Query(value = "SELECT r.* FROM Review r LEFT JOIN Review_Like rl ON r.review_id = rl.review_id GROUP BY r.review_id ORDER BY COUNT(rl.member_id) DESC",
+    @Query(value = "SELECT r.* FROM Review r LEFT JOIN Review_Like rl ON r.review_id = rl.review_id GROUP BY r.review_id ORDER BY COUNT(rl.user_id) DESC",
             countQuery = "SELECT count(*) FROM Review",
             nativeQuery = true)
     Page<Review> findTopReviewsByLikes(Pageable pageable);

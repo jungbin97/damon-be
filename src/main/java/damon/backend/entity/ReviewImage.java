@@ -3,11 +3,6 @@ package damon.backend.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-
 @Entity
 @Getter
 @Table(name = "review_image")

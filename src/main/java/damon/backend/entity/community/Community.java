@@ -1,7 +1,7 @@
 package damon.backend.entity.community;
 
 import damon.backend.entity.BaseEntity;
-import damon.backend.entity.Member;
+import damon.backend.entity.user.User;
 import damon.backend.enums.CommunityType;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -26,8 +26,8 @@ public class Community extends BaseEntity {
     private Long communityId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_id")
-    private Member member; // 작성자
+    @JoinColumn(name = "user_id")
+    private User user; // 작성자
 
     @Enumerated(EnumType.STRING)
     @Column(name = "type")
@@ -53,16 +53,16 @@ public class Community extends BaseEntity {
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "community", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<CommunityComment> comments = new ArrayList<>();
 
-    public Community(Member member, CommunityType type, String title, String content) {
-        this.member = member;
+    public Community(User user, CommunityType type, String title, String content) {
+        this.user = user;
         this.type = type;
         this.title = title;
         this.content = content;
         this.views = 0;
     }
 
-    public Community(Member member, CommunityType type, String title, String content, List<String> images) {
-        this.member = member;
+    public Community(User user, CommunityType type, String title, String content, List<String> images) {
+        this.user = user;
         this.type = type;
         this.title = title;
         this.content = content;
@@ -81,23 +81,23 @@ public class Community extends BaseEntity {
         this.images = images;
     }
 
-    public CommunityComment addComment(Member member, String content) {
-        CommunityComment comment = new CommunityComment(member, this, content);
+    public CommunityComment addComment(User user, String content) {
+        CommunityComment comment = new CommunityComment(user, this, content);
         comments.add(comment);
         return comment;
     }
 
-    public boolean isLike(Member member) {
-        return likes.stream().anyMatch(like -> like.getMember().getId().equals(member.getId()));
+    public boolean isLike(User user) {
+        return likes.stream().anyMatch(like -> like.getUser().getId().equals(user.getId()));
     }
 
-    public void addLike(Member member) {
-        CommunityLike like = new CommunityLike(this, member);
+    public void addLike(User user) {
+        CommunityLike like = new CommunityLike(this, user);
         likes.add(like);
     }
 
-    public void removeLike(Member member) {
-        CommunityLike findLike = likes.stream().filter(like -> like.getMember().getId().equals(member.getId())).findFirst().orElse(null);
+    public void removeLike(User user) {
+        CommunityLike findLike = likes.stream().filter(like -> like.getUser().getId().equals(user.getId())).findFirst().orElse(null);
 
         if (findLike != null) {
             likes.remove(findLike);

@@ -1,5 +1,6 @@
 package damon.backend.entity;
 
+import damon.backend.entity.user.User;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -31,8 +32,8 @@ public class ReviewLike {
 
     //멤버id 매핑
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_id")
-    private Member member;
+    @JoinColumn(name = "user_id")
+    private User user;
 
     //연관관계 매핑 메서드
     public void setReview(Review review) {
@@ -40,17 +41,17 @@ public class ReviewLike {
         review.getReviewLikes().add(this);
     }
 
-    public void setMember(Member member){
-        this.member = member;
-        if (member != null ) {
-            member.getReviewLikes().add(this);
+    public void setUser(User user){
+        this.user = user;
+        if (user != null ) {
+            user.getReviewLikes().add(this);
         }
     }
 
-    public static ReviewLike addLike(Review review, Member member) {
+    public static ReviewLike addLike(Review review, User user) {
         ReviewLike reviewLike = new ReviewLike();
         reviewLike.setReview(review);
-        reviewLike.setMember(member);
+        reviewLike.setUser(user);
         return reviewLike;
     }
 }
