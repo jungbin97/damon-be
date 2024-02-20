@@ -60,7 +60,6 @@ public class UserService {
 
     public UserDto getUserDto(String identifier) {
         return new UserDto(userRepository.findByIdentifier(identifier).orElseThrow(() -> new EntityNotFoundException("identifier", identifier)));
-
     }
 
     // 인가 코드로 카카오 토큰 발급

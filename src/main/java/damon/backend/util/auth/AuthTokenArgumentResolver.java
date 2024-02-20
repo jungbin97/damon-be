@@ -20,15 +20,25 @@ public class AuthTokenArgumentResolver implements HandlerMethodArgumentResolver 
     }
 
     @Override
-    public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
-                                  NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
+    public Object resolveArgument(
+            MethodParameter parameter,
+            ModelAndViewContainer mavContainer,
+            NativeWebRequest webRequest,
+            WebDataBinderFactory binderFactory
+    ) throws Exception {
         HttpServletRequest request = (HttpServletRequest) webRequest.getNativeRequest();
 
         // 헤더에서 토큰 추출하고 해당 토큰을 이용하여 사용자 정보를 얻는 로직을 여기에 구현
         String token = request.getHeader("Authorization");
+
         if (token != null && token.startsWith("Bearer ")) {
             token = token.substring(7); // "Bearer " 부분을 제외한 토큰 추출
             TokenDto tokenDto = Jwt.getUserDtoByToken(token);
+            Log.info(tokenDto);
+            return tokenDto;
+        } else if (token != null) {
+            TokenDto tokenDto = Jwt.getUserDtoByToken(token);
+            Log.info(tokenDto);
             return tokenDto;
         }
         return null;
