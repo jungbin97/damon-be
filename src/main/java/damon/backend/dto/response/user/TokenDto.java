@@ -2,12 +2,14 @@ package damon.backend.dto.response.user;
 
 import lombok.Data;
 
+import java.util.Date;
+
 @Data
 public class TokenDto {
     private String identifier;
-    private Long expiryDate;
+    private Date expiryDate;
 
-    public TokenDto(String identifier, Long expiryDate) {
+    public TokenDto(String identifier, Date expiryDate) {
         this.identifier = identifier;
         this.expiryDate = expiryDate;
     }

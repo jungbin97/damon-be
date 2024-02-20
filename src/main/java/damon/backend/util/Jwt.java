@@ -50,6 +50,6 @@ public class Jwt {
         String identifier = payloadJson.get("sub").getAsString(); // 사용자 아이디
         Long expiryDate = payloadJson.get("exp").getAsLong(); // 프로필 URL
 
-        return new TokenDto(identifier, expiryDate);
+        return new TokenDto(identifier, new Date(expiryDate));
     }
 }

@@ -1,6 +1,8 @@
 package damon.backend.util.auth;
 
+import damon.backend.dto.response.user.TokenDto;
 import damon.backend.util.Jwt;
+import damon.backend.util.Log;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.core.MethodParameter;
 import org.springframework.stereotype.Component;
@@ -26,7 +28,8 @@ public class AuthTokenArgumentResolver implements HandlerMethodArgumentResolver 
         String token = request.getHeader("Authorization");
         if (token != null && token.startsWith("Bearer ")) {
             token = token.substring(7); // "Bearer " 부분을 제외한 토큰 추출
-            return Jwt.getUserDtoByToken(token);
+            TokenDto tokenDto = Jwt.getUserDtoByToken(token);
+            return tokenDto;
         }
         return null;
     }
