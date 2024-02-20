@@ -4,9 +4,7 @@ import damon.backend.service.AwsS3Service;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -16,11 +14,13 @@ import java.util.Map;
 @Tag(name = "리뷰 이미지 API", description = "리뷰 이미지 API")
 @RestController
 @RequiredArgsConstructor
+@RequestMapping("/api")
+@CrossOrigin(origins = "*", allowedHeaders = "*")
 public class ReviewImageController {
 
     private final AwsS3Service awsS3Service;
 
-    @PostMapping("/image/upload")
+    @PostMapping("/upload")
     public ResponseEntity<Map<String, Object>> imageUpload(@RequestParam("upload") MultipartFile file) {
         Map<String, Object> responseData = new HashMap<>();
 
