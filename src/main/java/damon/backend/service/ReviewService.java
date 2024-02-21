@@ -71,6 +71,14 @@ public class ReviewService {
         }
     }
 
+    // 내 게시글 전체 조회
+    @Transactional(readOnly = true)
+    public List<ReviewListResponse> searchMyReviewList(String identifier) {
+        User user = userRepository.findByIdentifier(identifier).orElseThrow(ReviewException::memberNotFound);
+        List<Review> myReviews = reviewRepository.findMyReviews(user.getId());
+        return myReviews.stream().map(ReviewListResponse::from).toList();
+    }
+
     //게시글 상세 내용 조회 (댓글 포함)
     @Transactional(readOnly = true)
     public ReviewResponse searchReview(Long reviewId) {

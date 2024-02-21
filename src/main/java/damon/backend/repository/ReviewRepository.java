@@ -2,6 +2,8 @@ package damon.backend.repository;
 
 import damon.backend.entity.Area;
 import damon.backend.entity.Review;
+import damon.backend.entity.community.Community;
+import damon.backend.enums.CommunityType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -9,6 +11,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -36,4 +39,7 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
             countQuery = "SELECT count(*) FROM Review",
             nativeQuery = true)
     Page<Review> findTopReviewsByLikes(Pageable pageable);
+
+    @Query("SELECT r FROM Review r JOIN FETCH r.user u WHERE u.id = :userId ORDER BY r.createdDate DESC")
+    List<Review> findMyReviews(Long userId);
 }

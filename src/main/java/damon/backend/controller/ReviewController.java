@@ -59,6 +59,16 @@ public class ReviewController {
         return reviewService.searchReviewList(page, pageSize, area.orElse(null));
     }
 
+    // 내 게시글 목록 조회
+    @GetMapping("/my/list")
+    @Operation(summary = "내 리뷰 전체 조회", description = "내 리뷰를 전체 조회합니다.")
+    @ApiResponse(responseCode = "200", description = "리뷰 전체 조회 성공")
+    public List<ReviewListResponse> searchMyReviewList(
+            @AuthToken TokenDto tokenDto
+    ){
+        return reviewService.searchMyReviewList(tokenDto.getIdentifier());
+    }
+
 
     //게시글 상세 조회 (댓글 포함)
     @GetMapping("/{reviewId}")
