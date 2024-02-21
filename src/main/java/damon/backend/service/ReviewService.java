@@ -198,7 +198,7 @@ public class ReviewService {
     public List<ReviewListResponse> findLikedReviewsByUser(String identifier, int page, int pageSize) {
         User user = userRepository.findByIdentifier(identifier).orElseThrow(ReviewException::memberNotFound);
 
-        Pageable pageable = PageRequest.of(page, pageSize, Sort.by(Sort.Direction.DESC, "createdDate"));
+        Pageable pageable = PageRequest.of(page, pageSize, Sort.by(Sort.Direction.DESC, "id"));
 
         Page<ReviewLike> likedReviewsPage = reviewLikeRepository.findByUser(user, pageable);
 
@@ -206,6 +206,8 @@ public class ReviewService {
                 .map(reviewLike -> ReviewListResponse.from(reviewLike.getReview()))
                 .collect(Collectors.toList());
     }
+
+
 
     //태그를 통한 검색
     @Transactional(readOnly = true)

@@ -180,6 +180,9 @@ public class ReviewController {
 
     // 메인 페이지용 베스트 리뷰 조회
     @GetMapping("/best")
+    @Operation(summary = "베스트 리뷰", description = "메인 페이지에서 베스트 리뷰를 조회합니다.")
+    @ApiResponse(responseCode = "200", description = "베스트 리뷰 조회 성공")
+
     public ResponseEntity<List<ReviewListResponse>> getTopReviewsForMainPage() {
         List<ReviewListResponse> topReviews = reviewService.findTopReviewsForMainPage(5);
         return ResponseEntity.ok(topReviews);
