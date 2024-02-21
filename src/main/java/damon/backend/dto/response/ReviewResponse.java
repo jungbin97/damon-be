@@ -6,9 +6,8 @@ import damon.backend.entity.ReviewImage;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -37,6 +36,8 @@ public class ReviewResponse {
     private String content;
 
     private List<ReviewCommentResponse> reviewComments; // 댓글 목록 추가
+
+    private String url;
 
     // 날짜 포맷터 정의
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
@@ -69,7 +70,38 @@ public class ReviewResponse {
                 review.getFreeTags(),
                 imageUrls, // 이미지 URL 리스트
                 review.getContent(),
-                organizedComments // 계층적으로 구조화된 댓글 목록
+                organizedComments, // 계층적으로 구조화된 댓글 목록
+                ""
         );
+    }
+
+    // 추가
+    public ReviewResponse(Review review) {
+        long viewCount = review.getViewCount(); // 조회수
+        long likeCount = review.getReviewLikes().size();
+
+        String state = review.isEdited() ? "편집됨" : ""; // isEdited 값에 따라 상태 설정
+
+        List<String> imageUrls = review.getReviewImages().stream()
+                .map(ReviewImage::getUrl)
+                .collect(Collectors.toList());
+
+        this.id = review.getId();
+        this.name = review.getUser() != null ? review.getUser().getNickname() : null;
+        this.state = state;
+        this.createdDate = review.getCreatedDate().format(DATE_TIME_FORMATTER); // LocalDateTime -> String
+        this.viewCount = viewCount;
+        this.likeCount = likeCount;
+        this.title = review.getTitle();
+        this.area = review.getArea();
+        this.startDate = review.getStartDate().format(DATE_FORMATTER); // LocalDate -> String
+        this.endDate = review.getEndDate().format(DATE_FORMATTER); // LocalDate -> String
+        this.cost = review.getCost();
+        this.suggests = review.getSuggests();
+        this.freeTags = review.getFreeTags();
+        this.imageUrls = imageUrls; // 이미지 URL 리스트
+        this.content = review.getContent();
+        this.reviewComments = new ArrayList<>(); // 계층적으로 구조화된 댓글 목록
+        this.url = review.getReviewImages().get(0).getUrl();
     }
 }

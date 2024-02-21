@@ -1,14 +1,17 @@
 package damon.backend.service;
 
+import damon.backend.dto.request.ReviewAndImageRequest;
 import damon.backend.dto.request.ReviewRequest;
 import damon.backend.dto.response.ReviewCommentResponse;
 import damon.backend.dto.response.ReviewListResponse;
 import damon.backend.dto.response.ReviewResponse;
 import damon.backend.entity.Area;
 import damon.backend.entity.Review;
+import damon.backend.entity.ReviewImage;
 import damon.backend.entity.ReviewLike;
 import damon.backend.entity.user.User;
 import damon.backend.exception.ReviewException;
+import damon.backend.repository.ReviewImageRepository;
 import damon.backend.repository.ReviewLikeRepository;
 import damon.backend.repository.ReviewRepository;
 import damon.backend.repository.user.UserRepository;
@@ -32,10 +35,38 @@ import java.util.stream.Collectors;
 public class ReviewService {
 
     private final ReviewRepository reviewRepository;
+    private final ReviewImageRepository reviewImageRepository;
     private final ReviewLikeRepository reviewLikeRepository;
     private final UserRepository userRepository;
     private final CommentStructureOrganizer commentStructureOrganizer;
     private final ReviewImageService reviewImageService;
+
+    //게시글 등록
+    public ReviewResponse addReview(ReviewAndImageRequest form, String identifier) {
+        User user = userRepository.findByIdentifier(identifier).orElseThrow(ReviewException::memberNotFound);
+
+        Review review = reviewRepository.save(new Review(
+                form.getTitle(),
+                form.getStartDate(),
+                form.getEndDate(),
+                form.getArea(),
+                form.getCost(),
+                form.getSuggests(),
+                form.getFreeTags(),
+                form.getContent(),
+                user
+            )
+        );
+
+        // 이미지 정보 추가
+        if (form.getImage() != null) {
+            ReviewImage reviewImage =
+                    reviewImageRepository.save(new ReviewImage(form.getImage(), true, review));
+            review.addImage(reviewImage);
+        }
+
+        return new ReviewResponse(review);
+    }
 
     //게시글 등록
     public ReviewResponse postReview(ReviewRequest request, List<MultipartFile> images, String identifier) {

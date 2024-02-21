@@ -1,12 +1,14 @@
 package damon.backend.controller;
 
 
+import damon.backend.dto.request.ReviewAndImageRequest;
 import damon.backend.dto.request.ReviewRequest;
 import damon.backend.dto.response.ReviewListResponse;
 import damon.backend.dto.response.ReviewResponse;
 import damon.backend.dto.response.user.TokenDto;
 import damon.backend.entity.Area;
 import damon.backend.service.ReviewService;
+import damon.backend.util.Log;
 import damon.backend.util.auth.AuthToken;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -14,6 +16,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -32,6 +35,19 @@ public class ReviewController {
 
     //게시글 등록
     @PostMapping
+    public ReviewResponse addReview(
+            @RequestBody ReviewAndImageRequest form,
+            @AuthToken TokenDto tokenDto
+    ) {
+        // 이미지 데이터 처리
+        Log.info(form);
+        Log.info(tokenDto);
+
+        return reviewService.addReview(form, tokenDto.getIdentifier());
+    }
+
+    //게시글 등록
+    @PostMapping("/review")
     @Operation(summary = "내 리뷰 등록", description = "내 리뷰를 등록합니다.")
     @ApiResponse(responseCode = "200", description = "리뷰 등록 성공")
     public ReviewResponse postReview(

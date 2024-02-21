@@ -21,6 +21,7 @@ public class Review extends BaseEntity {
     private Long id;
 
     private long viewCount;
+
     private Long likeCount;
     private boolean isEdited = false; // 변경 여부를 추적하는 필드
 
@@ -123,4 +124,19 @@ public class Review extends BaseEntity {
         this.reviewImages.add(newImage); // 현재 리뷰의 이미지 목록에 추가
     }
 
+    public Review(String title, LocalDate startDate, LocalDate endDate, Area area, Long cost, List<String> suggests, List<String> freeTags, String content, User user) {
+        this.title = title;
+        this.startDate = startDate;
+        this.endDate = endDate;
+        this.area = area;
+        this.cost = cost;
+        this.suggests = suggests;
+        this.freeTags = freeTags;
+        this.content = content;
+        this.user = user;
+    }
+
+    public void addImage(ReviewImage reviewImage) {
+        this.reviewImages.add(reviewImage);
+    }
 }
