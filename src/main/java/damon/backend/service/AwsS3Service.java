@@ -1,5 +1,6 @@
 package damon.backend.service;
 
+import damon.backend.util.Log;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -10,6 +11,7 @@ import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
 import java.io.IOException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -39,8 +41,9 @@ public class AwsS3Service {
                         .key(reviewPrefix + uuidFileName)
                         .build(),
                 RequestBody.fromInputStream(file.getInputStream(), file.getSize()));
-
-        return s3Client.utilities().getUrl(builder -> builder.bucket(bucket).key(reviewPrefix + uuidFileName)).toExternalForm();
+        String result = s3Client.utilities().getUrl(builder -> builder.bucket(bucket).key(reviewPrefix + uuidFileName)).toString();
+        Log.info("AwsS3Service uploadImage return:" + result);
+        return result;
     }
 
     public List<String> uploadImages(List<MultipartFile> files) throws IOException {

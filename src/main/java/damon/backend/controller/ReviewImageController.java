@@ -26,8 +26,14 @@ public class ReviewImageController {
 
     @PostMapping("/upload")
     public String imageUpload(@RequestParam("image") MultipartFile image) {
-        Log.info(image.getOriginalFilename());
-        return image.getOriginalFilename();
+        try {
+            String result = awsS3Service.uploadImage(image);
+            Log.info(result);
+            return result;
+        } catch (IOException e) {
+            Log.info("ReviewImageController imageUpload에서 예외 발생");
+            throw new RuntimeException(e);
+        }
     }
 
 //        Map<String, Object> responseData = new HashMap<>();
