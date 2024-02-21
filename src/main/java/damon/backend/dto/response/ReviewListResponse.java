@@ -29,6 +29,8 @@ public class ReviewListResponse {
     private List<String> suggests; // 장소 추천
     private List<String> freeTags; // 자유 태그
 
+    private String mainImage;
+
     // 날짜 포맷터 정의
     private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
@@ -41,22 +43,41 @@ public class ReviewListResponse {
 
         String state = review.isEdited() ? "편집됨" : ""; // isEdited 값에 따라 상태 설정
 
-        return new ReviewListResponse(
+        if (review.getReviewImages().size() > 0) {
+            return new ReviewListResponse(
 
-                review.getId(),
-                review.getUser() != null ? review.getUser().getNickname() : null,
-                state,
-                review.getCreatedDate().format(DATE_TIME_FORMATTER),    // LocalDateTime -> String
-                review.getViewCount(),
-                likeCount,
-                commentCount,
-                review.getTitle(),
-                review.getArea(),
-                review.getCost(),
-                review.getSuggests(),
-                review.getFreeTags()
-//              firstImageUrl,
-        );
+                    review.getId(),
+                    review.getUser() != null ? review.getUser().getNickname() : null,
+                    state,
+                    review.getCreatedDate().format(DATE_TIME_FORMATTER),    // LocalDateTime -> String
+                    review.getViewCount(),
+                    likeCount,
+                    commentCount,
+                    review.getTitle(),
+                    review.getArea(),
+                    review.getCost(),
+                    review.getSuggests(),
+                    review.getFreeTags(),
+                    review.getReviewImages().get(0).getUrl()
+            );
+        } else {
+            return new ReviewListResponse(
+
+                    review.getId(),
+                    review.getUser() != null ? review.getUser().getNickname() : null,
+                    state,
+                    review.getCreatedDate().format(DATE_TIME_FORMATTER),    // LocalDateTime -> String
+                    review.getViewCount(),
+                    likeCount,
+                    commentCount,
+                    review.getTitle(),
+                    review.getArea(),
+                    review.getCost(),
+                    review.getSuggests(),
+                    review.getFreeTags(),
+                    "");
+        }
+
     }
 
 }
