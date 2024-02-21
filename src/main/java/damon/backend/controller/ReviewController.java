@@ -16,6 +16,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.hibernate.query.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -144,6 +145,17 @@ public class ReviewController {
     ) {
         reviewService.toggleLike(reviewId, tokenDto.getIdentifier());
         return ResponseEntity.ok().build(); // 토글 후 리뷰의 최신 상태 반환 // HTTP 200 OK 응답
+    }
+
+    //좋아요 누른 게시글 목록
+    @GetMapping("/likes")
+    public ResponseEntity<List<ReviewListResponse>> getLikedReviews(
+            @AuthToken TokenDto tokenDto,
+            @RequestParam("page") int page,
+            @RequestParam("pageSize") int pageSize
+    ) {
+        List<ReviewListResponse> likedReviews = reviewService.findLikedReviewsByUser(tokenDto.getIdentifier(), page, pageSize);
+        return ResponseEntity.ok(likedReviews);
     }
 
 

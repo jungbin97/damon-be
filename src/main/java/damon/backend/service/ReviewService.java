@@ -133,7 +133,6 @@ public class ReviewService {
 
     }
 
-
     // 게시글 수정
     public ReviewResponse updateReview(Long reviewId, ReviewRequest request, List<MultipartFile> newImages, List<Long> imageIdsToDelete, String identifier)  {
 
@@ -192,6 +191,20 @@ public class ReviewService {
             reviewLikeRepository.save(newLike); // 좋아요 추가
             review.incrementLikeCount(); // Review 엔티티 내 좋아요 수 증가 메서드
         }
+    }
+
+    // 좋아요 누른 게시글 모아보기
+    @Transactional(readOnly = true)
+    public List<ReviewListResponse> findLikedReviewsByUser(String identifier, int page, int pageSize) {
+        User user = userRepository.findByIdentifier(identifier).orElseThrow(ReviewException::memberNotFound);
+
+        Pageable pageable = PageRequest.of(page, pageSize, Sort.by(Sort.Direction.DESC, "createdDate"));
+
+        Page<ReviewLike> likedReviewsPage = reviewLikeRepository.findByUser(user, pageable);
+
+        return likedReviewsPage.stream()
+                .map(reviewLike -> ReviewListResponse.from(reviewLike.getReview()))
+                .collect(Collectors.toList());
     }
 
     //태그를 통한 검색
