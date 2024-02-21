@@ -149,9 +149,13 @@ public class ReviewController {
 
     //좋아요 누른 게시글 목록
     @GetMapping("/likes")
+    @Operation(summary = "내 좋아요 게시글", description = "좋아요 누른 게시글을 조회합니다.")
+    @ApiResponse(responseCode = "200", description = "리뷰 좋아요 조회 성공")
     public ResponseEntity<List<ReviewListResponse>> getLikedReviews(
             @AuthToken TokenDto tokenDto,
+            @Schema(description = "페이지 인덱스", example="0")
             @RequestParam("page") int page,
+            @Schema(description = "한 페이지 당 보여질 리뷰 개수", example="10")
             @RequestParam("pageSize") int pageSize
     ) {
         List<ReviewListResponse> likedReviews = reviewService.findLikedReviewsByUser(tokenDto.getIdentifier(), page, pageSize);
