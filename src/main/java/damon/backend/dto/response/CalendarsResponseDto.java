@@ -8,6 +8,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
@@ -16,16 +17,17 @@ import java.util.List;
 public class CalendarsResponseDto {
     private Long calendarId;
     private String title;
-    private LocalDate startDate;
-    private LocalDate endDate;
+    private String startDate;
+    private String endDate;
     private Area area;
 
     public static CalendarsResponseDto from(Calendar calendar) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         return new CalendarsResponseDto(
                 calendar.getId(),
                 calendar.getTitle(),
-                calendar.getStartDate(),
-                calendar.getEndDate(),
+                calendar.getStartDate().format(formatter),
+                calendar.getEndDate().format(formatter),
                 calendar.getArea()
         );
     }

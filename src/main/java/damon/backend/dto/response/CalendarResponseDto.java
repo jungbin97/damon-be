@@ -7,7 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
@@ -15,17 +15,18 @@ import java.util.List;
 @Getter
 public class CalendarResponseDto {
     private String title;
-    private LocalDate startDate;
-    private LocalDate endDate;
+    private String startDate;
+    private String endDate;
     private Area area;
 
     private List<TravelDetailDto> travels;
 
-    public static CalendarResponseDto from(Calendar calendar) {
+    public static CalendarResponseDto from(Calendar calendar){
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         return new CalendarResponseDto(
                 calendar.getTitle(),
-                calendar.getStartDate(),
-                calendar.getEndDate(),
+                calendar.getStartDate().format(formatter),
+                calendar.getEndDate().format(formatter),
                 calendar.getArea(),
                 TravelDetailDto.listFrom(calendar.getTravels())
         );

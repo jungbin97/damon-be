@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @Data
@@ -15,7 +16,7 @@ public class ReviewListResponse {
     private Long id;
     private String name;
     private String state;
-    private LocalDateTime createdDate;
+    private String createdDate;  // LocalDateTime -> String
 
     private long viewCount; // 조회수
     private long likeCount; // 좋아요 수
@@ -28,6 +29,8 @@ public class ReviewListResponse {
     private List<String> suggests; // 장소 추천
     private List<String> freeTags; // 자유 태그
 
+    // 날짜 포맷터 정의
+    private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     //정적 메소드
     public static ReviewListResponse from(Review review) {
@@ -43,7 +46,7 @@ public class ReviewListResponse {
                 review.getId(),
                 review.getUser() != null ? review.getUser().getNickname() : null,
                 state,
-                review.getCreatedDate(),
+                review.getCreatedDate().format(DATE_TIME_FORMATTER),    // LocalDateTime -> String
                 review.getViewCount(),
                 likeCount,
                 commentCount,
@@ -53,7 +56,6 @@ public class ReviewListResponse {
                 review.getSuggests(),
                 review.getFreeTags()
 //              firstImageUrl,
-
         );
     }
 

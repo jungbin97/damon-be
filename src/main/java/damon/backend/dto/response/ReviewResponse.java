@@ -8,6 +8,7 @@ import lombok.Data;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -18,15 +19,15 @@ public class ReviewResponse {
     private Long id;
     private String name;
     private String state;
-    private LocalDateTime createdDate;
+    private String createdDate;
 
     private long viewCount; // 조회수
     private long likeCount; // 좋아요 수
 
     private String title;
     private Area area;
-    private LocalDate startDate;
-    private LocalDate endDate;
+    private String startDate;
+    private String endDate;
 
     private Long cost;
     private List<String> suggests;
@@ -36,6 +37,10 @@ public class ReviewResponse {
     private String content;
 
     private List<ReviewCommentResponse> reviewComments; // 댓글 목록 추가
+
+    // 날짜 포맷터 정의
+    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+    private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     // 정적 팩토리 메서드
     public static ReviewResponse from(Review review, List<ReviewCommentResponse> organizedComments) {
@@ -52,13 +57,13 @@ public class ReviewResponse {
                 review.getId(),
                 review.getUser() != null ? review.getUser().getNickname() : null,
                 state,
-                review.getCreatedDate(),
+                review.getCreatedDate().format(DATE_TIME_FORMATTER),    // LocalDateTime -> String
                 viewCount,
                 likeCount,
                 review.getTitle(),
                 review.getArea(),
-                review.getStartDate(),
-                review.getEndDate(),
+                review.getStartDate().format(DATE_FORMATTER),    // LocalDate -> String
+                review.getEndDate().format(DATE_FORMATTER),     // LocalDate -> String
                 review.getCost(),
                 review.getSuggests(),
                 review.getFreeTags(),
