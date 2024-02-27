@@ -4,11 +4,14 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import damon.backend.dto.response.user.KakaoTokenDto;
+import damon.backend.dto.response.user.LoginDto;
 import damon.backend.dto.response.user.UserDto;
 import damon.backend.entity.user.User;
 import damon.backend.exception.EntityNotFoundException;
+import damon.backend.exception.KakaoLoginException;
 import damon.backend.repository.user.UserRepository;
 import damon.backend.util.Jwt;
+import damon.backend.util.Log;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -40,7 +43,7 @@ public class UserService {
     @Value("${kakao.redirect-uri}")
     private String kakaoRedirectUri;
 
-    public String kakaoLogin(String code) {
+    public LoginDto kakaoLogin(String code) {
         KakaoTokenDto token = getKakaoToken(code); // 인가 코드로 카카오 토큰 발급
         UserDto userDto = getKakaoUser(token.getAccess_token()); // 카카오 엑세스 토큰으로 유저 정보 조회
 
@@ -49,13 +52,15 @@ public class UserService {
             signUp(userDto);
         }
 
-        String serverToken = Jwt.generateToken(userDto);
+        String accessToken = Jwt.generateToken(userDto.getIdentifier());
+        String refreshToken = Jwt.generateRefreshToken(userDto.getIdentifier());
 
         log.info("kakaoLogin code={}", code);
         log.info("kakaoLogin KakaoTokenDto={}", token);
         log.info("kakaoLogin userDto={}", userDto);
-        log.info("kakaoLogin serverToken={}", serverToken);
-        return serverToken;
+        log.info("kakaoLogin accessToken={}", accessToken);
+        log.info("kakaoLogin refreshToken={}", refreshToken);
+        return new LoginDto(accessToken, refreshToken);
     }
 
     public UserDto getUserDto(String identifier) {
@@ -64,25 +69,30 @@ public class UserService {
 
     // 인가 코드로 카카오 토큰 발급
     public KakaoTokenDto getKakaoToken(String code) {
-        String kakaoTokenUrl = "https://kauth.kakao.com/oauth/token";
-        String grantType = "authorization_code";
+        try {
+            String kakaoTokenUrl = "https://kauth.kakao.com/oauth/token";
+            String grantType = "authorization_code";
 
-        UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(kakaoTokenUrl)
-                .queryParam("grant_type", grantType)
-                .queryParam("client_id", kakaoClientId)
-                .queryParam("client_secret", kakaoClientSecret)
-                .queryParam("redirect_uri", kakaoRedirectUri)
-                .queryParam("code", code);
+            UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(kakaoTokenUrl)
+                    .queryParam("grant_type", grantType)
+                    .queryParam("client_id", kakaoClientId)
+                    .queryParam("client_secret", kakaoClientSecret)
+                    .queryParam("redirect_uri", kakaoRedirectUri)
+                    .queryParam("code", code);
 
-        RestTemplate restTemplate = new RestTemplate();
-        return restTemplate.postForObject(builder.toUriString(), null, KakaoTokenDto.class);
+            RestTemplate restTemplate = new RestTemplate();
+            return restTemplate.postForObject(builder.toUriString(), null, KakaoTokenDto.class);
+        } catch (Exception e) {
+            throw new KakaoLoginException();
+        }
         // 인가코드 하나로 2번째 요청 시 postForObject에서 오류 발생
         // 400 Bad Request: "{"error":"invalid_grant","error_description":"authorization code not found for code=","error_code":"KOE320"}"
     }
 
     public UserDto getKakaoUser(String accessToken) {
-        String reqURL = "https://kapi.kakao.com/v2/user/me";
         try {
+            String reqURL = "https://kapi.kakao.com/v2/user/me";
+
             JsonObject jsonObject = getJsonObject(accessToken, reqURL);
             String identifier = jsonObject.get("id").getAsString();
 
@@ -95,8 +105,8 @@ public class UserService {
 
             UserDto userDto = new UserDto(identifier, nickname, email, profile);
             return userDto;
-        } catch (IOException e) {
-            return null;
+        } catch (Exception e) {
+            throw new KakaoLoginException();
         }
     }
 

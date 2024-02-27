@@ -1,6 +1,7 @@
 package damon.backend.controller;
 
 import damon.backend.dto.Result;
+import damon.backend.dto.response.user.LoginDto;
 import damon.backend.dto.response.user.TokenDto;
 import damon.backend.dto.response.user.UserDto;
 import damon.backend.exception.KakaoLoginException;
@@ -24,12 +25,8 @@ public class UserController {
 
     @Operation(summary = "카카오 로그인")
     @GetMapping("/login")
-    public String kakaoLogin(@RequestParam("code") String code) {
-        try {
-            return userService.kakaoLogin(code);
-        } catch (Exception e) {
-            throw new KakaoLoginException("카카오 로그인 중 예외 발생");
-        }
+    public Result<LoginDto> kakaoLogin(@RequestParam("code") String code) {
+        return Result.success(userService.kakaoLogin(code));
     }
 
     @Operation(summary = "토큰으로 유저 정보 조회")
