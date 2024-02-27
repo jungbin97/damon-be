@@ -1,5 +1,6 @@
 package damon.backend.controller;
 
+import damon.backend.dto.Result;
 import damon.backend.service.TimeService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -20,7 +21,7 @@ public class TimeController {
 
     @GetMapping("/time")
     @Operation(summary = "서버 테스트 용 시간체크", description = "현재 시간을 반환합니다.")
-    public String getCurrentTime() {
-        return timeService.getNowTime();
+    public Result<String> getCurrentTime() {
+        return Result.success(timeService.getNowTime());
     }
 }
