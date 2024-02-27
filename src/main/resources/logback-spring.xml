@@ -1,5 +1,19 @@
 <configuration>
 
+    <!-- TRACE 로그를 남길 파일 -->
+    <appender name="TRACE_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>logs/trace.log</file>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>logs/trace-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <maxFileSize>10MB</maxFileSize>
+            <maxHistory>30</maxHistory>
+            <totalSizeCap>1GB</totalSizeCap>
+        </rollingPolicy>
+    </appender>
+
     <!-- DEBUG 로그를 남길 파일 -->
     <appender name="DEBUG_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>logs/debug.log</file>
@@ -14,14 +28,42 @@
         </rollingPolicy>
     </appender>
 
-    <!-- TRACE 로그를 남길 파일 -->
-    <appender name="TRACE_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>logs/trace.log</file>
+    <!-- INFO 로그를 남길 파일 -->
+    <appender name="INFO_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>logs/info.log</file>
         <encoder>
             <pattern>%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n</pattern>
         </encoder>
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
-            <fileNamePattern>logs/trace-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <fileNamePattern>logs/info-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <maxFileSize>10MB</maxFileSize>
+            <maxHistory>30</maxHistory>
+            <totalSizeCap>1GB</totalSizeCap>
+        </rollingPolicy>
+    </appender>
+
+    <!-- WARN 로그를 남길 파일 -->
+    <appender name="WARN_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>logs/warn.log</file>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>logs/warn-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <maxFileSize>10MB</maxFileSize>
+            <maxHistory>30</maxHistory>
+            <totalSizeCap>1GB</totalSizeCap>
+        </rollingPolicy>
+    </appender>
+
+    <!-- ERROR 로그를 남길 파일 -->
+    <appender name="ERROR_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>logs/error.log</file>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>logs/error-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
             <maxFileSize>10MB</maxFileSize>
             <maxHistory>30</maxHistory>
             <totalSizeCap>1GB</totalSizeCap>
@@ -37,8 +79,11 @@
 
     <!-- 루트 로거 설정 -->
     <root level="INFO">
-        <appender-ref ref="DEBUG_FILE"/> <!-- DEBUG 레벨 이상의 로그를 DEBUG_FILE에 기록 -->
         <appender-ref ref="TRACE_FILE"/> <!-- TRACE 레벨 이상의 로그를 TRACE_FILE에 기록 -->
+        <appender-ref ref="DEBUG_FILE"/> <!-- DEBUG 레벨 이상의 로그를 DEBUG_FILE에 기록 -->
+        <appender-ref ref="INFO_FILE"/> <!-- INFO 레벨 이상의 로그를 INFO_FILE에 기록 -->
+        <appender-ref ref="WARN_FILE"/> <!-- WARN 레벨 이상의 로그를 WARN_FILE에 기록 -->
+        <appender-ref ref="ERROR_FILE"/> <!-- ERROR 레벨 이상의 로그를 ERROR_FILE에 기록 -->
         <appender-ref ref="STDOUT"/> <!-- INFO 레벨 이상의 로그를 STDOUT에 출력 -->
     </root>
 
