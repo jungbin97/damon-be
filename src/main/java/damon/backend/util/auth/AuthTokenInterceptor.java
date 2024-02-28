@@ -59,11 +59,11 @@ public class AuthTokenInterceptor implements HandlerInterceptor {
                     throw  new RefreshTokenExpiredException(); // -> 프론트에서 엑세스 토큰과 리프레시 토큰을 버려야 함.
                 }
 
-                // 리프래시 토큰이 유효한 경우, 새로운 엑세스 토큰 생성
+                // 리프래시 토큰이 유효한 경우, 새로운 토큰 생성
                 String newAccessToken = generateNewAccessToken(refreshToken);
                 String newRefreshToken = generateNewRefreshToken(refreshToken);
 
-                // 새로 생성한 엑세스 토큰을 응답 헤더에 설정
+                // 새로 생성한 토큰을 응답 헤더에 설정
                 response.setHeader("New-Access-Token", newAccessToken);
                 response.setHeader("New-Refresh-Token", newRefreshToken);
 
