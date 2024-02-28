@@ -4,7 +4,6 @@ import damon.backend.dto.Result;
 import damon.backend.dto.response.user.LoginDto;
 import damon.backend.dto.response.user.TokenDto;
 import damon.backend.dto.response.user.UserDto;
-import damon.backend.exception.KakaoLoginException;
 import damon.backend.service.UserService;
 import damon.backend.util.auth.AuthToken;
 import io.swagger.v3.oas.annotations.Operation;

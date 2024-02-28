@@ -7,7 +7,7 @@ import damon.backend.dto.response.community.CommunityDetailDTO;
 import damon.backend.dto.response.community.CommunitySimpleDTO;
 import damon.backend.dto.response.user.TokenDto;
 import damon.backend.enums.CommunityType;
-import damon.backend.exception.PermissionDeniedException;
+import damon.backend.exception.custom.UnauthorizedException;
 import damon.backend.service.CommunityService;
 import damon.backend.util.auth.AuthToken;
 import io.swagger.v3.oas.annotations.Operation;
@@ -110,7 +110,7 @@ public class CommunityController {
             @AuthToken TokenDto tokenDto
     ) {
         if (!communityService.isCommunityWriter(tokenDto.getIdentifier(), updateForm.getCommunityId())) {
-            throw new PermissionDeniedException();
+            throw new UnauthorizedException();
         }
 
         CommunityDetailDTO updatedCommunity = communityService.setCommunity(
@@ -130,7 +130,7 @@ public class CommunityController {
             @AuthToken TokenDto tokenDto
     ) {
         if (!communityService.isCommunityWriter(tokenDto.getIdentifier(), communityId)) {
-            throw new PermissionDeniedException();
+            throw new UnauthorizedException();
         }
 
         communityService.removeCommunity(communityId);
@@ -160,7 +160,7 @@ public class CommunityController {
             @AuthToken TokenDto tokenDto
     ) {
         if (!communityService.isCommentWriter(tokenDto.getIdentifier(), updateForm.getCommentId())) {
-            throw new PermissionDeniedException();
+            throw new UnauthorizedException();
         }
 
         CommunityCommentDTO comment = communityService.setComment(
@@ -178,7 +178,7 @@ public class CommunityController {
             @AuthToken TokenDto tokenDto
     ) {
         if (!communityService.isCommentWriter(tokenDto.getIdentifier(), commentId)) {
-            throw new PermissionDeniedException();
+            throw new UnauthorizedException();
         }
 
         communityService.removeComment(commentId);

@@ -7,10 +7,11 @@ import damon.backend.entity.community.Community;
 import damon.backend.entity.community.CommunityComment;
 import damon.backend.entity.user.User;
 import damon.backend.enums.CommunityType;
-import damon.backend.exception.EntityNotFoundException;
+import damon.backend.exception.custom.DataNotFoundException;
 import damon.backend.repository.community.CommunityCommentRepository;
 import damon.backend.repository.community.CommunityRepository;
 import damon.backend.repository.user.UserRepository;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -30,15 +31,15 @@ public class CommunityService {
     private final UserRepository userRepository;
 
     private User getUserEntity(String identifier) {
-        return userRepository.findByIdentifier(identifier).orElseThrow(() -> new EntityNotFoundException("provider", identifier));
+        return userRepository.findByIdentifier(identifier).orElseThrow(DataNotFoundException::new);
     }
 
     private Community getCommunityEntity(Long communityId) {
-        return communityRepository.findOne(communityId).orElseThrow(() -> new EntityNotFoundException("community", communityId));
+        return communityRepository.findOne(communityId).orElseThrow(DataNotFoundException::new);
     }
 
     private CommunityComment getCommentEntity(Long commentId) {
-        return commentRepository.findById(commentId).orElseThrow(() -> new EntityNotFoundException("comment", commentId));
+        return commentRepository.findById(commentId).orElseThrow(DataNotFoundException::new);
     }
 
     public boolean isCommunityWriter(String identifier, Long communityId) {

@@ -7,11 +7,11 @@ import damon.backend.dto.response.user.KakaoTokenDto;
 import damon.backend.dto.response.user.LoginDto;
 import damon.backend.dto.response.user.UserDto;
 import damon.backend.entity.user.User;
-import damon.backend.exception.EntityNotFoundException;
-import damon.backend.exception.KakaoLoginException;
+import damon.backend.exception.custom.DataNotFoundException;
+import damon.backend.exception.custom.KakaoAuthFailException;
 import damon.backend.repository.user.UserRepository;
 import damon.backend.util.Jwt;
-import damon.backend.util.Log;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -52,7 +52,7 @@ public class UserService {
             signUp(userDto);
         }
 
-        String accessToken = Jwt.generateToken(userDto.getIdentifier());
+        String accessToken = Jwt.generateAccessToken(userDto.getIdentifier());
         String refreshToken = Jwt.generateRefreshToken(userDto.getIdentifier());
 
         log.info("kakaoLogin code={}", code);
@@ -64,7 +64,7 @@ public class UserService {
     }
 
     public UserDto getUserDto(String identifier) {
-        return new UserDto(userRepository.findByIdentifier(identifier).orElseThrow(() -> new EntityNotFoundException("identifier", identifier)));
+        return new UserDto(userRepository.findByIdentifier(identifier).orElseThrow(DataNotFoundException::new));
     }
 
     // 인가 코드로 카카오 토큰 발급
@@ -83,7 +83,7 @@ public class UserService {
             RestTemplate restTemplate = new RestTemplate();
             return restTemplate.postForObject(builder.toUriString(), null, KakaoTokenDto.class);
         } catch (Exception e) {
-            throw new KakaoLoginException();
+            throw new KakaoAuthFailException();
         }
         // 인가코드 하나로 2번째 요청 시 postForObject에서 오류 발생
         // 400 Bad Request: "{"error":"invalid_grant","error_description":"authorization code not found for code=","error_code":"KOE320"}"
@@ -103,10 +103,9 @@ public class UserService {
             JsonObject kakaoAccount = jsonObject.getAsJsonObject("kakao_account");
             String email = kakaoAccount.get("email").getAsString();
 
-            UserDto userDto = new UserDto(identifier, nickname, email, profile);
-            return userDto;
+            return new UserDto(identifier, nickname, email, profile);
         } catch (Exception e) {
-            throw new KakaoLoginException();
+            throw new KakaoAuthFailException();
         }
     }
 
