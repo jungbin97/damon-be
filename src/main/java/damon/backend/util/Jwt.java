@@ -1,21 +1,11 @@
 package damon.backend.util;
 
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import damon.backend.dto.response.user.TokenDto;
-import damon.backend.dto.response.user.UserDto;
-import damon.backend.exception.PermissionDeniedException;
-import damon.backend.exception.TokenExpiredException;
-import damon.backend.exception.TokenNotValidateException;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.JwtException;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import damon.backend.exception.custom.TokenNotValidatedException;
+import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 
-import java.nio.charset.StandardCharsets;
 import java.security.Key;
-import java.util.Base64;
 import java.util.Date;
 
 public class Jwt {
@@ -30,7 +20,7 @@ public class Jwt {
     private static final long REFRESH_TOKEN_EXPIRATION_TIME = 7 * 24 * 60 * 60 * 1000;
 
     // JWT 토큰 생성
-    public static String generateToken(String identifier) {
+    public static String generateAccessToken(String identifier) {
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + EXPIRATION_TIME);
 
@@ -56,47 +46,47 @@ public class Jwt {
     }
 
     public static TokenDto getUserDtoByToken(String token) {
-        // 토큰의 유효성 검증 로직
-
-        // 토큰의 유효 기간이 만료된 경우
-        if (isTokenExpired(token)) {
-            throw new TokenExpiredException();
-        }
-
         try {
-            // 토큰을 점으로 나누어 Header, Payload, Signature로 분리
-            String[] parts = token.split("\\.");
+            // 토큰의 유효성 검증 및 페이로드 추출
+            Jws<Claims> claimsJws = Jwts.parserBuilder()
+                    .setSigningKey(SECRET_KEY)
+                    .build()
+                    .parseClaimsJws(token);
+            Claims claims = claimsJws.getBody();
 
-            // Payload 부분을 디코딩하여 클레임을 추출
-            byte[] payloadBytes = Base64.getUrlDecoder().decode(parts[1]);
-            String payload = new String(payloadBytes, StandardCharsets.UTF_8);
+            // 필요한 클레임 추출
+            String identifier = claims.getSubject(); // 사용자 아이디
+            Date expiryDate = claims.getExpiration(); // 토큰 만료 일자
 
-            // 추출한 클레임을 JSON 객체로 파싱
-            JsonObject payloadJson = new JsonParser().parse(payload).getAsJsonObject();
-
-            // 클레임에서 필요한 정보 추출
-            String identifier = payloadJson.get("sub").getAsString(); // 사용자 아이디
-            Long expiryDate = payloadJson.get("exp").getAsLong(); // 프로필 URL
-
-            return new TokenDto(identifier, new Date(expiryDate));
-        } catch (Exception e) {
-            throw new TokenNotValidateException();
+            return new TokenDto(identifier, expiryDate);
+        } catch (JwtException | IllegalArgumentException e) {
+            // 토큰 검증 실패 시
+            throw new TokenNotValidatedException();
         }
     }
 
-    private static boolean isTokenExpired(String token) {
+    public static boolean isExpiredToken(String token) {
         try {
-            // 토큰을 파싱하여 만료 일자 확인
-            Claims claims = Jwts.parser()
-                    .setSigningKey(SECRET_KEY)
-                    .parseClaimsJws(token)
-                    .getBody();
-            Date expiration = claims.getExpiration();
+            Jws<Claims> claimsJws = Jwts.parserBuilder().setSigningKey(SECRET_KEY).build().parseClaimsJws(token);
+            Claims claims = claimsJws.getBody();
 
-            // 현재 시간과 비교하여 토큰의 만료 여부 반환
-            return expiration.before(new Date());
+            Date expiryDate = claims.getExpiration();
+
+            // 토큰 만료 여부 확인
+            return expiryDate.before(new Date());
+
         } catch (JwtException | IllegalArgumentException e) {
-            // 토큰 파싱 오류 또는 잘못된 인자로 인한 예외 발생 시
+            throw new TokenNotValidatedException();
+        }
+    }
+
+    public static boolean isNotValidToken(String token) {
+        try {
+            Jws<Claims> claimsJws = Jwts.parserBuilder().setSigningKey(SECRET_KEY).build().parseClaimsJws(token);
+            Claims claims = claimsJws.getBody();
+            return false;
+
+        } catch (JwtException | IllegalArgumentException e) {
             return true;
         }
     }

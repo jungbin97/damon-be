@@ -1,8 +1,6 @@
 package damon.backend.util.auth;
 
-import damon.backend.dto.response.user.TokenDto;
 import damon.backend.util.Jwt;
-import damon.backend.util.Log;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.MethodParameter;
@@ -11,6 +9,8 @@ import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
+// HttpServletRequest에서 Authorization 헤더에서 토큰을 추출하고,
+// 추출된 토큰을 이용하여 Jwt.getUserDtoByToken 메서드를 호출하여 사용자 정보를 얻는 역활
 @Slf4j
 public class AuthTokenArgumentResolver implements HandlerMethodArgumentResolver {
 
@@ -33,13 +33,9 @@ public class AuthTokenArgumentResolver implements HandlerMethodArgumentResolver 
 
         if (token != null && token.startsWith("Bearer ")) {
             token = token.substring(7); // "Bearer " 부분을 제외한 토큰 추출
-            TokenDto tokenDto = Jwt.getUserDtoByToken(token);
-            Log.info(tokenDto);
-            return tokenDto;
+            return Jwt.getUserDtoByToken(token);
         } else if (token != null) {
-            TokenDto tokenDto = Jwt.getUserDtoByToken(token);
-            Log.info(tokenDto);
-            return tokenDto;
+            return Jwt.getUserDtoByToken(token);
         }
         return null;
     }
