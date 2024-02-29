@@ -14,4 +14,4 @@ ENV SPRINGDOC_SWAGGER_UI_PATH /doc
 EXPOSE 8080
 
 # 실행 명령어
-ENTRYPOINT ["java","-jar","-Dspring.profiles.active=prod","app.jar"]
+ENTRYPOINT ["java","-jar","-Dspring.profiles.active=server","app.jar"]

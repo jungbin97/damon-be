@@ -32,31 +32,33 @@ repositories {
 }
 
 dependencies {
-	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
-	compileOnly 'org.projectlombok:lombok'
-	developmentOnly 'org.springframework.boot:spring-boot-devtools'
-	runtimeOnly 'com.h2database:h2'
-	runtimeOnly 'com.mysql:mysql-connector-j'
-	annotationProcessor 'org.projectlombok:lombok'
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+	implementation 'org.springframework.boot:spring-boot-starter-aop'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
-	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.3.0' // swagger
+	developmentOnly 'org.springframework.boot:spring-boot-devtools'
 
+	compileOnly 'org.projectlombok:lombok'
+	annotationProcessor 'org.projectlombok:lombok'
 	testCompileOnly 'org.projectlombok:lombok' // lombok test
 	testAnnotationProcessor 'org.projectlombok:lombok' // lombok test
+
+	runtimeOnly 'com.h2database:h2'
+	runtimeOnly 'com.mysql:mysql-connector-j'
+
+	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.3.0' // swagger
 	implementation 'com.github.gavlyukovskiy:p6spy-spring-boot-starter:1.9.0' // query log
 	implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310' // date type to json
-	implementation 'org.springframework.boot:spring-boot-starter-actuator'
-	implementation 'io.micrometer:micrometer-registry-prometheus'
-	implementation 'org.springframework.boot:spring-boot-starter-aop'
-
-	implementation 'io.jsonwebtoken:jjwt-api:0.11.2' // jwt
-	runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.2' // jwt
-	runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.2' // jwt
-
 	implementation 'com.google.code.gson:gson:2.9.1' // json converter
 
+	implementation 'io.jsonwebtoken:jjwt-api:0.11.2'
+	runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.2'
+	runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.2'
+
 	implementation 'software.amazon.awssdk:s3:2.24.3' // aws S3
+
+	implementation 'org.springframework.boot:spring-boot-starter-actuator'
+	implementation 'io.micrometer:micrometer-registry-prometheus'
 }
 
 tasks.named('test') {

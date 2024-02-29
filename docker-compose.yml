@@ -1,0 +1,20 @@
+version: '3'
+services:
+  backend:
+    image: g6y116/damon-be
+    ports:
+      - "8080:8080"
+    networks:
+      - network
+
+  frontend:
+    image: g6y116/damon-fe
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - network
+
+networks:
+  network:

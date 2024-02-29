@@ -1,8 +1,13 @@
-# EC2 IP
+# Service
 ```
-13.124.113.56
+http://13.124.113.56
 ```
 # Swagger
 ```
-13.124.113.56:8080/doc
+http://13.124.113.56/doc
+```
+
+# Monitoring
+```
+http://ego2server.iptime.org
 ```
