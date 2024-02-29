@@ -2,9 +2,8 @@ package damon.backend.controller;
 
 import damon.backend.dto.request.ReviewCommentRequest;
 import damon.backend.dto.response.ReviewResponse;
-import damon.backend.dto.response.user.TokenDto;
 import damon.backend.service.ReviewCommentService;
-import damon.backend.util.auth.AuthToken;
+import damon.backend.util.login.AuthToken;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -31,8 +30,10 @@ public class ReviewCommentController {
             @Valid
             @PathVariable Long reviewId,
             @RequestBody ReviewCommentRequest request,
-            @AuthToken TokenDto tokenDto) {
-        return reviewCommentService.postComment(reviewId, request, tokenDto.getIdentifier());
+            @Schema(description = "엑세스 토큰")
+            @AuthToken String identifier
+    ) {
+        return reviewCommentService.postComment(reviewId, request, identifier);
     }
 
 
@@ -47,10 +48,12 @@ public class ReviewCommentController {
             @Valid
             @PathVariable Long commentId,
             @RequestBody ReviewCommentRequest request,
-            @AuthToken TokenDto tokenDto) {
+            @Schema(description = "엑세스 토큰")
+            @AuthToken String identifier
+    ) {
 
         if (request.getContent() != null && !request.getContent().trim().isEmpty()) {
-            ReviewResponse updatedReview = reviewCommentService.updateComment(commentId, request, tokenDto.getIdentifier());
+            ReviewResponse updatedReview = reviewCommentService.updateComment(commentId, request, identifier);
             return ResponseEntity.ok(updatedReview); // 수정된 리뷰의 최신 상태를 반환
         }
         return ResponseEntity.badRequest().build();
@@ -64,9 +67,10 @@ public class ReviewCommentController {
     public ResponseEntity<Void> deleteComment(
             @Schema(description = "댓글 인덱스", example="1")
             @PathVariable Long commentId,
-            @AuthToken TokenDto tokenDto
+            @Schema(description = "엑세스 토큰")
+            @AuthToken String identifier
     ) {
-        reviewCommentService.deleteComment(commentId, tokenDto.getIdentifier());
+        reviewCommentService.deleteComment(commentId, identifier);
         return ResponseEntity.ok().build(); // HTTP 200 OK 응답
     }
 
