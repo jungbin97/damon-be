@@ -28,7 +28,7 @@ public class UserController {
     }
 
     @Operation(summary = "토큰으로 유저 정보 조회")
-    @PostMapping("/info")
+    @GetMapping("/info")
     public Result<UserDto> getUserInfo(@AuthToken String identifier) {
         return Result.success(userService.getUserInfo(identifier));
     }
