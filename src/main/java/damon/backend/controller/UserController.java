@@ -6,6 +6,7 @@ import damon.backend.dto.response.user.UserDto;
 import damon.backend.service.UserService;
 import damon.backend.util.login.AuthToken;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,7 +30,10 @@ public class UserController {
 
     @Operation(summary = "토큰으로 유저 정보 조회")
     @GetMapping("/info")
-    public Result<UserDto> getUserInfo(@AuthToken String identifier) {
+    public Result<UserDto> getUserInfo(
+            @Parameter(description = "유저 식별자", required = true, hidden = true)
+            @AuthToken String identifier
+    ) {
         return Result.success(userService.getUserInfo(identifier));
     }
 

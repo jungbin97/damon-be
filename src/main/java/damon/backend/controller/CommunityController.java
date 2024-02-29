@@ -10,6 +10,7 @@ import damon.backend.exception.custom.UnauthorizedException;
 import damon.backend.service.CommunityService;
 import damon.backend.util.login.AuthToken;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -64,7 +65,7 @@ public class CommunityController {
     @Operation(summary = "내가 쓴 커뮤니티 페이징 조회")
     @GetMapping("/my")
     public Result<Page<CommunitySimpleDTO>> getMyCommunityPaging(
-            @Schema(description = "엑세스 토큰")
+            @Parameter(description = "유저 식별자", required = true, hidden = true)
             @AuthToken String identifier,
             @Schema(description = "커뮤니티 타입(번개, 자유)", defaultValue = "번개")
             @RequestParam CommunityType type,
@@ -90,7 +91,7 @@ public class CommunityController {
     @Operation(summary = "커뮤니티 추가")
     @PostMapping
     public Result<CommunityDetailDTO> addCommunity(
-            @Schema(description = "엑세스 토큰")
+            @Parameter(description = "유저 식별자", required = true, hidden = true)
             @AuthToken String identifier,
             @RequestBody CommunityCreateForm createForm
     ) {
@@ -106,7 +107,7 @@ public class CommunityController {
     @Operation(summary = "커뮤니티 수정")
     @PutMapping
     public Result<CommunityDetailDTO> setCommunity(
-            @Schema(description = "엑세스 토큰")
+            @Parameter(description = "유저 식별자", required = true, hidden = true)
             @AuthToken String identifier,
             @RequestBody CommunityUpdateForm updateForm
     ) {
@@ -126,7 +127,7 @@ public class CommunityController {
     @Operation(summary = "커뮤니티 삭제", description = "정상적으로 제거 되었는지 여부를 반환해 줍니다.")
     @DeleteMapping("/{communityId}")
     public Result<Boolean> removeCommunity(
-            @Schema(description = "엑세스 토큰")
+            @Parameter(description = "유저 식별자", required = true, hidden = true)
             @AuthToken String identifier,
             @Schema(description = "커뮤니티 아이디", defaultValue = "1")
             @PathVariable Long communityId
@@ -144,7 +145,7 @@ public class CommunityController {
     @Operation(summary = "커뮤니티 댓글 추가")
     @PostMapping("/comment")
     public Result<CommunityCommentDTO> addComment(
-            @Schema(description = "엑세스 토큰")
+            @Parameter(description = "유저 식별자", required = true, hidden = true)
             @AuthToken String identifier,
             @RequestBody CommunityCommentCreateForm commentCreateForm
     ) {
@@ -159,7 +160,7 @@ public class CommunityController {
     @Operation(summary = "커뮤니티 댓글 수정")
     @PutMapping("/comment")
     public Result<CommunityCommentDTO> setComment(
-            @Schema(description = "엑세스 토큰")
+            @Parameter(description = "유저 식별자", required = true, hidden = true)
             @AuthToken String identifier,
             @RequestBody CommunityCommentUpdateForm updateForm
     ) {
@@ -177,7 +178,7 @@ public class CommunityController {
     @Operation(summary = "커뮤니티 댓글 제거", description = "정상적으로 제거 되었는지 여부를 반환해 줍니다.")
     @DeleteMapping("/comment/{commentId}")
     public Result<Boolean> removeComment(
-            @Schema(description = "엑세스 토큰")
+            @Parameter(description = "유저 식별자", required = true, hidden = true)
             @AuthToken String identifier,
             @Schema(description = "커뮤니티 댓글 아이디", defaultValue = "1")
             @PathVariable Long commentId
@@ -193,7 +194,7 @@ public class CommunityController {
     @Operation(summary = "커뮤니티 대댓글 추가")
     @PostMapping("/comment/child")
     public Result<CommunityCommentDTO> addChildComment(
-            @Schema(description = "엑세스 토큰")
+            @Parameter(description = "유저 식별자", required = true, hidden = true)
             @AuthToken String identifier,
             @RequestBody CommunityChildCommentCreateForm form
     ) {
@@ -210,7 +211,7 @@ public class CommunityController {
     @Operation(summary = "커뮤니티 좋아요 확인")
     @GetMapping("/like/{communityId}")
     public Result<Boolean> isLike(
-            @Schema(description = "엑세스 토큰")
+            @Parameter(description = "유저 식별자", required = true, hidden = true)
             @AuthToken String identifier,
             @Schema(description = "커뮤니티 아이디", defaultValue = "1")
             @PathVariable Long communityId
@@ -221,7 +222,7 @@ public class CommunityController {
     @Operation(summary = "커뮤니티 좋아요 토글", description = "최종적으로 좋아요 여부를 반환해 줍니다.")
     @PostMapping("/like/{communityId}")
     public Result<Boolean> addLike(
-            @Schema(description = "엑세스 토큰")
+            @Parameter(description = "유저 식별자", required = true, hidden = true)
             @AuthToken String identifier,
             @Schema(description = "커뮤니티 아이디", defaultValue = "1")
             @PathVariable Long communityId

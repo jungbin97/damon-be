@@ -5,6 +5,7 @@ import damon.backend.dto.response.ReviewResponse;
 import damon.backend.service.ReviewCommentService;
 import damon.backend.util.login.AuthToken;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -30,7 +31,7 @@ public class ReviewCommentController {
             @Valid
             @PathVariable Long reviewId,
             @RequestBody ReviewCommentRequest request,
-            @Schema(description = "엑세스 토큰")
+            @Parameter(description = "유저 식별자", required = true, hidden = true)
             @AuthToken String identifier
     ) {
         return reviewCommentService.postComment(reviewId, request, identifier);
@@ -48,7 +49,7 @@ public class ReviewCommentController {
             @Valid
             @PathVariable Long commentId,
             @RequestBody ReviewCommentRequest request,
-            @Schema(description = "엑세스 토큰")
+            @Parameter(description = "유저 식별자", required = true, hidden = true)
             @AuthToken String identifier
     ) {
 
@@ -67,7 +68,7 @@ public class ReviewCommentController {
     public ResponseEntity<Void> deleteComment(
             @Schema(description = "댓글 인덱스", example="1")
             @PathVariable Long commentId,
-            @Schema(description = "엑세스 토큰")
+            @Parameter(description = "유저 식별자", required = true, hidden = true)
             @AuthToken String identifier
     ) {
         reviewCommentService.deleteComment(commentId, identifier);

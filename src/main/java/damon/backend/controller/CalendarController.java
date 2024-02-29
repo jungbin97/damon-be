@@ -10,6 +10,7 @@ import damon.backend.dto.response.CalendarsResponseDto;
 import damon.backend.service.CalendarService;
 import damon.backend.util.login.AuthToken;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -34,7 +35,7 @@ public class CalendarController {
 //    @ApiResponse(responseCode = "400", description = "일정 등록 실패")
     public CalendarCreateResponseDto createCalendar(
             @RequestBody CalendarCreateRequestDto calendarCreateRequestDto,
-            @Schema(description = "엑세스 토큰")
+            @Parameter(description = "유저 식별자", required = true, hidden = true)
             @AuthToken String identifier
     ) {
         return calendarService.createCalendar(identifier, calendarCreateRequestDto);
@@ -56,7 +57,7 @@ public class CalendarController {
 
             @Schema(description = "페이지에 출력할 개수를 입력합니다.", defaultValue = "10")
             @RequestParam(name = "size",defaultValue = "10") int size,
-            @Schema(description = "엑세스 토큰")
+            @Parameter(description = "유저 식별자", required = true, hidden = true)
             @AuthToken String identifier
 
     ) {
@@ -69,7 +70,7 @@ public class CalendarController {
     public CalendarResponseDto getCalendar(
             @Schema(description = "조회 할 일정 상세 페이지 ID", example="1")
             @PathVariable("calendarId") Long calendarId,
-            @Schema(description = "엑세스 토큰")
+            @Parameter(description = "유저 식별자", required = true, hidden = true)
             @AuthToken String identifier
     ) {
         return calendarService.getCalendar(identifier, calendarId);
@@ -82,7 +83,7 @@ public class CalendarController {
             @Schema(description = "수정 할 일정 상세 페이지 ID", example="1")
             @PathVariable("calendarId") Long calendarId,
             @RequestBody CalendarEditRequestDto calendarEditRequestDto,
-            @Schema(description = "엑세스 토큰")
+            @Parameter(description = "유저 식별자", required = true, hidden = true)
             @AuthToken String identifier
     ) {
         return calendarService.updateCalendar(identifier, calendarId, calendarEditRequestDto);
@@ -94,7 +95,7 @@ public class CalendarController {
     public void deleteCalendar(
             @Schema(description = "삭제 할 일정 상세 페이지 ID", example="1")
             @PathVariable("calendarId") Long calendarId,
-            @Schema(description = "엑세스 토큰")
+            @Parameter(description = "유저 식별자", required = true, hidden = true)
             @AuthToken String identifier
     ) {
         calendarService.deleteCalendar(identifier, calendarId);
@@ -105,7 +106,7 @@ public class CalendarController {
     @DeleteMapping("/calendar")
     public void deleteCalendars(
             @RequestBody CalendarsDeleteRequestDto calendarsDeleteRequestDto,
-            @Schema(description = "엑세스 토큰")
+            @Parameter(description = "유저 식별자", required = true, hidden = true)
             @AuthToken String identifier
     ) {
         calendarService.deleteCalendars(identifier, calendarsDeleteRequestDto);
