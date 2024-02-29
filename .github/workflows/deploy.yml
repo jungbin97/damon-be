@@ -33,7 +33,7 @@ jobs:
           username: g6y116
           password: ${{ secrets.DOCKER_USER_PW }}
       - name: 이미지 빌드
-        run: docker build -t g6y116/damon-be
+        run: docker build -t g6y116/damon-be .
       - name: 도커허브에 이미지 푸시
         run: docker push g6y116/damon-be
       - name: AWS EC2에 ssh 접속 후 배포
