@@ -15,48 +15,32 @@ public class Log {
     private static final ObjectMapper objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
     private static final ObjectWriter prettyPrinter = objectMapper.writerWithDefaultPrettyPrinter();
 
-    public static <T> void trace(T object) {
+    private static String toJsonString(Object object) {
         try {
-            String jsonString = prettyPrinter.writeValueAsString(object);
-            log.trace("\n\n{}\n{}\n\n", object.getClass().getSimpleName(), jsonString);
+            return prettyPrinter.writeValueAsString(object);
         } catch (JsonProcessingException e) {
             log.error("Error converting object to json", e);
+            return "";
         }
+    }
+
+    public static <T> void trace(T object) {
+        log.trace("\n\n{}\n{}\n\n", object.getClass().getSimpleName(), toJsonString(object));
     }
 
     public static <T> void debug(T object) {
-        try {
-            String jsonString = prettyPrinter.writeValueAsString(object);
-            log.debug("\n\n{}\n{}\n\n", object.getClass().getSimpleName(), jsonString);
-        } catch (JsonProcessingException e) {
-            log.error("Error converting object to json", e);
-        }
+        log.debug("\n\n{}\n{}\n\n", object.getClass().getSimpleName(), toJsonString(object));
     }
 
     public static <T> void info(T object) {
-        try {
-            String jsonString = prettyPrinter.writeValueAsString(object);
-            log.info("\n\n{}\n{}\n\n", object.getClass().getSimpleName(), jsonString);
-        } catch (JsonProcessingException e) {
-            log.error("Error converting object to json", e);
-        }
+        log.info("\n\n{}\n{}\n\n", object.getClass().getSimpleName(), toJsonString(object));
     }
 
     public static <T> void warn(T object) {
-        try {
-            String jsonString = prettyPrinter.writeValueAsString(object);
-            log.warn("\n\n{}\n{}\n\n", object.getClass().getSimpleName(), jsonString);
-        } catch (JsonProcessingException e) {
-            log.error("Error converting object to json", e);
-        }
+        log.warn("\n\n{}\n{}\n\n", object.getClass().getSimpleName(), toJsonString(object));
     }
 
     public static <T> void error(T object) {
-        try {
-            String jsonString = prettyPrinter.writeValueAsString(object);
-            log.error("\n\n{}\n{}\n\n", object.getClass().getSimpleName(), jsonString);
-        } catch (JsonProcessingException e) {
-            log.error("Error converting object to json", e);
-        }
+        log.error("\n\n{}\n{}\n\n", object.getClass().getSimpleName(), toJsonString(object));
     }
 }

@@ -7,9 +7,8 @@ import damon.backend.dto.response.CalendarCreateResponseDto;
 import damon.backend.dto.response.CalendarEditResponseDto;
 import damon.backend.dto.response.CalendarResponseDto;
 import damon.backend.dto.response.CalendarsResponseDto;
-import damon.backend.dto.response.user.TokenDto;
 import damon.backend.service.CalendarService;
-import damon.backend.util.auth.AuthToken;
+import damon.backend.util.login.AuthToken;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -35,17 +34,16 @@ public class CalendarController {
 //    @ApiResponse(responseCode = "400", description = "일정 등록 실패")
     public CalendarCreateResponseDto createCalendar(
             @RequestBody CalendarCreateRequestDto calendarCreateRequestDto,
-            @AuthToken TokenDto tokenDto
+            @Schema(description = "엑세스 토큰")
+            @AuthToken String identifier
     ) {
-        return calendarService.createCalendar(tokenDto.getIdentifier(), calendarCreateRequestDto);
+        return calendarService.createCalendar(identifier, calendarCreateRequestDto);
     }
 
     @Operation(summary = "상위 5개 리스트 조회", description = "상위 5개 일정리스트를 조회합니다.")
     @ApiResponse(responseCode = "200", description = "일정 리스트 조회 성공")
     @GetMapping("/top5/calendar")
-    public List<CalendarsResponseDto> getCalendarsTop5(
-            @AuthToken TokenDto tokenDto
-    ) {
+    public List<CalendarsResponseDto> getCalendarsTop5() {
         return calendarService.getCalendarsTop5();
     }
 
@@ -58,9 +56,11 @@ public class CalendarController {
 
             @Schema(description = "페이지에 출력할 개수를 입력합니다.", defaultValue = "10")
             @RequestParam(name = "size",defaultValue = "10") int size,
-            @AuthToken TokenDto tokenDto
+            @Schema(description = "엑세스 토큰")
+            @AuthToken String identifier
+
     ) {
-        return calendarService.getCalendars(tokenDto.getIdentifier(), page, size);
+        return calendarService.getCalendars(identifier, page, size);
     }
 
     @Operation(summary = "내 일정 상세 조회", description = "내 일정 상세 정보를 조회합니다.")
@@ -69,9 +69,10 @@ public class CalendarController {
     public CalendarResponseDto getCalendar(
             @Schema(description = "조회 할 일정 상세 페이지 ID", example="1")
             @PathVariable("calendarId") Long calendarId,
-            @AuthToken TokenDto tokenDto
+            @Schema(description = "엑세스 토큰")
+            @AuthToken String identifier
     ) {
-        return calendarService.getCalendar(tokenDto.getIdentifier(), calendarId);
+        return calendarService.getCalendar(identifier, calendarId);
     }
 
     @Operation(summary = "내 일정 상세 수정", description = "내 일정 상세 정보를 수정합니다.")
@@ -81,9 +82,10 @@ public class CalendarController {
             @Schema(description = "수정 할 일정 상세 페이지 ID", example="1")
             @PathVariable("calendarId") Long calendarId,
             @RequestBody CalendarEditRequestDto calendarEditRequestDto,
-            @AuthToken TokenDto tokenDto
+            @Schema(description = "엑세스 토큰")
+            @AuthToken String identifier
     ) {
-        return calendarService.updateCalendar(tokenDto.getIdentifier(), calendarId, calendarEditRequestDto);
+        return calendarService.updateCalendar(identifier, calendarId, calendarEditRequestDto);
     }
 
     @Operation(summary = "내 일정 삭제", description = "내 일정을 삭제합니다.")
@@ -92,9 +94,10 @@ public class CalendarController {
     public void deleteCalendar(
             @Schema(description = "삭제 할 일정 상세 페이지 ID", example="1")
             @PathVariable("calendarId") Long calendarId,
-            @AuthToken TokenDto tokenDto
+            @Schema(description = "엑세스 토큰")
+            @AuthToken String identifier
     ) {
-        calendarService.deleteCalendar(tokenDto.getIdentifier(), calendarId);
+        calendarService.deleteCalendar(identifier, calendarId);
     }
 
     @Operation(summary = "내 일정 선택 삭제", description = "내 일정을 선택 삭제합니다.")
@@ -102,8 +105,9 @@ public class CalendarController {
     @DeleteMapping("/calendar")
     public void deleteCalendars(
             @RequestBody CalendarsDeleteRequestDto calendarsDeleteRequestDto,
-            @AuthToken TokenDto tokenDto
+            @Schema(description = "엑세스 토큰")
+            @AuthToken String identifier
     ) {
-        calendarService.deleteCalendars(tokenDto.getIdentifier(), calendarsDeleteRequestDto);
+        calendarService.deleteCalendars(identifier, calendarsDeleteRequestDto);
     }
 }

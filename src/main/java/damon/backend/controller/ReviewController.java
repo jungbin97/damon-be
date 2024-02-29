@@ -5,19 +5,16 @@ import damon.backend.dto.request.ReviewAndImageRequest;
 import damon.backend.dto.request.ReviewRequest;
 import damon.backend.dto.response.ReviewListResponse;
 import damon.backend.dto.response.ReviewResponse;
-import damon.backend.dto.response.user.TokenDto;
 import damon.backend.entity.Area;
 import damon.backend.service.ReviewService;
 import damon.backend.util.Log;
-import damon.backend.util.auth.AuthToken;
+import damon.backend.util.login.AuthToken;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.hibernate.query.Page;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -38,13 +35,14 @@ public class ReviewController {
     @PostMapping
     public ReviewResponse addReview(
             @RequestBody ReviewAndImageRequest form,
-            @AuthToken TokenDto tokenDto
+            @Schema(description = "엑세스 토큰")
+            @AuthToken String identifier
     ) {
         // 이미지 데이터 처리
         Log.info(form);
-        Log.info(tokenDto);
+        Log.info(identifier);
 
-        return reviewService.addReview(form, tokenDto.getIdentifier());
+        return reviewService.addReview(form, identifier);
     }
 
     //게시글 등록
@@ -55,9 +53,10 @@ public class ReviewController {
             @Valid
             @RequestBody ReviewRequest reviewRequest,
             @RequestParam("images") Optional<List<MultipartFile>> images,
-            @AuthToken TokenDto tokenDto
+            @Schema(description = "엑세스 토큰")
+            @AuthToken String identifier
     ){
-        return reviewService.postReview(reviewRequest, images.orElse(new ArrayList<>()), tokenDto.getIdentifier());
+        return reviewService.postReview(reviewRequest, images.orElse(new ArrayList<>()), identifier);
     }
 
 
@@ -81,9 +80,10 @@ public class ReviewController {
     @Operation(summary = "내 리뷰 전체 조회", description = "내 리뷰를 전체 조회합니다.")
     @ApiResponse(responseCode = "200", description = "리뷰 전체 조회 성공")
     public List<ReviewListResponse> searchMyReviewList(
-            @AuthToken TokenDto tokenDto
+            @Schema(description = "엑세스 토큰")
+            @AuthToken String identifier
     ){
-        return reviewService.searchMyReviewList(tokenDto.getIdentifier());
+        return reviewService.searchMyReviewList(identifier);
     }
 
 
@@ -111,12 +111,13 @@ public class ReviewController {
             @RequestParam("images") Optional<List<MultipartFile>> newImages,
             @RequestParam("deleteImages") Optional<List<Long>> deleteImageIds,
             @RequestBody ReviewRequest reviewRequest,
-            @AuthToken TokenDto tokenDto){
+            @Schema(description = "엑세스 토큰")
+            @AuthToken String identifier){
         ReviewResponse updatedReview = reviewService.updateReview(
                 reviewId,
                 reviewRequest,
                 newImages.orElse(new ArrayList<>()), deleteImageIds.orElse(new ArrayList<>()),
-                tokenDto.getIdentifier()
+                identifier
         ); //memberId 추후에 추가
         return ResponseEntity.ok(updatedReview);
     }
@@ -128,9 +129,10 @@ public class ReviewController {
     public ResponseEntity<Void> deleteReview(
             @Schema(description = "리뷰 인덱스", example="1")
             @PathVariable Long reviewId,
-            @AuthToken TokenDto tokenDto
+            @Schema(description = "엑세스 토큰")
+            @AuthToken String identifier
     ) {
-        reviewService.deleteReview(reviewId, tokenDto.getIdentifier()); // memberId 추가
+        reviewService.deleteReview(reviewId, identifier); // memberId 추가
         return ResponseEntity.ok().build(); // HTTP 200 OK 응답
     }
 
@@ -141,9 +143,10 @@ public class ReviewController {
     public ResponseEntity<ReviewResponse> toggleLike(
             @Schema(description = "리뷰 인덱스", example="1")
             @PathVariable Long reviewId,
-            @AuthToken TokenDto tokenDto
+            @Schema(description = "엑세스 토큰")
+            @AuthToken String identifier
     ) {
-        reviewService.toggleLike(reviewId, tokenDto.getIdentifier());
+        reviewService.toggleLike(reviewId, identifier);
         return ResponseEntity.ok().build(); // 토글 후 리뷰의 최신 상태 반환 // HTTP 200 OK 응답
     }
 
@@ -152,13 +155,14 @@ public class ReviewController {
     @Operation(summary = "내 좋아요 게시글", description = "좋아요 누른 게시글을 조회합니다.")
     @ApiResponse(responseCode = "200", description = "리뷰 좋아요 조회 성공")
     public ResponseEntity<List<ReviewListResponse>> getLikedReviews(
-            @AuthToken TokenDto tokenDto,
+            @Schema(description = "엑세스 토큰")
+            @AuthToken String identifier,
             @Schema(description = "페이지 인덱스", example="0")
             @RequestParam("page") int page,
             @Schema(description = "한 페이지 당 보여질 리뷰 개수", example="10")
             @RequestParam("pageSize") int pageSize
     ) {
-        List<ReviewListResponse> likedReviews = reviewService.findLikedReviewsByUser(tokenDto.getIdentifier(), page, pageSize);
+        List<ReviewListResponse> likedReviews = reviewService.findLikedReviewsByUser(identifier, page, pageSize);
         return ResponseEntity.ok(likedReviews);
     }
 

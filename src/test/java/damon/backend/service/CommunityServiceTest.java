@@ -6,7 +6,7 @@ import damon.backend.dto.response.community.CommunitySimpleDTO;
 import damon.backend.entity.community.Community;
 import damon.backend.entity.user.User;
 import damon.backend.enums.CommunityType;
-import damon.backend.exception.EntityNotFoundException;
+import damon.backend.exception.custom.DataNotFoundException;
 import damon.backend.repository.community.CommunityCommentRepository;
 import damon.backend.repository.community.CommunityLikeRepository;
 import damon.backend.repository.community.CommunityRepository;
@@ -185,7 +185,7 @@ class CommunityServiceTest {
         communityService.removeCommunity(community1.getCommunityId());
 
         // then
-        assertThrows(EntityNotFoundException.class, () -> {
+        assertThrows(DataNotFoundException.class, () -> {
             communityService.getCommunity(community1.getCommunityId());
         });
     }

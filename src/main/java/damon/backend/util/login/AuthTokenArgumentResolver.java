@@ -1,17 +1,14 @@
-package damon.backend.util.auth;
+package damon.backend.util.login;
 
-import damon.backend.dto.response.user.TokenDto;
-import damon.backend.util.Jwt;
-import damon.backend.util.Log;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.MethodParameter;
-import org.springframework.stereotype.Component;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
-@Component
+@Slf4j
 public class AuthTokenArgumentResolver implements HandlerMethodArgumentResolver {
 
     @Override
@@ -25,21 +22,17 @@ public class AuthTokenArgumentResolver implements HandlerMethodArgumentResolver 
             ModelAndViewContainer mavContainer,
             NativeWebRequest webRequest,
             WebDataBinderFactory binderFactory
-    ) throws Exception {
+    ) {
         HttpServletRequest request = (HttpServletRequest) webRequest.getNativeRequest();
 
-        // 헤더에서 토큰 추출하고 해당 토큰을 이용하여 사용자 정보를 얻는 로직을 여기에 구현
+        // Authorization 헤더에서 엑세스 토큰을 가져와 TokenDto 형태로 반환
         String token = request.getHeader("Authorization");
 
         if (token != null && token.startsWith("Bearer ")) {
             token = token.substring(7); // "Bearer " 부분을 제외한 토큰 추출
-            TokenDto tokenDto = Jwt.getUserDtoByToken(token);
-            Log.info(tokenDto);
-            return tokenDto;
+            return JwtUtil.extractIdentifier(token);
         } else if (token != null) {
-            TokenDto tokenDto = Jwt.getUserDtoByToken(token);
-            Log.info(tokenDto);
-            return tokenDto;
+            return JwtUtil.extractIdentifier(token);
         }
         return null;
     }

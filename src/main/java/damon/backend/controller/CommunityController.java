@@ -5,11 +5,10 @@ import damon.backend.dto.request.community.*;
 import damon.backend.dto.response.community.CommunityCommentDTO;
 import damon.backend.dto.response.community.CommunityDetailDTO;
 import damon.backend.dto.response.community.CommunitySimpleDTO;
-import damon.backend.dto.response.user.TokenDto;
 import damon.backend.enums.CommunityType;
-import damon.backend.exception.PermissionDeniedException;
+import damon.backend.exception.custom.UnauthorizedException;
 import damon.backend.service.CommunityService;
-import damon.backend.util.auth.AuthToken;
+import damon.backend.util.login.AuthToken;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -65,14 +64,14 @@ public class CommunityController {
     @Operation(summary = "내가 쓴 커뮤니티 페이징 조회")
     @GetMapping("/my")
     public Result<Page<CommunitySimpleDTO>> getMyCommunityPaging(
-            @Schema(description = "멤버아이디", defaultValue = "1")
-            @RequestParam String provider,
+            @Schema(description = "엑세스 토큰")
+            @AuthToken String identifier,
             @Schema(description = "커뮤니티 타입(번개, 자유)", defaultValue = "번개")
             @RequestParam CommunityType type,
             @Schema(description = "페이지 번호(0부터)", defaultValue = "0")
             @RequestParam int page
     ) {
-        Page<CommunitySimpleDTO> communityList = communityService.getMyCommunityPaging(provider, type, page);
+        Page<CommunitySimpleDTO> communityList = communityService.getMyCommunityPaging(identifier, type, page);
         return Result.success(communityList);
     }
 
@@ -91,11 +90,12 @@ public class CommunityController {
     @Operation(summary = "커뮤니티 추가")
     @PostMapping
     public Result<CommunityDetailDTO> addCommunity(
-            @RequestBody CommunityCreateForm createForm,
-            @AuthToken TokenDto tokenDto
+            @Schema(description = "엑세스 토큰")
+            @AuthToken String identifier,
+            @RequestBody CommunityCreateForm createForm
     ) {
         CommunityDetailDTO addedCommunity = communityService.addCommunity(
-                tokenDto.getIdentifier(),
+                identifier,
                 createForm.getType(),
                 createForm.getTitle(),
                 createForm.getContent()
@@ -106,11 +106,12 @@ public class CommunityController {
     @Operation(summary = "커뮤니티 수정")
     @PutMapping
     public Result<CommunityDetailDTO> setCommunity(
-            @RequestBody CommunityUpdateForm updateForm,
-            @AuthToken TokenDto tokenDto
+            @Schema(description = "엑세스 토큰")
+            @AuthToken String identifier,
+            @RequestBody CommunityUpdateForm updateForm
     ) {
-        if (!communityService.isCommunityWriter(tokenDto.getIdentifier(), updateForm.getCommunityId())) {
-            throw new PermissionDeniedException();
+        if (!communityService.isCommunityWriter(identifier, updateForm.getCommunityId())) {
+            throw new UnauthorizedException();
         }
 
         CommunityDetailDTO updatedCommunity = communityService.setCommunity(
@@ -125,12 +126,13 @@ public class CommunityController {
     @Operation(summary = "커뮤니티 삭제", description = "정상적으로 제거 되었는지 여부를 반환해 줍니다.")
     @DeleteMapping("/{communityId}")
     public Result<Boolean> removeCommunity(
+            @Schema(description = "엑세스 토큰")
+            @AuthToken String identifier,
             @Schema(description = "커뮤니티 아이디", defaultValue = "1")
-            @PathVariable Long communityId,
-            @AuthToken TokenDto tokenDto
+            @PathVariable Long communityId
     ) {
-        if (!communityService.isCommunityWriter(tokenDto.getIdentifier(), communityId)) {
-            throw new PermissionDeniedException();
+        if (!communityService.isCommunityWriter(identifier, communityId)) {
+            throw new UnauthorizedException();
         }
 
         communityService.removeCommunity(communityId);
@@ -142,11 +144,12 @@ public class CommunityController {
     @Operation(summary = "커뮤니티 댓글 추가")
     @PostMapping("/comment")
     public Result<CommunityCommentDTO> addComment(
-            @RequestBody CommunityCommentCreateForm commentCreateForm,
-            @AuthToken TokenDto tokenDto
+            @Schema(description = "엑세스 토큰")
+            @AuthToken String identifier,
+            @RequestBody CommunityCommentCreateForm commentCreateForm
     ) {
         CommunityCommentDTO addedComment = communityService.addComment(
-                tokenDto.getIdentifier(),
+                identifier,
                 commentCreateForm.getCommunityId(),
                 commentCreateForm.getContent()
         );
@@ -156,11 +159,12 @@ public class CommunityController {
     @Operation(summary = "커뮤니티 댓글 수정")
     @PutMapping("/comment")
     public Result<CommunityCommentDTO> setComment(
-            @RequestBody CommunityCommentUpdateForm updateForm,
-            @AuthToken TokenDto tokenDto
+            @Schema(description = "엑세스 토큰")
+            @AuthToken String identifier,
+            @RequestBody CommunityCommentUpdateForm updateForm
     ) {
-        if (!communityService.isCommentWriter(tokenDto.getIdentifier(), updateForm.getCommentId())) {
-            throw new PermissionDeniedException();
+        if (!communityService.isCommentWriter(identifier, updateForm.getCommentId())) {
+            throw new UnauthorizedException();
         }
 
         CommunityCommentDTO comment = communityService.setComment(
@@ -173,12 +177,13 @@ public class CommunityController {
     @Operation(summary = "커뮤니티 댓글 제거", description = "정상적으로 제거 되었는지 여부를 반환해 줍니다.")
     @DeleteMapping("/comment/{commentId}")
     public Result<Boolean> removeComment(
+            @Schema(description = "엑세스 토큰")
+            @AuthToken String identifier,
             @Schema(description = "커뮤니티 댓글 아이디", defaultValue = "1")
-            @PathVariable Long commentId,
-            @AuthToken TokenDto tokenDto
+            @PathVariable Long commentId
     ) {
-        if (!communityService.isCommentWriter(tokenDto.getIdentifier(), commentId)) {
-            throw new PermissionDeniedException();
+        if (!communityService.isCommentWriter(identifier, commentId)) {
+            throw new UnauthorizedException();
         }
 
         communityService.removeComment(commentId);
@@ -188,11 +193,12 @@ public class CommunityController {
     @Operation(summary = "커뮤니티 대댓글 추가")
     @PostMapping("/comment/child")
     public Result<CommunityCommentDTO> addChildComment(
-            @RequestBody CommunityChildCommentCreateForm form,
-            @AuthToken TokenDto tokenDto
+            @Schema(description = "엑세스 토큰")
+            @AuthToken String identifier,
+            @RequestBody CommunityChildCommentCreateForm form
     ) {
         CommunityCommentDTO addedChildComment = communityService.addChildComment(
-                tokenDto.getIdentifier(),
+                identifier,
                 form.getParentId(),
                 form.getContent()
         );
@@ -204,20 +210,22 @@ public class CommunityController {
     @Operation(summary = "커뮤니티 좋아요 확인")
     @GetMapping("/like/{communityId}")
     public Result<Boolean> isLike(
+            @Schema(description = "엑세스 토큰")
+            @AuthToken String identifier,
             @Schema(description = "커뮤니티 아이디", defaultValue = "1")
-            @PathVariable Long communityId,
-            @AuthToken TokenDto tokenDto
+            @PathVariable Long communityId
     ) {
-        return Result.success(communityService.isLike(tokenDto.getIdentifier(), communityId));
+        return Result.success(communityService.isLike(identifier, communityId));
     }
 
     @Operation(summary = "커뮤니티 좋아요 토글", description = "최종적으로 좋아요 여부를 반환해 줍니다.")
     @PostMapping("/like/{communityId}")
     public Result<Boolean> addLike(
+            @Schema(description = "엑세스 토큰")
+            @AuthToken String identifier,
             @Schema(description = "커뮤니티 아이디", defaultValue = "1")
-            @PathVariable Long communityId,
-            @AuthToken TokenDto tokenDto
+            @PathVariable Long communityId
     ) {
-        return Result.success(communityService.toggleLike(tokenDto.getIdentifier(), communityId));
+        return Result.success(communityService.toggleLike(identifier, communityId));
     }
 }

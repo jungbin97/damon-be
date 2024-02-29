@@ -1,6 +1,8 @@
 package damon.backend.exception;
 
 import damon.backend.dto.Result;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -9,22 +11,15 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import java.util.HashMap;
 import java.util.Map;
 
+@Slf4j
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(EntityNotFoundException.class)
-    public Result<Void> handleException(EntityNotFoundException e) {
-        return Result.error(e.getMessage());
-    }
-
-    @ExceptionHandler(PermissionDeniedException.class)
-    public Result<Void> handleException(PermissionDeniedException e) {
-        return Result.error(e.getMessage());
-    }
-
-    @ExceptionHandler(KakaoLoginException.class)
-    public Result<Void> handleException(KakaoLoginException e) {
-        return Result.error(e.getMessage());
+    @ExceptionHandler(CustomException.class)
+    public ResponseEntity<Result<Void>> handleException(CustomException e) {
+        log.error("ErrorMessage={}", e.getErrorMessage());
+        log.error("StackTrace={}", ExceptionUtils.getStackTrace(e));
+        return ResponseEntity.status(e.getCode()).body(Result.error(e));
     }
 
     @ExceptionHandler(ReviewException.class)
@@ -43,7 +38,5 @@ public class GlobalExceptionHandler {
         body.put("error", ex.getMessage());
         return new ResponseEntity<>(body, status);
     }
-
-
 }
 
