@@ -1,6 +1,6 @@
 package damon.backend.config;
 
-import damon.backend.util.auth.AuthTokenArgumentResolver;
+import damon.backend.util.login.AuthTokenArgumentResolver;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;

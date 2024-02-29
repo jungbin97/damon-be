@@ -1,4 +1,4 @@
-package damon.backend.util.auth;
+package damon.backend.util.login;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

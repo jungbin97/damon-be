@@ -1,30 +1,17 @@
 package damon.backend.service;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import damon.backend.dto.response.user.KakaoTokenDto;
 import damon.backend.dto.response.user.LoginDto;
 import damon.backend.dto.response.user.UserDto;
 import damon.backend.entity.user.User;
-import damon.backend.exception.custom.DataNotFoundException;
-import damon.backend.exception.custom.KakaoAuthFailException;
+import damon.backend.exception.custom.*;
 import damon.backend.repository.user.UserRepository;
-import damon.backend.util.Jwt;
-import jakarta.persistence.EntityNotFoundException;
+import damon.backend.util.login.JwtUtil;
+import damon.backend.util.login.KakaoUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.client.RestTemplate;
-import org.springframework.web.util.UriComponentsBuilder;
-
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
 
 @Slf4j
 @Service
@@ -33,110 +20,47 @@ import java.net.URL;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final KakaoUtil kakaoUtil;
 
-    @Value("${kakao.client-id}")
-    private String kakaoClientId;
-
-    @Value("${kakao.client-secret}")
-    private String kakaoClientSecret;
-
-    @Value("${kakao.redirect-uri}")
-    private String kakaoRedirectUri;
-
-    public LoginDto kakaoLogin(String code) {
-        KakaoTokenDto token = getKakaoToken(code); // 인가 코드로 카카오 토큰 발급
-        UserDto userDto = getKakaoUser(token.getAccess_token()); // 카카오 엑세스 토큰으로 유저 정보 조회
+    public LoginDto loginByKakao(String code) {
+        KakaoTokenDto token = kakaoUtil.getKakaoToken(code); // 인가 코드로 카카오 토큰 발급
+        UserDto userDto = kakaoUtil.getKakaoUser(token.getAccess_token()); // 카카오 엑세스 토큰으로 유저 정보 조회
 
         // DB에 없으면 회원가입
-        if (userRepository.findByIdentifier(userDto.getIdentifier()).orElse(null) == null) {
+        if (userRepository.findByIdentifier(userDto.getIdentifier()).isEmpty()) {
             signUp(userDto);
         }
 
-        String accessToken = Jwt.generateAccessToken(userDto.getIdentifier());
-        String refreshToken = Jwt.generateRefreshToken(userDto.getIdentifier());
+        String accessToken = JwtUtil.generateAccessToken(userDto.getIdentifier());
+        String refreshToken = JwtUtil.generateRefreshToken(userDto.getIdentifier());
 
-        log.info("kakaoLogin code={}", code);
-        log.info("kakaoLogin KakaoTokenDto={}", token);
-        log.info("kakaoLogin userDto={}", userDto);
-        log.info("kakaoLogin accessToken={}", accessToken);
-        log.info("kakaoLogin refreshToken={}", refreshToken);
         return new LoginDto(accessToken, refreshToken);
     }
 
-    public UserDto getUserDto(String identifier) {
+    private void signUp(UserDto userDto) {
+        userRepository.save(new User(userDto.getIdentifier(), userDto.getNickname(), userDto.getEmail(), userDto.getProfile()));
+    }
+
+    public UserDto getUserInfo(String identifier) {
         return new UserDto(userRepository.findByIdentifier(identifier).orElseThrow(DataNotFoundException::new));
     }
 
-    // 인가 코드로 카카오 토큰 발급
-    public KakaoTokenDto getKakaoToken(String code) {
-        try {
-            String kakaoTokenUrl = "https://kauth.kakao.com/oauth/token";
-            String grantType = "authorization_code";
-
-            UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(kakaoTokenUrl)
-                    .queryParam("grant_type", grantType)
-                    .queryParam("client_id", kakaoClientId)
-                    .queryParam("client_secret", kakaoClientSecret)
-                    .queryParam("redirect_uri", kakaoRedirectUri)
-                    .queryParam("code", code);
-
-            RestTemplate restTemplate = new RestTemplate();
-            return restTemplate.postForObject(builder.toUriString(), null, KakaoTokenDto.class);
-        } catch (Exception e) {
-            throw new KakaoAuthFailException();
-        }
-        // 인가코드 하나로 2번째 요청 시 postForObject에서 오류 발생
-        // 400 Bad Request: "{"error":"invalid_grant","error_description":"authorization code not found for code=","error_code":"KOE320"}"
-    }
-
-    public UserDto getKakaoUser(String accessToken) {
-        try {
-            String reqURL = "https://kapi.kakao.com/v2/user/me";
-
-            JsonObject jsonObject = getJsonObject(accessToken, reqURL);
-            String identifier = jsonObject.get("id").getAsString();
-
-            JsonObject properties = jsonObject.getAsJsonObject("properties");
-            String nickname = properties.get("nickname").getAsString();
-            String profile = properties.get("profile_image").getAsString();
-
-            JsonObject kakaoAccount = jsonObject.getAsJsonObject("kakao_account");
-            String email = kakaoAccount.get("email").getAsString();
-
-            return new UserDto(identifier, nickname, email, profile);
-        } catch (Exception e) {
-            throw new KakaoAuthFailException();
-        }
-    }
-
-    public void signUp(UserDto userDto) {
-        User user = userRepository.save(new User(
-                userDto.getIdentifier(),
-                userDto.getNickname(),
-                userDto.getEmail(),
-                userDto.getProfile()
-        ));
-        log.info("signUp {}", user);
-    }
-
-    private JsonObject getJsonObject(String accessToken, String reqURL) throws IOException {
-        URL url = new URL(reqURL);
-        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-        conn.setRequestMethod("POST");
-        conn.setRequestProperty("Authorization", "Bearer " + accessToken);
-
-        BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream(), "UTF-8"));
-        StringBuilder result = new StringBuilder();
-        String line;
-
-        while ((line = br.readLine()) != null) {
-            result.append(line);
+    public LoginDto refresh(String refreshToken) {
+        if (refreshToken == null || refreshToken.isEmpty()) {
+            throw new RefreshTokenNotFoundException();
         }
 
-        JsonParser parser = new JsonParser();
-        JsonElement element = parser.parse(result.toString());
+        if (!JwtUtil.isValidateToken(refreshToken)) {
+            throw new TokenNotValidatedException();
+        }
 
-        JsonObject jsonObject = element.getAsJsonObject();
-        return jsonObject;
+        if (JwtUtil.isExpiredToken(refreshToken)) {
+            throw new RefreshTokenExpiredException();
+        }
+
+        String identifier = JwtUtil.extractIdentifier(refreshToken);
+        String newAccessToken = JwtUtil.generateAccessToken(identifier);
+        String newRefreshToken = JwtUtil.generateRefreshToken(identifier);
+        return new LoginDto(newAccessToken, newRefreshToken);
     }
 }
