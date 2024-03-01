@@ -3,6 +3,9 @@ package damon.backend.util.trace;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+/**
+ * 로그를 추적하고 표시하기 위한 유틸리티 클래스입니다.
+ */
 @Slf4j
 @Component
 public class LogTrace {

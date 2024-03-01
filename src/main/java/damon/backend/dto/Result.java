@@ -4,6 +4,12 @@ import damon.backend.exception.Status;
 import damon.backend.exception.CustomException;
 import lombok.Getter;
 
+/**
+ * 결과를 표현하는 클래스입니다.
+ * 이 클래스는 API 응답의 상태, 메시지, 데이터를 포함합니다.
+ *
+ * @param <T> 결과 데이터의 타입
+ */
 @Getter
 public class Result<T> {
 

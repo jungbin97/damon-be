@@ -1,5 +1,8 @@
 package damon.backend.util.trace;
 
+/**
+ * 추적 상태를 나타내는 클래스입니다.
+ */
 public class TraceStatus {
 
     private TraceId traceId;

@@ -11,6 +11,10 @@ import org.springframework.web.method.support.ModelAndViewContainer;
 
 import javax.security.auth.login.AccountNotFoundException;
 
+/**
+ * 엑세스 토큰을 변환하는 클래스입니다.
+ * extractAtkIdentifier 중에 토큰 관련 예외가 발생하면 관련된 커스텀 익셉션을 터트립니다.
+ */
 @Slf4j
 public class AuthTokenArgumentResolver implements HandlerMethodArgumentResolver {
 

@@ -22,6 +22,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * 커뮤니티와 관련된 비즈니스 로직을 처리하는 서비스 클래스입니다.
+ */
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)

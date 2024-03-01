@@ -17,13 +17,14 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
-import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+/**
+ * 커뮤니티 API 컨트롤러입니다.
+ */
 @Tag(name = "커뮤니티 API", description = "커뮤니티, 댓글, 좋아요 관련 API")
 @RestController
 @RequestMapping("/api/community")
@@ -33,8 +34,12 @@ public class CommunityController {
 
     private final CommunityService communityService;
 
-    /* ---커뮤니티 조회--- */
-
+    /**
+     * 커뮤니티 전체 리스트를 조회합니다.
+     *
+     * @param type 커뮤니티 타입(번개, 자유)
+     * @return 커뮤니티 전체 리스트
+     */
     @Operation(summary = "커뮤니티 전체 리스트 조회")
     @GetMapping
     public Result<List<CommunitySimpleDTO>> getCommunityList(
@@ -45,6 +50,13 @@ public class CommunityController {
         return Result.success(communityList);
     }
 
+    /**
+     * 커뮤니티 전체를 페이징하여 조회합니다.
+     *
+     * @param type 커뮤니티 타입(번개, 자유)
+     * @param page 페이지 번호(0부터)
+     * @return 커뮤니티 전체 페이징 조회 결과
+     */
     @Operation(summary = "커뮤니티 전체 페이징 조회")
     @GetMapping("/paging")
     public Result<Page<CommunitySimpleDTO>> getCommunityPaging(
@@ -57,6 +69,12 @@ public class CommunityController {
         return Result.success(communityList);
     }
 
+    /**
+     * 커뮤니티 상위 5개를 조회합니다.
+     *
+     * @param type 커뮤니티 타입(번개, 자유)
+     * @return 커뮤니티 상위 5개
+     */
     @Operation(summary = "커뮤니티 상위 5개 조회")
     @GetMapping("/top5")
     public Result<List<CommunitySimpleDTO>> getCommunityTop5(
@@ -67,6 +85,14 @@ public class CommunityController {
         return Result.success(communityList);
     }
 
+    /**
+     * 현재 사용자가 작성한 커뮤니티를 페이징하여 조회합니다.
+     *
+     * @param identifier 유저 식별자
+     * @param type 커뮤니티 타입(번개, 자유)
+     * @param page 페이지 번호(0부터)
+     * @return 현재 사용자가 작성한 커뮤니티 페이징 조회 결과
+     */
     @Operation(summary = "내가 쓴 커뮤니티 페이징 조회")
     @GetMapping("/my")
     public Result<Page<CommunitySimpleDTO>> getMyCommunityPaging(
@@ -81,6 +107,12 @@ public class CommunityController {
         return Result.success(communityList);
     }
 
+    /**
+     * 커뮤니티를 조회합니다.
+     *
+     * @param communityId 커뮤니티 아이디
+     * @return 커뮤니티 상세 정보
+     */
     @Operation(summary = "커뮤니티 단건 조회")
     @GetMapping("/{communityId}")
     public Result<CommunityDetailDTO> getCommunity(
@@ -91,8 +123,15 @@ public class CommunityController {
         return Result.success(communityDetail);
     }
 
-    /* ---커뮤니티 추가/수정/삭제--- */
-
+    /**
+     * 커뮤니티를 추가합니다.
+     *
+     * @param identifier 유저 식별자
+     * @param createForm 커뮤니티 생성 폼
+     * @param bindingResult 바인딩 결과
+     * @return 추가된 커뮤니티 상세 정보
+     * @throws InvalidFormException 폼이 유효하지 않을 경우 발생하는 예외
+     */
     @Operation(summary = "커뮤니티 추가")
     @PostMapping
     public Result<CommunityDetailDTO> addCommunity(
@@ -114,6 +153,16 @@ public class CommunityController {
         return Result.success(addedCommunity);
     }
 
+    /**
+     * 커뮤니티를 수정합니다.
+     *
+     * @param identifier 유저 식별자
+     * @param updateForm 커뮤니티 수정 폼
+     * @param bindingResult 바인딩 결과
+     * @return 수정된 커뮤니티 상세 정보
+     * @throws InvalidFormException 폼이 유효하지 않을 경우 발생하는 예외
+     * @throws UnauthorizedException 수정 권한이 없는 경우 발생하는 예외
+     */
     @Operation(summary = "커뮤니티 수정")
     @PutMapping
     public Result<CommunityDetailDTO> setCommunity(
@@ -139,6 +188,14 @@ public class CommunityController {
         return Result.success(updatedCommunity);
     }
 
+    /**
+     * 커뮤니티를 삭제합니다.
+     *
+     * @param identifier 유저 식별자
+     * @param communityId 커뮤니티 아이디
+     * @return 삭제 여부
+     * @throws UnauthorizedException 삭제 권한이 없는 경우 발생하는 예외
+     */
     @Operation(summary = "커뮤니티 삭제", description = "정상적으로 제거 되었는지 여부를 반환해 줍니다.")
     @DeleteMapping("/{communityId}")
     public Result<Boolean> removeCommunity(
@@ -155,8 +212,15 @@ public class CommunityController {
         return Result.success(true);
     }
 
-    /* ---커뮤니티 댓글 대댓글 추가/수정/삭제--- */
-
+    /**
+     * 커뮤니티에 댓글을 추가합니다.
+     *
+     * @param identifier 유저 식별자
+     * @param commentCreateForm 커뮤니티 댓글 생성 폼
+     * @param bindingResult 바인딩 결과
+     * @return 추가된 커뮤니티 댓글 정보
+     * @throws InvalidFormException 폼이 유효하지 않을 경우 발생하는 예외
+     */
     @Operation(summary = "커뮤니티 댓글 추가")
     @PostMapping("/comment")
     public Result<CommunityCommentDTO> addComment(
@@ -177,6 +241,16 @@ public class CommunityController {
         return Result.success(addedComment);
     }
 
+    /**
+     * 커뮤니티 댓글을 수정합니다.
+     *
+     * @param identifier 유저 식별자
+     * @param updateForm 커뮤니티 댓글 수정 폼
+     * @param bindingResult 바인딩 결과
+     * @return 수정된 커뮤니티 댓글 정보
+     * @throws InvalidFormException 폼이 유효하지 않을 경우 발생하는 예외
+     * @throws UnauthorizedException 권한이 없을 경우 발생하는 예외
+     */
     @Operation(summary = "커뮤니티 댓글 수정")
     @PutMapping("/comment")
     public Result<CommunityCommentDTO> setComment(
@@ -200,6 +274,14 @@ public class CommunityController {
         return Result.success(comment);
     }
 
+    /**
+     * 커뮤니티 댓글을 삭제합니다.
+     *
+     * @param identifier 유저 식별자
+     * @param commentId 커뮤니티 댓글 아이디
+     * @return 삭제 여부를 나타내는 불리언 값
+     * @throws UnauthorizedException 권한이 없을 경우 발생하는 예외
+     */
     @Operation(summary = "커뮤니티 댓글 제거", description = "정상적으로 제거 되었는지 여부를 반환해 줍니다.")
     @DeleteMapping("/comment/{commentId}")
     public Result<Boolean> removeComment(
@@ -216,6 +298,15 @@ public class CommunityController {
         return Result.success(true);
     }
 
+    /**
+     * 커뮤니티 댓글에 대댓글을 추가합니다.
+     *
+     * @param identifier 유저 식별자
+     * @param form 커뮤니티 대댓글 추가 폼
+     * @param bindingResult 바인딩 결과
+     * @return 추가된 커뮤니티 대댓글 정보
+     * @throws InvalidFormException 폼이 유효하지 않을 경우 발생하는 예외
+     */
     @Operation(summary = "커뮤니티 대댓글 추가")
     @PostMapping("/comment/child")
     public Result<CommunityCommentDTO> addChildComment(
@@ -236,8 +327,15 @@ public class CommunityController {
         return Result.success(addedChildComment);
     }
 
-    /* ---커뮤니티 좋아요 확인/추가/삭제--- */
+    /* ---커뮤니티 좋아요 확인--- */
 
+    /**
+     * 해당 유저가 특정 커뮤니티에 좋아요를 눌렀는지 확인합니다.
+     *
+     * @param identifier 유저 식별자
+     * @param communityId 커뮤니티 아이디
+     * @return 해당 커뮤니티에 대한 좋아요 여부
+     */
     @Operation(summary = "커뮤니티 좋아요 확인")
     @GetMapping("/like/{communityId}")
     public Result<Boolean> isLike(
@@ -249,6 +347,13 @@ public class CommunityController {
         return Result.success(communityService.isLike(identifier, communityId));
     }
 
+    /**
+     * 해당 유저가 특정 커뮤니티에 좋아요를 추가하거나 제거합니다.
+     *
+     * @param identifier 유저 식별자
+     * @param communityId 커뮤니티 아이디
+     * @return 최종적으로 변경된 좋아요 여부
+     */
     @Operation(summary = "커뮤니티 좋아요 토글", description = "최종적으로 좋아요 여부를 반환해 줍니다.")
     @PostMapping("/like/{communityId}")
     public Result<Boolean> addLike(
@@ -260,6 +365,14 @@ public class CommunityController {
         return Result.success(communityService.toggleLike(identifier, communityId));
     }
 
+    /**
+     * 검색어에 따라 커뮤니티를 검색합니다.
+     *
+     * @param keyword 검색어
+     * @param type 커뮤니티 타입
+     * @param page 페이지 번호
+     * @return 검색된 커뮤니티 목록 페이지
+     */
     @Operation(summary = "커뮤니티 검색")
     @GetMapping("/search")
     public Result<Page<CommunitySimpleDTO>> searchCommunity(

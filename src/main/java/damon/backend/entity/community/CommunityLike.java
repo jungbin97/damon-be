@@ -7,6 +7,9 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+/**
+ * 커뮤니티 좋아요 정보를 나타내는 엔티티 클래스입니다.
+ */
 @Entity
 @Table(name = "community_like")
 @Getter
