@@ -6,6 +6,7 @@ import damon.backend.dto.response.community.CommunityCommentDTO;
 import damon.backend.dto.response.community.CommunityDetailDTO;
 import damon.backend.dto.response.community.CommunitySimpleDTO;
 import damon.backend.enums.CommunityType;
+import damon.backend.exception.custom.InvalidFormException;
 import damon.backend.exception.custom.UnauthorizedException;
 import damon.backend.service.CommunityService;
 import damon.backend.util.login.AuthToken;
@@ -13,8 +14,12 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -93,8 +98,13 @@ public class CommunityController {
     public Result<CommunityDetailDTO> addCommunity(
             @Parameter(description = "유저 식별자", required = true, hidden = true)
             @AuthToken String identifier,
-            @RequestBody CommunityCreateForm createForm
+            @RequestBody @Valid CommunityCreateForm createForm,
+            BindingResult bindingResult
     ) {
+        if (bindingResult.hasErrors()) {
+            throw new InvalidFormException();
+        }
+
         CommunityDetailDTO addedCommunity = communityService.addCommunity(
                 identifier,
                 createForm.getType(),
@@ -109,8 +119,13 @@ public class CommunityController {
     public Result<CommunityDetailDTO> setCommunity(
             @Parameter(description = "유저 식별자", required = true, hidden = true)
             @AuthToken String identifier,
-            @RequestBody CommunityUpdateForm updateForm
+            @RequestBody @Valid CommunityUpdateForm updateForm,
+            BindingResult bindingResult
     ) {
+        if (bindingResult.hasErrors()) {
+            throw new InvalidFormException();
+        }
+
         if (!communityService.isCommunityWriter(identifier, updateForm.getCommunityId())) {
             throw new UnauthorizedException();
         }
@@ -147,8 +162,13 @@ public class CommunityController {
     public Result<CommunityCommentDTO> addComment(
             @Parameter(description = "유저 식별자", required = true, hidden = true)
             @AuthToken String identifier,
-            @RequestBody CommunityCommentCreateForm commentCreateForm
+            @RequestBody @Valid CommunityCommentCreateForm commentCreateForm,
+            BindingResult bindingResult
     ) {
+        if (bindingResult.hasErrors()) {
+            throw new InvalidFormException();
+        }
+
         CommunityCommentDTO addedComment = communityService.addComment(
                 identifier,
                 commentCreateForm.getCommunityId(),
@@ -162,8 +182,13 @@ public class CommunityController {
     public Result<CommunityCommentDTO> setComment(
             @Parameter(description = "유저 식별자", required = true, hidden = true)
             @AuthToken String identifier,
-            @RequestBody CommunityCommentUpdateForm updateForm
+            @RequestBody @Valid CommunityCommentUpdateForm updateForm,
+            BindingResult bindingResult
     ) {
+        if (bindingResult.hasErrors()) {
+            throw new InvalidFormException();
+        }
+
         if (!communityService.isCommentWriter(identifier, updateForm.getCommentId())) {
             throw new UnauthorizedException();
         }
@@ -196,8 +221,13 @@ public class CommunityController {
     public Result<CommunityCommentDTO> addChildComment(
             @Parameter(description = "유저 식별자", required = true, hidden = true)
             @AuthToken String identifier,
-            @RequestBody CommunityChildCommentCreateForm form
+            @RequestBody @Valid CommunityChildCommentCreateForm form,
+            BindingResult bindingResult
     ) {
+        if (bindingResult.hasErrors()) {
+            throw new InvalidFormException();
+        }
+
         CommunityCommentDTO addedChildComment = communityService.addChildComment(
                 identifier,
                 form.getParentId(),
