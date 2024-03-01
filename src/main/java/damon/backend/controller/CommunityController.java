@@ -229,4 +229,17 @@ public class CommunityController {
     ) {
         return Result.success(communityService.toggleLike(identifier, communityId));
     }
+
+    @Operation(summary = "커뮤니티 검색")
+    @GetMapping("/search")
+    public Result<Page<CommunitySimpleDTO>> searchCommunity(
+            @Schema(description = "검색어")
+            @RequestParam(required = false) String keyword,
+            @Schema(description = "커뮤니티 타입(번개, 자유)")
+            @RequestParam(required = false) CommunityType type,
+            @Schema(description = "페이지 번호(0부터)", defaultValue = "0")
+            @RequestParam int page
+    ) {
+        return Result.success(communityService.searchCommunity(keyword, type, page));
+    }
 }

@@ -9,6 +9,7 @@ import damon.backend.entity.user.User;
 import damon.backend.enums.CommunityType;
 import damon.backend.exception.custom.DataNotFoundException;
 import damon.backend.repository.community.CommunityCommentRepository;
+import damon.backend.repository.community.CommunityQueryRepository;
 import damon.backend.repository.community.CommunityRepository;
 import damon.backend.repository.user.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -29,6 +30,7 @@ public class CommunityService {
     private final CommunityRepository communityRepository;
     private final CommunityCommentRepository commentRepository;
     private final UserRepository userRepository;
+    private final CommunityQueryRepository communityQueryRepository;
 
     private User getUserEntity(String identifier) {
         return userRepository.findByIdentifier(identifier).orElseThrow(DataNotFoundException::new);
@@ -160,5 +162,10 @@ public class CommunityService {
 
     public boolean isLike(String identifier, Long communityId) {
         return getCommunityEntity(communityId).isLike(getUserEntity(identifier));
+    }
+
+    public Page<CommunitySimpleDTO> searchCommunity(String keyword, CommunityType type, int page) {
+        Page<Community> communities = communityQueryRepository.searchCommunity(keyword, type, PageRequest.of(page, 20));
+        return communities.map(CommunitySimpleDTO::new);
     }
 }
