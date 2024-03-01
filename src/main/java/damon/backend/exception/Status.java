@@ -1,7 +1,8 @@
 package damon.backend.exception;
 
 /**
- * 응답 상태 목록을 상수로 정의한 클래스
+ * HTTP 응답 상태 코드를 정의하는 클래스입니다.
+ * 각 상태 코드에 대한 설명과 함께 사용됩니다.
  */
 public class Status {
     // 200 - OK: 요청이 성공적으로 처리되었음

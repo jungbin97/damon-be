@@ -7,6 +7,9 @@ import io.jsonwebtoken.security.Keys;
 import java.security.Key;
 import java.util.Date;
 
+/**
+ * JWT 토큰을 생성하고 해석하는 유틸리티 클래스입니다.
+ */
 public class JwtUtil {
 
     // 안전한 랜덤 키 생성

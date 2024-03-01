@@ -18,6 +18,9 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
+/**
+ * 카카오 API와 통신하여 토큰 및 사용자 정보를 가져오는 유틸리티 클래스입니다.
+ */
 @Component
 @RequiredArgsConstructor
 public class KakaoUtil {

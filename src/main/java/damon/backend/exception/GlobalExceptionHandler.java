@@ -11,6 +11,9 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * 전역 예외를 처리하기 위한 클래스입니다.
+ */
 @Slf4j
 @ControllerAdvice
 public class GlobalExceptionHandler {
