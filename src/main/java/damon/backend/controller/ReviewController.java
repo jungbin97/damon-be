@@ -1,7 +1,5 @@
 package damon.backend.controller;
 
-
-import damon.backend.dto.request.ReviewAndImageRequest;
 import damon.backend.dto.request.ReviewRequest;
 import damon.backend.dto.response.ReviewListResponse;
 import damon.backend.dto.response.ReviewResponse;
@@ -53,11 +51,11 @@ public class ReviewController {
     public ReviewResponse postReview(
             @Valid
             @RequestBody ReviewRequest reviewRequest,
-            @RequestParam("images") Optional<List<MultipartFile>> images,
+//            @RequestParam("images") Optional<List<MultipartFile>> images,
             @Parameter(description = "유저 식별자", required = true, hidden = true)
             @AuthToken String identifier
     ){
-        return reviewService.postReview(reviewRequest, images.orElse(new ArrayList<>()), identifier);
+        return reviewService.postReview(reviewRequest, identifier);
     }
 
 

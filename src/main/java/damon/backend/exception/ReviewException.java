@@ -2,6 +2,7 @@ package damon.backend.exception;
 
 public class ReviewException extends RuntimeException{
     // 에러 타입을 구분하는 열거형
+
     public enum ErrorType {
         MEMBER_NOT_FOUND,
         REVIEW_NOT_FOUND,

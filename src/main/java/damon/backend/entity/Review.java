@@ -149,5 +149,6 @@ public class Review extends BaseEntity {
 
     public void addImage(ReviewImage reviewImage) {
         this.reviewImages.add(reviewImage);
+        reviewImage.setReview(this); // 양방향 연관관계 설정
     }
 }

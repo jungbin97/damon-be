@@ -1,6 +1,4 @@
 package damon.backend.service;
-
-import damon.backend.dto.request.ReviewAndImageRequest;
 import damon.backend.dto.request.ReviewRequest;
 import damon.backend.dto.response.ReviewCommentResponse;
 import damon.backend.dto.response.ReviewListResponse;
@@ -21,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -31,6 +30,7 @@ import java.util.stream.Collectors;
 @Transactional
 public class ReviewService {
 
+    private final AwsS3Service awsS3Service;
     private final ReviewRepository reviewRepository;
     private final ReviewImageRepository reviewImageRepository;
     private final ReviewLikeRepository reviewLikeRepository;
@@ -66,16 +66,31 @@ public class ReviewService {
 //    }
 
     //게시글 등록
-    public ReviewResponse postReview(ReviewRequest request, List<MultipartFile> images, String identifier) {
+    public ReviewResponse postReview(ReviewRequest request, String identifier) {
         User user = userRepository.findByIdentifier(identifier).orElseThrow(ReviewException::memberNotFound);
 
         Review review = Review.create(request, user);
         review = reviewRepository.save(review); // 리뷰 저장
 
         // 이미지 처리
-        if (!images.isEmpty()) {
-            reviewImageService.postImage(review, images);
+//        if (images != null && !images.isEmpty()) {
+//            for (MultipartFile file : images) {
+//                try {
+//                    String url = awsS3Service.uploadImage(file); // S3에 이미지 업로드
+//                    review.addImage(url); // 리뷰에 이미지 URL 추가
+//                } catch (IOException e) {
+//                    throw ReviewException.imageUploadFailed();
+//                }
+//            }
+//        }
+
+        if (request.getImage() != null) {
+            ReviewImage reviewImage =
+                    reviewImageRepository.save(new ReviewImage(request.getImage(), true, review));
+            review.addImage(reviewImage);
         }
+        reviewRepository.save(review); // 이미지 URL이 추가된 리뷰 저장
+
 
         List<ReviewCommentResponse> emptyCommentsList = new ArrayList<>(); // 새 리뷰에는 댓글이 없으므로 빈 리스트 생성
         return ReviewResponse.from(review, emptyCommentsList); // 저장된 리뷰와 빈 댓글 목록을 전달
