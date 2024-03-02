@@ -37,10 +37,6 @@ public class Review extends BaseEntity {
     @ElementCollection
     private List<String> suggests = new ArrayList<>();
 
-    @ElementCollection
-    @Column
-    private List<String> freeTags = new ArrayList<>();
-
     @Column(columnDefinition = "TEXT")
     private String content;
 
@@ -48,6 +44,10 @@ public class Review extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
+
+    //리뷰태그 매핑
+    @OneToMany(mappedBy = "review", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Tag> tags = new ArrayList<>();
 
     //리뷰이미지 매핑
     @OneToMany(mappedBy = "review", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -69,24 +69,37 @@ public class Review extends BaseEntity {
         }
     }
 
-
     // 조회수 증가 메소드
     public void incrementViewCount() {
         this.viewCount++;
     }
 
-    // 생성자 메서드
+    // 리뷰 생성 메서드
     public static Review create(ReviewRequest request, User user) {
         Review review = new Review();
         populateReviewFields(review, request);
         review.user = user; // Member 설정은 create 시에만 수행
+        // 태그 설정
+        if (request.getTags() != null && !request.getTags().isEmpty()) {
+            for (String tagValue : request.getTags()) {
+                review.getTags().add(new Tag(tagValue, review));
+            }
+        }
         return review;
     }
 
-    // 업데이트 메서드
+    // 리뷰 수정 메서드
     public void update(ReviewRequest request) {
         populateReviewFields(this, request);
         this.isEdited = true; // 업데이트 시 isEdited를 true로 설정
+
+        // 기존 태그 모두 제거 후 새로운 태그 추가
+        this.tags.clear();
+        if (request.getTags() != null) {
+            for (String tagValue : request.getTags()) {
+                this.tags.add(new Tag(tagValue, this));
+            }
+        }
     }
 
     // 공통 필드 설정 메서드
@@ -97,7 +110,6 @@ public class Review extends BaseEntity {
         review.area = request.getArea();
         review.cost = request.getCost();
         review.suggests = request.getSuggests();
-        review.freeTags = request.getFreeTags();
         review.content = request.getContent();
 
     }
@@ -123,18 +135,17 @@ public class Review extends BaseEntity {
         ReviewImage newImage = ReviewImage.createImage(url, this); // URL을 받아 ReviewImage 객체 생성
         this.reviewImages.add(newImage); // 현재 리뷰의 이미지 목록에 추가
     }
-
-    public Review(String title, LocalDate startDate, LocalDate endDate, Area area, Long cost, List<String> suggests, List<String> freeTags, String content, User user) {
-        this.title = title;
-        this.startDate = startDate;
-        this.endDate = endDate;
-        this.area = area;
-        this.cost = cost;
-        this.suggests = suggests;
-        this.freeTags = freeTags;
-        this.content = content;
-        this.user = user;
-    }
+//
+//    public Review(String title, LocalDate startDate, LocalDate endDate, Area area, Long cost, List<String> suggests, List<Tag> tags, String content, User user) {
+//        this.title = title;
+//        this.startDate = startDate;
+//        this.endDate = endDate;
+//        this.area = area;
+//        this.cost = cost;
+//        this.suggests = suggests;
+//        this.content = content;
+//        this.user = user;
+//    }
 
     public void addImage(ReviewImage reviewImage) {
         this.reviewImages.add(reviewImage);
