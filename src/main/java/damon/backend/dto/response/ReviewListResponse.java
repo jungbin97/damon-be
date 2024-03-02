@@ -2,12 +2,13 @@ package damon.backend.dto.response;
 
 import damon.backend.entity.Area;
 import damon.backend.entity.Review;
+import damon.backend.entity.Tag;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Data
 @AllArgsConstructor
@@ -27,7 +28,7 @@ public class ReviewListResponse {
 
     private Long cost;
     private List<String> suggests; // 장소 추천
-    private List<String> freeTags; // 자유 태그
+    private List<String> tags; // 자유 태그
 
     private String mainImage;
 
@@ -43,6 +44,11 @@ public class ReviewListResponse {
 
         String state = review.isEdited() ? "편집됨" : ""; // isEdited 값에 따라 상태 설정
 
+        List<String> tagValues = review.getTags().stream()
+                .map(Tag::getValue)
+                .collect(Collectors.toList());
+
+
         if (review.getReviewImages().size() > 0) {
             return new ReviewListResponse(
 
@@ -57,7 +63,7 @@ public class ReviewListResponse {
                     review.getArea(),
                     review.getCost(),
                     review.getSuggests(),
-                    review.getFreeTags(),
+                    tagValues,
                     review.getReviewImages().get(0).getUrl()
             );
         } else {
@@ -74,7 +80,7 @@ public class ReviewListResponse {
                     review.getArea(),
                     review.getCost(),
                     review.getSuggests(),
-                    review.getFreeTags(),
+                    tagValues,
                     "");
         }
 

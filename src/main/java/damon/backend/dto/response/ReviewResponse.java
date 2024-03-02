@@ -3,6 +3,7 @@ package damon.backend.dto.response;
 import damon.backend.entity.Area;
 import damon.backend.entity.Review;
 import damon.backend.entity.ReviewImage;
+import damon.backend.entity.Tag;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
@@ -30,7 +31,7 @@ public class ReviewResponse {
 
     private Long cost;
     private List<String> suggests;
-    private List<String> freeTags;
+    private List<String> tags;
 
     private List<String> imageUrls; // 이미지 URL 리스트 추가
     private String content;
@@ -50,6 +51,10 @@ public class ReviewResponse {
 
         String state = review.isEdited() ? "편집됨" : ""; // isEdited 값에 따라 상태 설정
 
+        List<String> tags = review.getTags().stream()
+                .map(tag -> tag.getValue())
+                .collect(Collectors.toList());
+
         List<String> imageUrls = review.getReviewImages().stream()
                 .map(ReviewImage::getUrl)
                 .collect(Collectors.toList());
@@ -67,7 +72,7 @@ public class ReviewResponse {
                 review.getEndDate().format(DATE_FORMATTER),     // LocalDate -> String
                 review.getCost(),
                 review.getSuggests(),
-                review.getFreeTags(),
+                tags,
                 imageUrls, // 이미지 URL 리스트
                 review.getContent(),
                 organizedComments, // 계층적으로 구조화된 댓글 목록
@@ -98,7 +103,7 @@ public class ReviewResponse {
         this.endDate = review.getEndDate().format(DATE_FORMATTER); // LocalDate -> String
         this.cost = review.getCost();
         this.suggests = review.getSuggests();
-        this.freeTags = review.getFreeTags();
+        this.tags = review.getTags().stream().map(Tag::getValue).collect(Collectors.toList());
         this.imageUrls = imageUrls; // 이미지 URL 리스트
         this.content = review.getContent();
         this.reviewComments = new ArrayList<>(); // 계층적으로 구조화된 댓글 목록

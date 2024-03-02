@@ -33,21 +33,21 @@ public class ReviewController {
     private final ReviewService reviewService;
 
     //게시글 등록
-    @PostMapping
-    public ReviewResponse addReview(
-            @RequestBody ReviewAndImageRequest form,
-            @Parameter(description = "유저 식별자", required = true, hidden = true)
-            @AuthToken String identifier
-    ) {
-        // 이미지 데이터 처리
-        Log.info(form);
-        Log.info(identifier);
-
-        return reviewService.addReview(form, identifier);
-    }
+//    @PostMapping
+//    public ReviewResponse addReview(
+//            @RequestBody ReviewAndImageRequest form,
+//            @Parameter(description = "유저 식별자", required = true, hidden = true)
+//            @AuthToken String identifier
+//    ) {
+//        // 이미지 데이터 처리
+//        Log.info(form);
+//        Log.info(identifier);
+//
+//        return reviewService.addReview(form, identifier);
+//    }
 
     //게시글 등록
-    @PostMapping("/review")
+    @PostMapping
     @Operation(summary = "내 리뷰 등록", description = "내 리뷰를 등록합니다.")
     @ApiResponse(responseCode = "200", description = "리뷰 등록 성공")
     public ReviewResponse postReview(
@@ -77,15 +77,15 @@ public class ReviewController {
     }
 
     // 내 게시글 목록 조회
-    @GetMapping("/my/list")
-    @Operation(summary = "내 리뷰 전체 조회", description = "내 리뷰를 전체 조회합니다.")
-    @ApiResponse(responseCode = "200", description = "리뷰 전체 조회 성공")
-    public List<ReviewListResponse> searchMyReviewList(
-            @Parameter(description = "유저 식별자", required = true, hidden = true)
-            @AuthToken String identifier
-    ){
-        return reviewService.searchMyReviewList(identifier);
-    }
+//    @GetMapping("/my/list")
+//    @Operation(summary = "내 리뷰 전체 조회", description = "내 리뷰를 전체 조회합니다.")
+//    @ApiResponse(responseCode = "200", description = "리뷰 전체 조회 성공")
+//    public List<ReviewListResponse> searchMyReviewList(
+//            @Parameter(description = "유저 식별자", required = true, hidden = true)
+//            @AuthToken String identifier
+//    ){
+//        return reviewService.searchMyReviewList(identifier);
+//    }
 
 
     //게시글 상세 조회 (댓글 포함)
@@ -168,19 +168,20 @@ public class ReviewController {
     }
 
 
-    // freeTag 기반 검색
+    // 리뷰 검색
     @GetMapping("/list/search")
-    @Operation(summary = "리뷰 태그별 검색", description = "리뷰를 태그 별로 검색 합니다.")
-    @ApiResponse(responseCode = "200", description = "리뷰 태그별 검색 성공")
-    public List<ReviewListResponse> searchReviewsByFreeTag(
-            @Schema(description = "검색할 태그명", example="강릉")
-            @RequestParam("tag") String tag,
+    @Operation(summary = "리뷰 검색", description = "작성자 이름, 리뷰 제목, 태그를 기반으로 리뷰를 검색합니다.")
+    @ApiResponse(responseCode = "200", description = "리뷰 검색 성공")
+    public List<ReviewListResponse> searchReviews(
+            @Schema(description = "검색 옵션", example="작성자 / 제목 / 태그")
+            @RequestParam("mode") String mode,
+            @Schema(description = "검색어", example="강민우")
+            @RequestParam("keyword") String keyword,
             @Schema(description = "페이지 인덱스", example="0")
             @RequestParam("page") int page,
             @Schema(description = "한 페이지 당 보여질 리뷰 개수", example="10")
-            @RequestParam("pageSize") int pageSize
-    ) {
-        return reviewService.searchReviewsTag(tag, page, pageSize);
+            @RequestParam("pageSize") int pageSize) {
+        return reviewService.searchReviews(mode, keyword, page, pageSize);
     }
 
     // 메인 페이지용 베스트 리뷰 조회

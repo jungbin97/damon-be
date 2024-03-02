@@ -15,7 +15,7 @@ public class ReviewRequest {
     private Area area;
     private Long cost;
     private List<String> suggests;
-    private List<String> freeTags;
+    private List<String> tags;
     private String content;
 
 }
