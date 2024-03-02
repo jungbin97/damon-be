@@ -2,6 +2,9 @@ package damon.backend.util.trace;
 
 import java.util.UUID;
 
+/**
+ * 추적 식별자를 나타내는 클래스입니다.
+ */
 public class TraceId {
 
     private String id;

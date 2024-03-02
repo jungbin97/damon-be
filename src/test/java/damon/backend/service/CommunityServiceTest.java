@@ -11,7 +11,9 @@ import damon.backend.repository.community.CommunityCommentRepository;
 import damon.backend.repository.community.CommunityLikeRepository;
 import damon.backend.repository.community.CommunityRepository;
 import damon.backend.repository.user.UserRepository;
+import damon.backend.util.Log;
 import jakarta.transaction.Transactional;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -24,6 +26,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@Slf4j
 @SpringBootTest
 @Transactional
 class CommunityServiceTest {
@@ -278,6 +281,28 @@ class CommunityServiceTest {
                 () -> assertFalse(communityService.isLike(user2.getIdentifier(), community1.getCommunityId())),
                 () -> assertFalse(communityService.isLike(user1.getIdentifier(), community2.getCommunityId())),
                 () -> assertFalse(communityService.isLike(user2.getIdentifier(), community2.getCommunityId()))
+        );
+    }
+
+    @Test
+    @DisplayName("커뮤니티 검색")
+    void searchCommunity() {
+        // when
+        Community community3 = communityRepository.save(new Community(user1, CommunityType.번개, "community3 title", "community3 content"));
+        Community community4 = communityRepository.save(new Community(user1, CommunityType.번개, "community4 title", "community4 content"));
+        Community community5 = communityRepository.save(new Community(user1, CommunityType.번개, "community5 title", "community5 content"));
+
+        Page<CommunitySimpleDTO> page1 = communityService.searchCommunity(null, null, 0);
+        Page<CommunitySimpleDTO> page2 = communityService.searchCommunity(null, CommunityType.번개, 0);
+        Page<CommunitySimpleDTO> page3 = communityService.searchCommunity("community1 title", CommunityType.번개, 0);
+        Page<CommunitySimpleDTO> page4 = communityService.searchCommunity("community1 content", CommunityType.번개, 0);
+
+        // then
+        assertAll(
+                () -> assertEquals(page1.getContent().size(), 5),
+                () -> assertEquals(page2.getContent().size(), 4),
+                () -> assertEquals(page3.getContent().size(), 1),
+                () -> assertEquals(page4.getContent().size(), 1)
         );
     }
 }

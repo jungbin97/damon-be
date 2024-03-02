@@ -46,19 +46,7 @@ public class UserService {
     }
 
     public LoginDto refresh(String refreshToken) {
-        if (refreshToken == null || refreshToken.isEmpty()) {
-            throw new RefreshTokenNotFoundException();
-        }
-
-        if (!JwtUtil.isValidateToken(refreshToken)) {
-            throw new TokenNotValidatedException();
-        }
-
-        if (JwtUtil.isExpiredToken(refreshToken)) {
-            throw new RefreshTokenExpiredException();
-        }
-
-        String identifier = JwtUtil.extractIdentifier(refreshToken);
+        String identifier = JwtUtil.extractRtkIdentifier(refreshToken);
         String newAccessToken = JwtUtil.generateAccessToken(identifier);
         String newRefreshToken = JwtUtil.generateRefreshToken(identifier);
         return new LoginDto(newAccessToken, newRefreshToken);

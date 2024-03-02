@@ -8,6 +8,9 @@ import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.springframework.stereotype.Component;
 
+/**
+ * 로그 및 추적을 관리하는 Aspect 클래스입니다.
+ */
 @Slf4j
 @Aspect
 @Component

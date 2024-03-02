@@ -9,6 +9,7 @@ import damon.backend.entity.user.User;
 import damon.backend.enums.CommunityType;
 import damon.backend.exception.custom.DataNotFoundException;
 import damon.backend.repository.community.CommunityCommentRepository;
+import damon.backend.repository.community.CommunityQueryRepository;
 import damon.backend.repository.community.CommunityRepository;
 import damon.backend.repository.user.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -21,6 +22,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * 커뮤니티와 관련된 비즈니스 로직을 처리하는 서비스 클래스입니다.
+ */
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -29,6 +33,7 @@ public class CommunityService {
     private final CommunityRepository communityRepository;
     private final CommunityCommentRepository commentRepository;
     private final UserRepository userRepository;
+    private final CommunityQueryRepository communityQueryRepository;
 
     private User getUserEntity(String identifier) {
         return userRepository.findByIdentifier(identifier).orElseThrow(DataNotFoundException::new);
@@ -160,5 +165,10 @@ public class CommunityService {
 
     public boolean isLike(String identifier, Long communityId) {
         return getCommunityEntity(communityId).isLike(getUserEntity(identifier));
+    }
+
+    public Page<CommunitySimpleDTO> searchCommunity(String keyword, CommunityType type, int page) {
+        Page<Community> communities = communityQueryRepository.searchCommunity(keyword, type, PageRequest.of(page, 20));
+        return communities.map(CommunitySimpleDTO::new);
     }
 }

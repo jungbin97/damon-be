@@ -1,11 +1,15 @@
 package damon.backend.util.login;
 
+import damon.backend.exception.custom.*;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 
 import java.security.Key;
 import java.util.Date;
 
+/**
+ * JWT 토큰을 생성하고 해석하는 유틸리티 클래스입니다.
+ */
 public class JwtUtil {
 
     // 안전한 랜덤 키 생성
@@ -43,34 +47,39 @@ public class JwtUtil {
                 .compact();
     }
 
-    public static String extractIdentifier(String token) {
-        return Jwts.parser()
-                .setSigningKey(SECRET_KEY)
-                .parseClaimsJws(token)
-                .getBody()
-                .getSubject();
-    }
+    public static String extractAtkIdentifier(String accessToken) {
+        if (accessToken == null || accessToken.isEmpty()) {
+            throw new AccessTokenNotFoundException();
+        }
 
-    public static Date extractExpiryDate(String token) {
-        return Jwts.parser()
-                .setSigningKey(SECRET_KEY)
-                .parseClaimsJws(token)
-                .getBody()
-                .getExpiration();
-    }
-
-    public static boolean isExpiredToken(String token) {
-        Date expiryDate = extractExpiryDate(token);
-        return expiryDate.before(new Date());
-    }
-
-    // 토큰의 유효성 검사
-    public static boolean isValidateToken(String token) {
         try {
-            Jwts.parser().setSigningKey(SECRET_KEY).parseClaimsJws(token);
-            return true;
-        } catch (JwtException | IllegalArgumentException e) {
-            return false;
+            return Jwts.parser()
+                    .setSigningKey(SECRET_KEY)
+                    .parseClaimsJws(accessToken)
+                    .getBody()
+                    .getSubject();
+        } catch (SignatureException | MalformedJwtException e) {
+            throw new TokenNotValidatedException();
+        } catch (ExpiredJwtException e) {
+            throw new AccessTokenExpiredException();
+        }
+    }
+
+    public static String extractRtkIdentifier(String refreshToken) {
+        if (refreshToken == null || refreshToken.isEmpty()) {
+            throw new RefreshTokenNotFoundException();
+        }
+
+        try {
+            return Jwts.parser()
+                    .setSigningKey(SECRET_KEY)
+                    .parseClaimsJws(refreshToken)
+                    .getBody()
+                    .getSubject();
+        } catch (SignatureException | MalformedJwtException e) {
+            throw new TokenNotValidatedException();
+        } catch (ExpiredJwtException e) {
+            throw new RefreshTokenExpiredException();
         }
     }
 }
