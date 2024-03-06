@@ -14,10 +14,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 @RequiredArgsConstructor
@@ -30,10 +28,8 @@ public class ReviewCommentService implements CommentStructureOrganizer {
 
     // 댓글 등록
     public ReviewResponse postComment(Long reviewId, ReviewCommentRequest request, String identifier) {
-        // 사용자 조회
-        User user = userRepository.findByIdentifier(identifier).orElseThrow(ReviewException::memberNotFound);
-
-        // 리뷰 조회
+        User user = userRepository.findByIdentifier(identifier)
+                .orElseThrow(ReviewException::memberNotFound);
         Review review = reviewRepository.findById(reviewId)
                 .orElseThrow(ReviewException::reviewNotFound);
 
@@ -46,14 +42,12 @@ public class ReviewCommentService implements CommentStructureOrganizer {
 
         }
 
-        ReviewComment newComment = ReviewComment.createContent(request.getContent(), review, user, parentComment);
+        ReviewComment newComment = ReviewComment.createComment(review, user, request.getContent(), parentComment);
 
         reviewCommentRepository.save(newComment);
 
         // Review와 관련된 모든 댓글 및 대댓글 조직화 후 ReviewResponse 생성
         List<ReviewCommentResponse> organizedComments = organizeCommentStructure(reviewId);
-
-        // 댓글 구조를 다시 조직화하여 리뷰 전체 상태를 반환
         return ReviewResponse.from(review, organizedComments);
     }
 
@@ -93,7 +87,6 @@ public class ReviewCommentService implements CommentStructureOrganizer {
         ReviewComment comment = reviewCommentRepository.findById(commentId)
                 .orElseThrow(ReviewException::commentNotFound);
 
-        // 사용자 조회
         User user = userRepository.findByIdentifier(identifier).orElseThrow(ReviewException::memberNotFound);
 
         if (!comment.getReview().getUser().getIdentifier().equals(identifier)) {
@@ -117,35 +110,26 @@ public class ReviewCommentService implements CommentStructureOrganizer {
         //모든 댓글 및 대댓글 리뷰 id를 기준으로 가져오기
         List<ReviewComment> allComments = reviewCommentRepository.findByReviewId(reviewId);
 
-        // 대댓글이 없는 독립된 댓글
+        // 댓글 ID와 댓글 응답 객체의 매핑을 저장하는 맵 (해시맵 보완점)
+        // 전역변수(static) - 동시성이슈 생긴다
+        // but 지역변수에 선언 - 하나의 스레드만 생성
+        // 계층 구조 조회할 때마다 생성하고 버리니까 (캐싱 보완)
         Map<Long, ReviewCommentResponse> commentMap = new HashMap<>();
 
-        // 대댓글이 없는 독립된 댓글
+        // 대댓글이 없는 독립된 댓글 (최상위 댓글)
         List<ReviewCommentResponse> topLevelComments = new ArrayList<>();
 
-        // 댓글을 DTO로 변환하면서 바로 구조화
         for (ReviewComment comment : allComments) {
             ReviewCommentResponse commentResponse = ReviewCommentResponse.from(comment);
             commentMap.put(comment.getId(), commentResponse);
 
-            // 대댓글인 경우, 부모 댓글에 연결
             if (comment.getParent() != null) {
-                ReviewCommentResponse parentCommentResponse = commentMap.get(comment.getParent().getId());
-                if (parentCommentResponse != null) {
-                    boolean isDuplicate = parentCommentResponse.getReplies().stream()
-                            .anyMatch(reply -> reply.getId().equals(comment.getId()));
-                    if (!isDuplicate) {
-                        parentCommentResponse.getReplies().add(commentMap.get(comment.getId()));
-                    }
-                }
+                ReviewCommentResponse parentResponse = commentMap.get(comment.getParent().getId());
+                parentResponse.getReplies().add(commentResponse);
             } else {
-                // 루트 댓글인 경우, topLevelComments에 추가
-                topLevelComments.add(commentMap.get(comment.getId()));
+                topLevelComments.add(commentResponse);
             }
         }
-
         return topLevelComments;
     }
-
-
 }

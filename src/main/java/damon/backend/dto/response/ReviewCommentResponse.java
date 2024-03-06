@@ -33,11 +33,12 @@ public class ReviewCommentResponse {
 
         // 대댓글 목록 초기화 조건 변경
         List<ReviewCommentResponse> replies = new ArrayList<>();
-        if (reviewComment.getParent() == null) { // 부모 댓글인 경우에만 대댓글 목록 초기화
-            replies = reviewComment.getReplies() != null ?
-                    reviewComment.getReplies().stream()
-                            .map(ReviewCommentResponse::from)
-                            .collect(Collectors.toList()) : new ArrayList<>();
+
+        // 부모 댓글이 없는 경우에만 대댓글 목록을 초기화합니다.
+        if (reviewComment.getParent() == null && reviewComment.getReplies() != null) {
+            replies = reviewComment.getReplies().stream()
+                    .map(ReviewCommentResponse::from)
+                    .collect(Collectors.toList());
         }
 
         return new ReviewCommentResponse(
