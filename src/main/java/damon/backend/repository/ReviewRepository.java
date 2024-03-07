@@ -37,4 +37,8 @@ public interface ReviewRepository extends JpaRepository<Review, Long>,ReviewRepo
 
     @Query("SELECT r FROM Review r JOIN FETCH r.user u WHERE u.id = :userId ORDER BY r.createdDate DESC")
     List<Review> findMyReviews(Long userId);
+
+    // 사용자 식별자를 기반으로 해당 사용자가 작성한 리뷰 목록을 조회
+    @Query("SELECT r FROM Review r WHERE r.user.identifier = :identifier ORDER BY r.createdDate DESC")
+    List<Review> findByUserIdentifier(@Param("identifier") String identifier);
 }

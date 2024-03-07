@@ -42,4 +42,24 @@ public class UserController {
     public Result<LoginDto> refresh(@RequestParam("refreshToken") String refreshToken) {
         return Result.success(userService.refresh(refreshToken));
     }
+
+    // 유저 닉네임 변경 API
+    @PatchMapping("/updateNickname")
+    @Operation(summary = "유저 닉네임 변경")
+    public Result<UserDto> updateNickname(
+            @AuthToken String identifier,
+            @RequestParam("newNickname") String newNickname) {
+        UserDto updatedUser = userService.updateNickname(identifier, newNickname);
+        return Result.success("User nickname successfully updated.", updatedUser);
+    }
+
+
+    // 유저 탈퇴 API
+    @DeleteMapping("/delete")
+    @Operation(summary = "유저 탈퇴")
+    public Result<?> deleteUser(@AuthToken String identifier) {
+        userService.deleteUserAccount(identifier);
+        return Result.success("User successfully deleted.");
+    }
+
 }
