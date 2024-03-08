@@ -66,6 +66,12 @@ public class Review extends BaseEntity {
         }
     }
 
+    // 이미지 추가
+    public void addImage(ReviewImage image) {
+        this.reviewImages.add(image);
+        image.setReview(this);
+    }
+
 
     // 리뷰 공통 필드 캡슐화
     private void populateReviewFields(String title, LocalDate startDate, LocalDate endDate, Area area, Long cost, List<String> suggests, String content, List<String> tags) {
@@ -112,12 +118,5 @@ public class Review extends BaseEntity {
         if (this.likeCount > 0) {
             this.likeCount--;
         }
-    }
-
-
-    // 이미지 추가
-    public void addImage(ReviewImage reviewImage) {
-        this.reviewImages.add(reviewImage);
-        reviewImage.setReview(this); // 양방향 연관관계 설정
     }
 }

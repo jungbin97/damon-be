@@ -42,11 +42,11 @@ public class ReviewController {
     public Result<ReviewResponse> postReview(
             @Valid
             @RequestBody ReviewRequest reviewRequest,
-//            @RequestParam("images") Optional<List<MultipartFile>> images,
+            @RequestParam("images") Optional<List<MultipartFile>> images,
             @Parameter(description = "유저 식별자", required = true, hidden = true)
             @AuthToken String identifier
     ){
-        ReviewResponse review = reviewService.postReview(reviewRequest, identifier);
+        ReviewResponse review = reviewService.postReview(reviewRequest, images.orElse(new ArrayList<>()), identifier);
         return Result.success(review);
     }
 
@@ -57,7 +57,7 @@ public class ReviewController {
             @Schema(description = "리뷰 인덱스", example="1")
             @Valid
             @PathVariable Long reviewId,
-            @RequestParam("images") Optional<List<MultipartFile>> newImages,
+            @RequestParam("images") Optional<List<MultipartFile>> images,
             @RequestParam("deleteImages") Optional<List<Long>> deleteImageIds,
             @RequestBody ReviewRequest reviewRequest,
             @Parameter(description = "유저 식별자", required = true, hidden = true)
@@ -65,7 +65,8 @@ public class ReviewController {
         ReviewResponse updatedReview = reviewService.updateReview(
                 reviewId,
                 reviewRequest,
-                newImages.orElse(new ArrayList<>()), deleteImageIds.orElse(new ArrayList<>()),
+                images.orElse(new ArrayList<>()),
+                deleteImageIds.orElse(new ArrayList<>()),
                 identifier
         );
         return Result.success(updatedReview);

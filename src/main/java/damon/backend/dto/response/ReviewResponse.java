@@ -67,10 +67,9 @@ public class ReviewResponse {
                 review.getCost(),
                 review.getSuggests(),
                 tags,
-                imageUrls, // 이미지 URL 리스트
+                imageUrls,
                 review.getContent(),
                 organizedComments// 계층적으로 구조화된 댓글 목록
-
         );
     }
 }

@@ -5,7 +5,7 @@ import damon.backend.dto.response.ReviewListResponse;
 import damon.backend.dto.response.ReviewResponse;
 import damon.backend.entity.*;
 import damon.backend.entity.user.User;
-import damon.backend.exception.ReviewException;
+import damon.backend.exception.custom.*;
 import damon.backend.repository.ReviewImageRepository;
 import damon.backend.repository.ReviewLikeRepository;
 import damon.backend.repository.ReviewRepository;
@@ -20,12 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.ZoneOffset;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -41,48 +36,42 @@ public class ReviewService {
     private final ReviewLikeRepository reviewLikeRepository;
     private final UserRepository userRepository;
     private final CommentStructureOrganizer commentStructureOrganizer;
-    private final ReviewImageService reviewImageService;
 
     // 등록
-    public ReviewResponse postReview(ReviewRequest request, String identifier) {
-        User user = userRepository.findByIdentifier(identifier).orElseThrow(ReviewException::memberNotFound);
+    public ReviewResponse postReview(ReviewRequest request, List<MultipartFile> images, String identifier) {
+        User user = userRepository.findByIdentifier(identifier).orElseThrow(UserNotFoundException::new);
 
         Review review = Review.create(request.getTitle(), request.getStartDate(), request.getEndDate(),
                 request.getArea(), request.getCost(), request.getSuggests(),
                 request.getContent(), request.getTags(), user);
         review = reviewRepository.save(review);
 
-        if (request.getImage() != null) {
-            ReviewImage reviewImage =
-                    reviewImageRepository.save(new ReviewImage(request.getImage(), true, review));
-            review.addImage(reviewImage);
-        }
+        addImages(images, review);
         reviewRepository.save(review); // 이미지 URL이 추가된 리뷰 저장
-
-
         List<ReviewCommentResponse> emptyCommentsList = new ArrayList<>(); // 새 리뷰에는 댓글이 없으므로 빈 리스트 생성
         return ReviewResponse.from(review, emptyCommentsList); // 저장된 리뷰와 빈 댓글 목록을 전달
     }
 
     // 수정
-    public ReviewResponse updateReview(Long reviewId, ReviewRequest request, List<MultipartFile> newImages, List<Long> imageIdsToDelete, String identifier)  {
+    public ReviewResponse updateReview(Long reviewId, ReviewRequest request, List<MultipartFile> images, List<Long> deleteImageIds, String identifier) {
 
         Review review = reviewRepository.findById(reviewId)
-                .orElseThrow(ReviewException::reviewNotFound);
+                .orElseThrow(ReviewNotFoundException::new);
 
-        User user = userRepository.findByIdentifier(identifier).orElseThrow(ReviewException::memberNotFound);
+        User user = userRepository.findByIdentifier(identifier)
+                .orElseThrow(UserNotFoundException::new);
 
         if (!review.getUser().getIdentifier().equals(identifier)) {
-            throw ReviewException.unauthorized();
+            throw new UnauthorizedException();
         }
 
         // 리뷰 업데이트
         review.update(request.getTitle(), request.getStartDate(), request.getEndDate(), request.getArea(),
                 request.getCost(), request.getSuggests(), request.getContent(), request.getTags());
 
-
-        // 이미지 처리: 새 이미지 추가 및 기존 이미지 삭제
-        reviewImageService.handleImage(review, newImages, imageIdsToDelete);
+        // 이미지 추가 및 삭제
+        deleteImages(deleteImageIds, review);
+        addImages(images, review);
         review = reviewRepository.save(review);
 
         // 댓글 구조를 다시 조직화
@@ -96,7 +85,7 @@ public class ReviewService {
     @Transactional(readOnly = true)
     public ReviewResponse searchReviewDetail(Long reviewId, boolean incrementViewCount) {
         Review review = reviewRepository.findReviewWithCommentsAndRepliesByReviewId(reviewId)
-                .orElseThrow(ReviewException::reviewNotFound);
+                .orElseThrow(ReviewNotFoundException::new);
 
         if (incrementViewCount) {
             review.incrementViewCount();
@@ -129,21 +118,25 @@ public class ReviewService {
     // 삭제
     public void deleteReview(Long reviewId, String identifier) {
         Review review = reviewRepository.findById(reviewId)
-                .orElseThrow(ReviewException::reviewNotFound);
-        User user = userRepository.findByIdentifier(identifier).orElseThrow(ReviewException::memberNotFound);
+                .orElseThrow(ReviewNotFoundException::new);
+        User user = userRepository.findByIdentifier(identifier).orElseThrow(UserNotFoundException::new);
 
         if (!review.getUser().getIdentifier().equals(identifier)) {
-            throw ReviewException.unauthorized();
+            throw new UnauthorizedException();
         }
+
+        // 리뷰와 연관된 모든 이미지를 S3에서 삭제
+        review.getReviewImages().forEach(image -> awsS3Service.deleteImage(image.getFileKey()));
+
         reviewRepository.delete(review);
     }
 
     // 좋아요 수 (다시 누르면 좋아요 취소)
     @Transactional
     public void toggleLike(Long reviewId, String identifier) {
-        User user = userRepository.findByIdentifier(identifier).orElseThrow(ReviewException::memberNotFound);
+        User user = userRepository.findByIdentifier(identifier).orElseThrow(UserNotFoundException::new);
         Review review = reviewRepository.findById(reviewId)
-                .orElseThrow(ReviewException::reviewNotFound);
+                .orElseThrow(ReviewNotFoundException::new);
 
         Optional<ReviewLike> like = reviewLikeRepository.findByReviewAndUser(review, user);
         if (like.isPresent()) {
@@ -159,7 +152,7 @@ public class ReviewService {
     // 좋아요 누른 게시글 조회
     @Transactional(readOnly = true)
     public Page<ReviewListResponse> searchLikedReviews(String identifier, int page, int pageSize) {
-        User user = userRepository.findByIdentifier(identifier).orElseThrow(ReviewException::memberNotFound);
+        User user = userRepository.findByIdentifier(identifier).orElseThrow(UserNotFoundException::new);
 
         Pageable pageable = PageRequest.of(page, pageSize, Sort.by(Sort.Direction.DESC, "id"));
         Page<Review> likedReviews = reviewLikeRepository.findReviewsByUser(user, pageable);
@@ -178,4 +171,48 @@ public class ReviewService {
                 .collect(Collectors.toList());
     }
 
+    // 이미지 삭제
+    private void deleteImages(List<Long> deleteImageIds, Review review) {
+        review.getReviewImages().forEach(image -> {
+            if (review.getReviewImages().contains(image)) {
+                awsS3Service.deleteImage(image.getFileKey());  // 파일 키를 사용하여 S3 파일 삭제
+                reviewImageRepository.delete(image);
+            }
+        });
+    }
+
+    // 이미지 추가
+    private void addImages (List < MultipartFile > images, Review review){
+        validateImages(images);
+
+        images.forEach(image -> {
+            try {
+                AwsS3Service.UploadResult uploadResult = awsS3Service.uploadImage(image);
+                ReviewImage reviewImage = ReviewImage.createImage(uploadResult.getFileUrl(), uploadResult.getFileKey(), review);
+                review.addImage(reviewImage);
+                reviewImageRepository.save(reviewImage);
+            }
+
+            // 이미지 업로드 후 예외
+            catch (IOException e) {
+                throw new ImageUploadFailedException();
+            }
+        });
+    }
+
+    // 이미지 업로드 직전 검증 로직
+    private void validateImages(List<MultipartFile> images) {
+        final int MAX_IMAGE_COUNT = 10;
+        final long MAX_IMAGE_SIZE = 10 * 1024 * 1024; // 10MB
+
+        if (images.size() > MAX_IMAGE_COUNT) {
+            throw new ImageCountExceededException();
+        }
+
+        for (MultipartFile image : images) {
+            if (image.getSize() > MAX_IMAGE_SIZE) {
+                throw new ImageSizeExceededException();
+            }
+        }
+    }
 }

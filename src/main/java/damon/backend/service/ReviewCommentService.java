@@ -6,7 +6,10 @@ import damon.backend.dto.response.ReviewResponse;
 import damon.backend.entity.Review;
 import damon.backend.entity.ReviewComment;
 import damon.backend.entity.user.User;
-import damon.backend.exception.ReviewException;
+import damon.backend.exception.custom.CommentNotFoundException;
+import damon.backend.exception.custom.ReviewNotFoundException;
+import damon.backend.exception.custom.UnauthorizedException;
+import damon.backend.exception.custom.UserNotFoundException;
 import damon.backend.repository.ReviewCommentRepository;
 import damon.backend.repository.ReviewRepository;
 import damon.backend.repository.user.UserRepository;
@@ -15,7 +18,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 @RequiredArgsConstructor
@@ -29,16 +31,16 @@ public class ReviewCommentService implements CommentStructureOrganizer {
     // 댓글 등록
     public ReviewResponse postComment(Long reviewId, ReviewCommentRequest request, String identifier) {
         User user = userRepository.findByIdentifier(identifier)
-                .orElseThrow(ReviewException::memberNotFound);
+                .orElseThrow(UserNotFoundException::new);
         Review review = reviewRepository.findById(reviewId)
-                .orElseThrow(ReviewException::reviewNotFound);
+                .orElseThrow(ReviewNotFoundException::new);
 
         ReviewComment parentComment = null; // 초기화 변경
 
         // 부모 댓글 처리
         if (request.getParentId() != null) {
             parentComment = reviewCommentRepository.findById(request.getParentId())
-                    .orElseThrow(ReviewException::commentNotFound);
+                    .orElseThrow(CommentNotFoundException::new);
 
         }
 
@@ -54,13 +56,13 @@ public class ReviewCommentService implements CommentStructureOrganizer {
     // 댓글 수정
     public ReviewResponse updateComment(Long commentId, ReviewCommentRequest request, String identifier) {
         ReviewComment comment = reviewCommentRepository.findById(commentId)
-                .orElseThrow(ReviewException::commentNotFound);
+                .orElseThrow(CommentNotFoundException::new);
 
         // 사용자 조회
-        User user = userRepository.findByIdentifier(identifier).orElseThrow(ReviewException::memberNotFound);
+        User user = userRepository.findByIdentifier(identifier).orElseThrow(UserNotFoundException::new);
 
         if (!comment.getReview().getUser().getIdentifier().equals(identifier)) {
-            throw ReviewException.unauthorized();
+            throw new UnauthorizedException();
         }
 
         // 댓글 업데이트 로직
@@ -72,7 +74,7 @@ public class ReviewCommentService implements CommentStructureOrganizer {
 
         // 여기서는 ReviewRepository를 사용하여 리뷰 정보를 직접 조회하고, 필요한 데이터를 조합하여 ReviewResponse를 생성합니다.
         Review review = reviewRepository.findById(reviewId)
-                .orElseThrow(ReviewException::reviewNotFound);
+                .orElseThrow(ReviewNotFoundException::new);
 
         // 댓글 구조를 다시 조직화
         List<ReviewCommentResponse> organizedComments = organizeCommentStructure(reviewId);
@@ -85,12 +87,12 @@ public class ReviewCommentService implements CommentStructureOrganizer {
     // 댓글 삭제
     public void deleteComment(Long commentId, String identifier) {
         ReviewComment comment = reviewCommentRepository.findById(commentId)
-                .orElseThrow(ReviewException::commentNotFound);
+                .orElseThrow(CommentNotFoundException::new);
 
-        User user = userRepository.findByIdentifier(identifier).orElseThrow(ReviewException::memberNotFound);
+        User user = userRepository.findByIdentifier(identifier).orElseThrow(UserNotFoundException::new);
 
         if (!comment.getReview().getUser().getIdentifier().equals(identifier)) {
-            throw ReviewException.unauthorized();
+            throw new UnauthorizedException();
         }
 
         // 부모 댓글 삭제 시 대댓글도 함께 삭제

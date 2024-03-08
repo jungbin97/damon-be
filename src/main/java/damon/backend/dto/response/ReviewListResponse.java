@@ -43,15 +43,15 @@ public class ReviewListResponse {
         List<String> tagValues = review.getTags().stream()
                 .map(Tag::getValue)
                 .collect(Collectors.toList());
-        String mainImageUrl = !review.getReviewImages().isEmpty() ? review.getReviewImages().get(0).getUrl() : null;
 
-        if (review.getReviewImages().size() > 0) {
+        String mainImage = !review.getReviewImages().isEmpty() ? review.getReviewImages().get(0).getUrl() : null;
+
             return new ReviewListResponse(
 
                     review.getId(),
                     review.getUser() != null ? review.getUser().getNickname() : null,
                     state,
-                    review.getCreatedDate().format(DATE_TIME_FORMATTER),    // LocalDateTime -> String
+                    review.getCreatedDate().format(DATE_TIME_FORMATTER),
                     review.getViewCount(),
                     review.getLikeCount(),
                     commentCount,
@@ -60,26 +60,7 @@ public class ReviewListResponse {
                     review.getCost(),
                     review.getSuggests(),
                     tagValues,
-                    review.getReviewImages().get(0).getUrl()
+                    mainImage
             );
-        } else {
-            return new ReviewListResponse(
-
-                    review.getId(),
-                    review.getUser() != null ? review.getUser().getNickname() : null,
-                    state,
-                    review.getCreatedDate().format(DATE_TIME_FORMATTER),    // LocalDateTime -> String
-                    review.getViewCount(),
-                    review.getLikeCount(),
-                    commentCount,
-                    review.getTitle(),
-                    review.getArea(),
-                    review.getCost(),
-                    review.getSuggests(),
-                    tagValues,
-                    "");
-        }
-
     }
-
 }

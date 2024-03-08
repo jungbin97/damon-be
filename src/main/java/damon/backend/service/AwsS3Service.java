@@ -27,35 +27,41 @@ public class AwsS3Service {
     @Value("${cloud.aws.s3.review-prefix}")
     private String reviewPrefix;
 
-    public String uploadImage(MultipartFile file) throws IOException {
-        if (file.isEmpty()) {
-            throw new IllegalStateException("Cannot upload empty file");
+    public class UploadResult {
+        private final String fileKey;
+        private final String fileUrl;
+
+        public UploadResult(String fileKey, String fileUrl) {
+            this.fileKey = fileKey;
+            this.fileUrl = fileUrl;
         }
 
-        String fileName = file.getOriginalFilename();
-        String ext = fileName.substring(fileName.lastIndexOf("."));
-        String uuidFileName = UUID.randomUUID().toString() + ext;
+        public String getFileKey() {
+            return fileKey;
+        }
+
+        public String getFileUrl() {
+            return fileUrl;
+        }
+    }
+
+    public UploadResult uploadImage(MultipartFile multipartFile) throws IOException {
+        String fileName = multipartFile.getOriginalFilename();
+        String extension = fileName.substring(fileName.lastIndexOf("."));
+        String fileKey = reviewPrefix + UUID.randomUUID().toString() + extension;
 
         s3Client.putObject(PutObjectRequest.builder()
                         .bucket(bucket)
-                        .key(reviewPrefix + uuidFileName)
+                        .key(fileKey)
                         .build(),
-                RequestBody.fromInputStream(file.getInputStream(), file.getSize()));
-        String result = s3Client.utilities().getUrl(builder -> builder.bucket(bucket).key(reviewPrefix + uuidFileName)).toString();
-        Log.info("AwsS3Service uploadImage return:" + result);
-        return result;
+                RequestBody.fromInputStream(multipartFile.getInputStream(), multipartFile.getSize()));
+
+        String fileUrl = s3Client.utilities().getUrl(builder -> builder.bucket(bucket).key(fileKey)).toString();
+
+        return new UploadResult(fileKey, fileUrl);
     }
 
-    public List<String> uploadImages(List<MultipartFile> files) throws IOException {
-        List<String> imageUrls = new ArrayList<>();
-        for (MultipartFile file : files) {
-            String imageUrl = uploadImage(file);
-            imageUrls.add(imageUrl);
-        }
-        return imageUrls;
-    }
-
-    // AwsS3Service 내 이미지 삭제 메서드
+    // 3S 내 이미지 삭제
     public void deleteImage(String fileKey) {
         s3Client.deleteObject(DeleteObjectRequest.builder()
                 .bucket(bucket)
