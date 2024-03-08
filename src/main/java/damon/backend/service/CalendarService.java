@@ -65,7 +65,7 @@ public class CalendarService {
                     .travelDay(travelDto.getDay())
                     .orderNumber(travelDto.getOrder())
                     .build();
-            // 생명 주기를 수동으로 관리하기 위해 여행지를 저장할 때마다 일정 글에도 저장(추후에 cascade를 고려합니다.)
+
             travelRepository.save(newTravel);
         });
         return CalendarCreateResponseDto.from(savedCalendar.getId());
@@ -113,10 +113,6 @@ public class CalendarService {
         Calendar calendar = calendarRepository.findByIdWithTravel(calendarId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 일정을 찾을 수 없습니다."));
 
-        if (!calendar.getUser().getId().equals(user.getId())) {
-            throw new IllegalArgumentException("해당 일정을 조회할 수 없습니다.");
-        }
-
         return CalendarResponseDto.from(calendar);
     }
 
@@ -132,10 +128,6 @@ public class CalendarService {
 
         Calendar calendar = calendarRepository.findByIdWithTravel(calendarId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 일정을 찾을 수 없습니다."));
-
-        if (!calendar.getUser().getId().equals(user.getId())) {
-            throw new IllegalArgumentException("해당 일정을 수정할 수 없습니다.");
-        }
 
         // 일정 글 업데이트 로직
         calendar.update(requestDto.getTitle(), requestDto.getStartDate(), requestDto.getEndDate(), requestDto.getArea());
@@ -156,7 +148,8 @@ public class CalendarService {
                         .latitude(travelEditRequestDto.getLatitude())
                         .longitude(travelEditRequestDto.getLongitude())
                         .memo(travelEditRequestDto.getMemo())
-                        .travelDay(travelEditRequestDto.getDay()) // orderNum 순서를 어떻게 관리 할 것인가? => day로 관리
+                        .travelDay(travelEditRequestDto.getDay())
+                        .orderNumber(travelEditRequestDto.getOrder())
                         .build())
                 .collect(Collectors.toList());
 
