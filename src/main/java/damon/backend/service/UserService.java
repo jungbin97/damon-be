@@ -4,15 +4,12 @@ import damon.backend.dto.response.user.KakaoTokenDto;
 import damon.backend.dto.response.user.LoginDto;
 import damon.backend.dto.response.user.UserDto;
 import damon.backend.entity.user.User;
-import damon.backend.exception.CustomException;
-import damon.backend.exception.Status;
 import damon.backend.exception.custom.*;
 import damon.backend.repository.user.UserRepository;
 import damon.backend.util.login.JwtUtil;
 import damon.backend.util.login.KakaoUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -54,22 +51,4 @@ public class UserService {
         String newRefreshToken = JwtUtil.generateRefreshToken(identifier);
         return new LoginDto(newAccessToken, newRefreshToken);
     }
-
-// UserService.java
-
-    public UserDto updateNickname(String identifier, String newNickname) {
-        User user = userRepository.findByIdentifier(identifier)
-                .orElseThrow(() -> new CustomException(HttpStatus.NOT_FOUND.value(), Status.NOT_FOUND, "User not found with identifier: " + identifier));
-        user.setNickname(newNickname);
-        userRepository.save(user);
-        return new UserDto(user);
-    }
-
-
-    public void deleteUserAccount(String identifier) {
-        User user = userRepository.findByIdentifier(identifier)
-                .orElseThrow(() -> new CustomException(HttpStatus.NOT_FOUND.value(), Status.NOT_FOUND, "User not found with identifier: " + identifier));
-        userRepository.delete(user);
-    }
-
 }
