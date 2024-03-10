@@ -1,160 +1,299 @@
-//package damon.backend.service;
-//
-//import damon.backend.dto.request.CalendarCreateRequestDto;
-//import damon.backend.dto.request.TravelCreateRequestDto;
-//import damon.backend.dto.response.CalendarResponseDto;
-//import damon.backend.dto.response.CalendarsResponseDto;
-//import damon.backend.entity.Area;
-//import damon.backend.entity.Calendar;
-//import damon.backend.entity.Travel;
-//import damon.backend.entity.user.User;
-//import damon.backend.repository.CalendarRepository;
-//import damon.backend.repository.TravelRepository;
-//import damon.backend.repository.user.UserRepository;
-//import org.junit.jupiter.api.*;
-//import org.junit.jupiter.api.extension.ExtendWith;
-//import org.mockito.InjectMocks;
-//import org.mockito.Mock;
-//import org.mockito.Mockito;
-//import org.mockito.junit.jupiter.MockitoExtension;
-//import org.springframework.data.domain.Page;
-//import org.springframework.data.domain.PageImpl;
-//import org.springframework.data.domain.PageRequest;
-//
-//import java.time.LocalDate;
-//import java.util.*;
-//
-//import static org.junit.jupiter.api.Assertions.assertEquals;
-//import static org.junit.jupiter.api.Assertions.assertNotNull;
-//import static org.mockito.AdditionalAnswers.returnsFirstArg;
-//import static org.mockito.ArgumentMatchers.any;
-//import static org.mockito.Mockito.*;
-//
-//
-//@ExtendWith(MockitoExtension.class)
-//class CalendarServiceTest {
-//    @Mock
-//    CalendarRepository calendarRepository;
-//    @Mock
-//    private TravelRepository travelRepository;
-//
-//    @Mock
-//    private UserRepository userRepository;
-//
-//    @InjectMocks
-//    private CalendarService calendarService;
-//
-//    private User user;
-//
-//    private CalendarCreateRequestDto requestDto;
-//
-//
-//
-//    @BeforeEach
-//    void setUp() {
-//        userRepository = Mockito.mock(UserRepository.class);
-//        calendarRepository = Mockito.mock(CalendarRepository.class);
-//        travelRepository = Mockito.mock(TravelRepository.class);
-//
-//        user = new User("1", "test nickname", "ex@naver.com", "/test/url");
-//
-//        ArrayList<TravelCreateRequestDto> travelDtoList = new ArrayList<>();
-//
-//        TravelCreateRequestDto travelDto1 = TravelCreateRequestDto.of("test LocalName1", "38.1231231", "128.123123", 1, "test memo", 1);
-//        TravelCreateRequestDto travelDto2 = TravelCreateRequestDto.of("test LocalName2", "38.1231231", "128.123123", 1, "test memo", 2);
-//        TravelCreateRequestDto travelDto3 = TravelCreateRequestDto.of("test LocalName3", "38.1231231", "128.123123", 1, "test memo", 3);
-//        TravelCreateRequestDto travelDto4 = TravelCreateRequestDto.of("test LocalName1", "38.1231231", "128.123123", 2, "test memo", 1);
-//        TravelCreateRequestDto travelDto5 = TravelCreateRequestDto.of("test LocalName2", "38.1231231", "128.123123", 2, "test memo",2);
-//        TravelCreateRequestDto travelDto6 = TravelCreateRequestDto.of("test LocalName3", "38.1231231", "128.123123", 2, "test memo", 3);
-//
-//        travelDtoList.add(travelDto1);
-//        travelDtoList.add(travelDto2);
-//        travelDtoList.add(travelDto3);
-//        travelDtoList.add(travelDto4);
-//        travelDtoList.add(travelDto5);
-//        travelDtoList.add(travelDto6);
-//
-//        requestDto = CalendarCreateRequestDto.of("제주 여행 2박 3일", LocalDate.of(2021, 8, 1), LocalDate.of(2021, 8, 3), Area.JEJU, travelDtoList);
-//
-//        when(userRepository.findByIdentifier(any())).thenReturn(Optional.of(user));
-//    }
-//
-//    @DisplayName("createCalendar: 일정 글을 생성한다.")
-//    @Test
-//    public void createCalendar() throws Exception {
-//        when(calendarRepository.save(any(Calendar.class))).then(returnsFirstArg());
-//        when(travelRepository.save(any(Travel.class))).then(returnsFirstArg());
-//
-//        // Action
-//        calendarService.createCalendar(user.getIdentifier(), requestDto);
-//
-//        // Verify
-//        verify(userRepository).findByIdentifier(user.getIdentifier());
-//        verify(calendarRepository).save(any(Calendar.class));
-//        verify(travelRepository, times(requestDto.getTravels().size())).save(any(Travel.class));
-//    }
-//
-//    @DisplayName("getCalendars: 멤버의 일정 글 리스트를 조회한다.")
-//    @Test
-//    public void getCalendarList() throws Exception {
-//        int page = 0;
-//        int size = 10;
-//
-//        // 여러개의 캘린더 생성(11개)
-//        List<Calendar> calendars = Arrays.asList(
-//                Calendar.builder().build(),
-//                Calendar.builder().build(),
-//                Calendar.builder().build(),
-//                Calendar.builder().build(),
-//                Calendar.builder().build(),
-//                Calendar.builder().build(),
-//                Calendar.builder().build(),
-//                Calendar.builder().build(),
-//                Calendar.builder().build(),
-//                Calendar.builder().build(),
-//                Calendar.builder().build()
-//                );
-//
-//        // 페이징 처리 수동
-//        PageRequest pageRequest = PageRequest.of(page, size);
-//        int start = 0;
-//        int end = Math.min(start + size, calendars.size());
-//
-//        List<Calendar> subList = calendars.subList(start, end);
-//        Page<Calendar> mockPage = new PageImpl<>(subList, pageRequest, calendars.size());
-//        when(calendarRepository.findPageByUser(any(PageRequest.class))).thenReturn(mockPage);
-////        when(calendarRepository.findPageByUser(any(Long.class), any(PageRequest.class))).thenReturn(mockPage);
-//
-//        // Action
-//        Page<CalendarsResponseDto> result = calendarService.getCalendars(page, size);
-////        Page<CalendarsResponseDto> result = calendarService.getCalendars(user.getIdentifier(), page, size);
-//
-//        // Verify
-//        assertNotNull(result);
-//        assertEquals(size, result.getContent().size());
-//        verify(calendarRepository).findPageByUser(any(PageRequest.class));
-////        verify(calendarRepository).findPageByUser(any(Long.class), any(PageRequest.class));
-//    }
-//
-//    @DisplayName("getCalendar: 멤버의 일정 글 상세 조회한다.")
-//    @Test
-//    public void getCalender() throws Exception {
-//        Long calendarId = 1L;
-//        Calendar calendar = Calendar.builder()
-//                .user(user)
-//                .title("제주 여행 2박 3일")
-//                .startDate(LocalDate.of(2021, 8, 1))
-//                .endDate(LocalDate.of(2021, 8, 3))
-//                .area(Area.JEJU)
-//                .build();
-//        when(calendarRepository.findByIdWithTravel(any())).thenReturn(Optional.of(calendar));
-//
-//        // Action
-//        CalendarResponseDto result = calendarService.getCalendar(user.getIdentifier(), calendarId);
-//
-//        // Verify
-//        assertNotNull(result);
-//        verify(userRepository).findById(user.getId());  // 멤버 조회 확인
-//        assertEquals(calendar.getTitle(), result.getTitle());
-//    }
-//}
+package damon.backend.service;
+
+import damon.backend.dto.request.*;
+import damon.backend.dto.response.CalendarCreateResponseDto;
+import damon.backend.dto.response.CalendarEditResponseDto;
+import damon.backend.dto.response.CalendarResponseDto;
+import damon.backend.dto.response.CalendarsResponseDto;
+import damon.backend.entity.Area;
+import damon.backend.entity.Calendar;
+import damon.backend.entity.Travel;
+import damon.backend.entity.user.User;
+import damon.backend.repository.CalendarRepository;
+import damon.backend.repository.TravelRepository;
+import damon.backend.repository.user.UserRepository;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.*;
+
+import java.time.LocalDate;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+
+import static org.assertj.core.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.*;
+
+@ExtendWith(MockitoExtension.class)
+class CalendarServiceTest {
+    @InjectMocks
+    private CalendarService calendarService;
+
+    @Mock
+    private CalendarRepository calendarRepository;
+
+    @Mock
+    private TravelRepository travelRepository;
+
+    @Mock
+    private UserRepository userRepository;
+
+    private User user;
+
+    private Calendar calendar;
+    private CalendarCreateRequestDto createRequestDto;
+
+    private TravelCreateRequestDto travelRequestDto;
+
+    private List<Calendar> calendarList;
+
+    @BeforeEach
+    void setUp() {
+
+        user = new User("1", "사용자1", "ex1@naver.com", "http://ex1.png");
+        user.setId(1L);     // User 객체에 ID 값 설정
+
+        calendar = Calendar.builder()
+                .user(user)
+                .title("제목")
+                .startDate(LocalDate.now())
+                .endDate(LocalDate.now().plusDays(1))
+                .area(Area.BUSAN)
+                .build();
+
+        // 서로 다른 Calendar 인스턴스 생성
+        calendarList = IntStream.rangeClosed(1, 3)
+                .mapToObj(i -> new Calendar(user, "제목" + i, LocalDate.now(), LocalDate.now().plusDays(i), Area.BUSAN))
+                .collect(Collectors.toList());
+
+        travelRequestDto = TravelCreateRequestDto.of("제목", "123.123.123", "123.123.123", 3, "메모", 1);
+        createRequestDto = CalendarCreateRequestDto.of("제목", LocalDate.now(), LocalDate.now().plusDays(1), Area.BUSAN, Arrays.asList(travelRequestDto));
+    }
+
+
+    @DisplayName("일정을 생성합니다.")
+    @Test
+    public void testCreateCalendar() {
+        //given
+        when(userRepository.findByIdentifier(anyString())).thenReturn(Optional.of(user));
+        when(calendarRepository.save(any(Calendar.class))).thenReturn(calendar);
+
+        //when
+        CalendarCreateResponseDto result = calendarService.createCalendar("1", createRequestDto);
+
+        //then
+        verify(calendarRepository, times(1)).save(any(Calendar.class));
+        verify(travelRepository, times(createRequestDto.getTravels().size())).save(any(Travel.class));
+
+        ArgumentCaptor<Calendar> calendarArgumentCaptor = ArgumentCaptor.forClass(Calendar.class);
+        verify(calendarRepository).save(calendarArgumentCaptor.capture());
+        Calendar savedCalendar = calendarArgumentCaptor.getValue();
+        assertThat(savedCalendar.getUser()).isEqualTo(user);
+        assertThat(savedCalendar.getTitle()).isEqualTo("제목");
+
+        ArgumentCaptor<Travel> travelArgumentCaptor = ArgumentCaptor.forClass(Travel.class);
+        verify(travelRepository).save(travelArgumentCaptor.capture());
+        Travel savedTravel = travelArgumentCaptor.getAllValues().get(0);
+        assertThat(savedTravel.getCalendar()).isEqualTo(savedCalendar);
+        assertThat(savedTravel.getLocationName()).isEqualTo("제목");
+    }
+
+    @DisplayName("상위 5개 일정 글 리스트를 조회합니다.")
+    @Test
+    public void testGetCalendarsTop5() {
+        // given
+        List<Calendar> calendars = Arrays.asList(calendar, calendar, calendar, calendar, calendar);
+        when(calendarRepository.findTop5()).thenReturn(calendars);
+
+        // when
+        List<CalendarsResponseDto> result = calendarService.getCalendarsTop5();
+
+        // then
+        assertThat(result).isNotNull();
+        assertThat(result.size()).isEqualTo(5);
+        verify(calendarRepository, times(1)).findTop5();
+    }
+
+    @DisplayName("내 일정 글 리스트를 조회합니다.")
+    @Test
+    public void testGetCalendars() {
+        // given
+        Pageable pageable = PageRequest.of(0, 5, Sort.by(Sort.Direction.DESC, "createdDate"));
+        Page<Calendar> calendarPage = new PageImpl<>(Arrays.asList(calendar, calendar, calendar, calendar, calendar));
+        when(userRepository.findByIdentifier("1")).thenReturn(Optional.of(user));
+        when(calendarRepository.findPageByUser(user.getId(), pageable)).thenReturn(calendarPage);
+
+        // when
+        Page<CalendarsResponseDto> result = calendarService.getCalendars("1", 0, 5);
+
+        // then
+        assertThat(result).isNotNull();
+        assertThat(result.getTotalElements()).isEqualTo(5);
+        verify(userRepository, times(1)).findByIdentifier(anyString());
+        verify(calendarRepository, times(1)).findPageByUser(eq(user.getId()), any(Pageable.class));
+    }
+
+    @DisplayName("일정 글 상세 조회합니다.")
+    @Test
+    public void testGetCalendar() {
+        // given
+        when(userRepository.findByIdentifier("1")).thenReturn(Optional.of(user));
+        when(calendarRepository.findByIdWithTravel(1L)).thenReturn(Optional.of(calendar));
+
+        // when
+        CalendarResponseDto result = calendarService.getCalendar("1", 1L);
+
+        // then
+        assertThat(result).isNotNull();
+        assertThat(result.getTitle()).isEqualTo("제목");
+        verify(userRepository, times(1)).findByIdentifier("1");
+        verify(calendarRepository, times(1)).findByIdWithTravel(1L);
+    }
+
+    @DisplayName("일정 글을 수정합니다.")
+    @Test
+    public void testUpdateCalendar() {
+        CalendarEditRequestDto calendarEditRequestDto = CalendarEditRequestDto.of("수정된 제목", LocalDate.now(), LocalDate.now().plusDays(1), Area.SEOUL, new ArrayList<>());
+
+        // given
+        when(userRepository.findByIdentifier("1")).thenReturn(Optional.of(user));
+        when(calendarRepository.findByIdWithTravel(1L)).thenReturn(Optional.of(calendar));
+
+        // when
+        CalendarEditResponseDto result = calendarService.updateCalendar("1", 1L, calendarEditRequestDto);
+
+        // then
+        assertThat(result).isNotNull();
+        verify(userRepository, times(1)).findByIdentifier("1");
+        verify(calendarRepository, times(1)).findByIdWithTravel(1L);
+
+        assertThat(calendar.getTitle()).isEqualTo(calendarEditRequestDto.getTitle());
+        assertThat(calendar.getStartDate()).isEqualTo(calendarEditRequestDto.getStartDate());
+        assertThat(calendar.getEndDate()).isEqualTo(calendarEditRequestDto.getEndDate());
+        assertThat(calendar.getArea()).isEqualTo(calendarEditRequestDto.getArea());
+    }
+
+    @DisplayName("일정 글 수정 시 유저가 유효하지 않은 경우 예외가 발생합니다.")
+    @Test
+    public void testUpdateCalendarWithInvalidIdentifier() {
+        // given
+        CalendarEditRequestDto calendarEditRequestDto = CalendarEditRequestDto.of("수정된 제목", LocalDate.now(), LocalDate.now().plusDays(1), Area.SEOUL, new ArrayList<>());
+        when(userRepository.findByIdentifier("1")).thenReturn(Optional.empty());
+
+        // when & then
+        assertThrows(IllegalArgumentException.class, () -> calendarService.updateCalendar("1", 1L, calendarEditRequestDto),
+                "해당 사용자를 찾을 수 없습니다.");
+    }
+
+    @DisplayName("일정 글 수정 시 일정 ID가 유효하지 않은 경우 예외가 발생합니다.")
+    @Test
+    public void testUpdateCalendarWithInvalidCalendarId() {
+        // given
+        CalendarEditRequestDto calendarEditRequestDto = CalendarEditRequestDto.of("수정된 제목", LocalDate.now(), LocalDate.now().plusDays(1), Area.SEOUL, new ArrayList<>());
+        when(userRepository.findByIdentifier("1")).thenReturn(Optional.of(user));
+        when(calendarRepository.findByIdWithTravel(1L)).thenReturn(Optional.empty());
+
+        // when & then
+        assertThrows(IllegalArgumentException.class, () -> calendarService.updateCalendar("1", 1L, calendarEditRequestDto),
+                "해당 일정을 찾을 수 없습니다.");
+    }
+
+    @DisplayName("일정 업데이트에서 여행지를 추가합니다.")
+    @Test
+    public void testAddTravel() {
+        // given
+        TravelEditRequestDto newTravelDto = TravelEditRequestDto.of(null, "새로운 장소", "123.123.123", "123.123.123", 1, 1, "새로운 메모", false);
+        CalendarEditRequestDto calendarEditRequestDto = CalendarEditRequestDto.of("수정된 제목", LocalDate.now(), LocalDate.now().plusDays(1), Area.SEOUL, Arrays.asList(newTravelDto));
+
+        when(userRepository.findByIdentifier("1")).thenReturn(Optional.of(user));
+        when(calendarRepository.findByIdWithTravel(1L)).thenReturn(Optional.of(calendar));
+        ArgumentCaptor<List<Travel>> travelListCaptor = ArgumentCaptor.forClass(List.class);
+
+        // when
+        CalendarEditResponseDto result = calendarService.updateCalendar("1", 1L, calendarEditRequestDto);
+
+        // then
+        verify(travelRepository, times(1)).saveAll(travelListCaptor.capture());
+        List<Travel> capturedTravels = travelListCaptor.getValue();
+
+        assertThat(capturedTravels.size()).isEqualTo(1);
+        assertThat(capturedTravels.get(0).getLocationName()).isEqualTo("새로운 장소");
+    }
+
+    @DisplayName("일정 업데이트에서 여행지를 삭제합니다.")
+    @Test
+    public void testDeleteTravel() {
+        // given
+        TravelEditRequestDto newTravelDto = TravelEditRequestDto.of(1L, "삭제된 장소", "123.123.123", "123.123.123", 1, 1, "삭제된 메모", true);
+        CalendarEditRequestDto calendarEditRequestDto = CalendarEditRequestDto.of("수정된 제목", LocalDate.now(), LocalDate.now().plusDays(1), Area.SEOUL, Arrays.asList(newTravelDto));
+
+        when(userRepository.findByIdentifier("1")).thenReturn(Optional.of(user));
+        when(calendarRepository.findByIdWithTravel(1L)).thenReturn(Optional.of(calendar));
+        ArgumentCaptor<List<Long>> travelListCaptor = ArgumentCaptor.forClass(List.class);
+
+        // when
+        CalendarEditResponseDto result = calendarService.updateCalendar("1", 1L, calendarEditRequestDto);
+
+        // then
+        verify(travelRepository, times(1)).deleteAllByIdIn(travelListCaptor.capture());
+        List<Long> capturedDeleteTravelsId = travelListCaptor.getValue();
+
+        assertThat(capturedDeleteTravelsId.size()).isEqualTo(1);
+        assertThat(capturedDeleteTravelsId.get(0)).isEqualTo(1L);
+    }
+
+
+    @DisplayName("일정 글 단건 삭제합니다.")
+    @Test
+    public void testDeleteCalendar() {
+        // given
+        when(userRepository.findByIdentifier("1")).thenReturn(Optional.of(user));
+        when(calendarRepository.findById(1L)).thenReturn(Optional.of(calendar));
+
+        // when
+        calendarService.deleteCalendar("1", 1L);
+
+        // then
+        verify(calendarRepository, times(1)).delete(any(Calendar.class));
+    }
+
+    @DisplayName("선택한 일정 글을 삭제합니다.")
+    @Test
+    public void testDeleteCalendars() {
+        // given
+        CalendarsDeleteRequestDto deleteRequestDto = CalendarsDeleteRequestDto.of(Arrays.asList(1L, 2L, 3L));
+        List<Calendar> calendars = Arrays.asList(calendar, calendar, calendar);
+
+        when(userRepository.findByIdentifier("1")).thenReturn(Optional.of(user));
+        when(calendarRepository.findAllById(deleteRequestDto.getCalendarIds())).thenReturn(calendars);
+
+        // when
+        calendarService.deleteCalendars("1", deleteRequestDto);
+
+        // then
+        verify(userRepository, times(1)).findByIdentifier("1");
+        verify(calendarRepository, times(1)).findAllById(deleteRequestDto.getCalendarIds());
+        verify(calendarRepository, times(1)).deleteAllByIn(deleteRequestDto.getCalendarIds());
+    }
+
+    @DisplayName("존재하지 않는 일정 삭제 시도 시 예외 발생")
+    @Test
+    public void testDeleteNonExistentCalendars() {
+        // given
+        when(userRepository.findByIdentifier("1")).thenReturn(Optional.of(user));
+        when(calendarRepository.findAllById(anyList())).thenReturn(Collections.emptyList());
+
+        // when & then
+        assertThrows(IllegalArgumentException.class, () -> calendarService.deleteCalendars("1", CalendarsDeleteRequestDto.of(Arrays.asList(1L, 2L, 3L))),
+                "요청된 일정 중 일부가 존재하지 않습니다.");;
+    }
+}
