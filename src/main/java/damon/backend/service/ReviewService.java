@@ -60,7 +60,7 @@ public class ReviewService {
     }
 
     // 수정
-    public ReviewResponse updateReview(Long reviewId, ReviewRequest request, List<MultipartFile> images, List<Long> deleteImageIds, String identifier) {
+    public ReviewResponse updateReview(Long reviewId, ReviewRequest request, List<MultipartFile> newImages, List<String> deleteImageUrls, String identifier) {
 
         Review review = reviewRepository.findById(reviewId)
                 .orElseThrow(ReviewNotFoundException::new);
@@ -80,6 +80,25 @@ public class ReviewService {
 //        deleteImages(deleteImageIds, review);
 //        addImages(images, review);
 //        review = reviewRepository.save(review);
+
+        // 이미지 삭제
+        if (!deleteImageUrls.isEmpty()) {
+            deleteImageUrls.forEach(awsS3Service::deleteImageByUrl);
+        }
+
+        // 이미지 추가
+        if (newImages != null && !newImages.isEmpty()) {
+            for (MultipartFile file : newImages) {
+                try {
+                    String url = awsS3Service.uploadImage(file);
+                    ReviewImage image = new ReviewImage(url, false, review);
+                    reviewImageRepository.save(image);
+                } catch (IOException e) {
+                    // 예외 처리
+
+                }
+            }
+        }
 
         // 댓글 구조를 다시 조직화
         List<ReviewCommentResponse> organizedComments = commentStructureOrganizer.organizeCommentStructure(reviewId);
@@ -106,6 +125,7 @@ public class ReviewService {
             throw new ImageSizeExceededException();
         }
     }
+
 
     // 상세 조회 (댓글 포함)
     @Transactional(readOnly = true)
@@ -149,6 +169,13 @@ public class ReviewService {
 
         if (!review.getUser().getIdentifier().equals(identifier)) {
             throw new UnauthorizedException();
+        }
+
+        // 리뷰와 연관된 모든 이미지를 S3에서 삭제
+        List<ReviewImage> reviewImages = review.getReviewImages();
+        for (ReviewImage reviewImage : reviewImages) {
+            awsS3Service.deleteImageByUrl(reviewImage.getUrl());
+            reviewImageRepository.delete(reviewImage);
         }
 
         // 리뷰와 연관된 모든 이미지를 S3에서 삭제
@@ -227,18 +254,18 @@ public class ReviewService {
 //    }
 
     // 이미지 업로드 직전 검증 로직
-    private void validateImages(List<MultipartFile> images) {
-        final int MAX_IMAGE_COUNT = 10;
-        final long MAX_IMAGE_SIZE = 10 * 1024 * 1024; // 10MB
+//    private void validateImages(List<MultipartFile> images) {
+//        final int MAX_IMAGE_COUNT = 10;
+//        final long MAX_IMAGE_SIZE = 10 * 1024 * 1024; // 10MB
+//
+//        if (images.size() > MAX_IMAGE_COUNT) {
+//            throw new ImageCountExceededException();
+//        }
+//
+//        for (MultipartFile image : images) {
+//            if (image.getSize() > MAX_IMAGE_SIZE) {
+//                throw new ImageSizeExceededException();
+//            }
+//        }
 
-        if (images.size() > MAX_IMAGE_COUNT) {
-            throw new ImageCountExceededException();
-        }
-
-        for (MultipartFile image : images) {
-            if (image.getSize() > MAX_IMAGE_SIZE) {
-                throw new ImageSizeExceededException();
-            }
-        }
-    }
 }

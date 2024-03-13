@@ -1,5 +1,7 @@
 package damon.backend.service;
 
+import damon.backend.exception.custom.ImageCountExceededException;
+import damon.backend.exception.custom.ImageSizeExceededException;
 import damon.backend.util.Log;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -75,6 +77,7 @@ public class AwsS3Service {
             throw new IllegalStateException("Cannot upload empty file");
         }
 
+
         String fileName = file.getOriginalFilename();
         String ext = fileName.substring(fileName.lastIndexOf("."));
         String uuidFileName = UUID.randomUUID().toString() + ext;
@@ -91,20 +94,41 @@ public class AwsS3Service {
 
     public List<String> uploadImages(List<MultipartFile> files) throws IOException {
         List<String> imageUrls = new ArrayList<>();
+
+        final int MAX_IMAGE_COUNT = 10;
+        final long MAX_IMAGE_SIZE = 10 * 1024 * 1024; // 10MB
+
+        if (files.size() > MAX_IMAGE_COUNT) {
+            throw new ImageCountExceededException();
+        }
+
         for (MultipartFile file : files) {
-            String imageUrl = uploadImage(file);
-            imageUrls.add(imageUrl);
+            if (file.getSize() > MAX_IMAGE_SIZE) {
+                throw new ImageSizeExceededException();
+            }
+
+            try {
+                String imageUrl = uploadImage(file);
+                imageUrls.add(imageUrl);
+            } catch (IOException e) {
+
+            }
         }
         return imageUrls;
     }
 
     // AwsS3Service 내 이미지 삭제 메서드
-    public void deleteImage(String fileKey) {
+    public void deleteImageByUrl(String imageUrl) {
+        // 예를 들어, imageUrl이 "https://s3.region.amazonaws.com/bucket-name/file-key" 형태라고 가정합니다.
+        String fileKey = imageUrl.split(bucket + "/")[1]; // URL에서 파일 키 부분을 추출합니다.
+
         s3Client.deleteObject(DeleteObjectRequest.builder()
                 .bucket(bucket)
                 .key(fileKey)
                 .build());
     }
 
-
+    private String extractFileKeyFromUrl(String imageUrl) {
+        return imageUrl.substring(imageUrl.indexOf(bucket) + bucket.length() + 1);
+    }
 }
