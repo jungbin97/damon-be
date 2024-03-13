@@ -67,9 +67,8 @@ public class Review extends BaseEntity {
     }
 
     // 이미지 추가
-    public void addImage(ReviewImage image) {
-        this.reviewImages.add(image);
-        image.setReview(this);
+    public void addImage(ReviewImage reviewImage) {
+        this.reviewImages.add(reviewImage);
     }
 
 

@@ -46,8 +46,14 @@ public class ReviewService {
                 request.getContent(), request.getTags(), user);
         review = reviewRepository.save(review);
 
-        addImages(images, review);
-        reviewRepository.save(review); // 이미지 URL이 추가된 리뷰 저장
+        // 여러 이미지 처리
+        if (request.getImages() != null && !request.getImages().isEmpty()) {
+            for (String imageUrl : request.getImages()) {
+                ReviewImage reviewImage = new ReviewImage(imageUrl, false, review);
+                reviewImageRepository.save(reviewImage);
+                review.addImage(reviewImage);
+            }
+        }
         List<ReviewCommentResponse> emptyCommentsList = new ArrayList<>(); // 새 리뷰에는 댓글이 없으므로 빈 리스트 생성
         return ReviewResponse.from(review, emptyCommentsList); // 저장된 리뷰와 빈 댓글 목록을 전달
     }
@@ -70,9 +76,9 @@ public class ReviewService {
                 request.getCost(), request.getSuggests(), request.getContent(), request.getTags());
 
         // 이미지 추가 및 삭제
-        deleteImages(deleteImageIds, review);
-        addImages(images, review);
-        review = reviewRepository.save(review);
+//        deleteImages(deleteImageIds, review);
+//        addImages(images, review);
+//        review = reviewRepository.save(review);
 
         // 댓글 구조를 다시 조직화
         List<ReviewCommentResponse> organizedComments = commentStructureOrganizer.organizeCommentStructure(reviewId);
@@ -126,7 +132,7 @@ public class ReviewService {
         }
 
         // 리뷰와 연관된 모든 이미지를 S3에서 삭제
-        review.getReviewImages().forEach(image -> awsS3Service.deleteImage(image.getFileKey()));
+//        review.getReviewImages().forEach(image -> awsS3Service.deleteImage(image.getFileKey()));
 
         reviewRepository.delete(review);
     }
@@ -172,33 +178,33 @@ public class ReviewService {
     }
 
     // 이미지 삭제
-    private void deleteImages(List<Long> deleteImageIds, Review review) {
-        review.getReviewImages().forEach(image -> {
-            if (review.getReviewImages().contains(image)) {
-                awsS3Service.deleteImage(image.getFileKey());  // 파일 키를 사용하여 S3 파일 삭제
-                reviewImageRepository.delete(image);
-            }
-        });
-    }
+//    private void deleteImages(List<Long> deleteImageIds, Review review) {
+//        review.getReviewImages().forEach(image -> {
+//            if (review.getReviewImages().contains(image)) {
+//                awsS3Service.deleteImage(image.getFileKey());  // 파일 키를 사용하여 S3 파일 삭제
+//                reviewImageRepository.delete(image);
+//            }
+//        });
+//    }
 
     // 이미지 추가
-    private void addImages (List < MultipartFile > images, Review review){
-        validateImages(images);
-
-        images.forEach(image -> {
-            try {
-                AwsS3Service.UploadResult uploadResult = awsS3Service.uploadImage(image);
-                ReviewImage reviewImage = ReviewImage.createImage(uploadResult.getFileUrl(), uploadResult.getFileKey(), review);
-                review.addImage(reviewImage);
-                reviewImageRepository.save(reviewImage);
-            }
-
-            // 이미지 업로드 후 예외
-            catch (IOException e) {
-                throw new ImageUploadFailedException();
-            }
-        });
-    }
+//    private void addImages (List < MultipartFile > images, Review review){
+//        validateImages(images);
+//
+//        images.forEach(image -> {
+//            try {
+//                AwsS3Service.UploadResult uploadResult = awsS3Service.uploadImage(image);
+//                ReviewImage reviewImage = ReviewImage.createImage(uploadResult.getFileUrl(), uploadResult.getFileKey(), review);
+//                review.addImage(reviewImage);
+//                reviewImageRepository.save(reviewImage);
+//            }
+//
+//            // 이미지 업로드 후 예외
+//            catch (IOException e) {
+//                throw new ImageUploadFailedException();
+//            }
+//        });
+//    }
 
     // 이미지 업로드 직전 검증 로직
     private void validateImages(List<MultipartFile> images) {

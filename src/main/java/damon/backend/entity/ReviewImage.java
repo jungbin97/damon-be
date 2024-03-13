@@ -15,7 +15,9 @@ public class ReviewImage {
 
     private Long id;
     private String url;
-    private String fileKey;
+
+    private boolean isMain;
+//    private String fileKey;
 
     //리뷰id 매핑
     @ManyToOne(fetch = FetchType.LAZY)
@@ -31,12 +33,17 @@ public class ReviewImage {
         }
     }
 
+    // 기존 생성자를 유지하면서 Review 객체를 함께 설정할 수 있는 생성자 추가
+    public ReviewImage(String url, boolean isMain, Review review) {
+        this.url = url;
+        this.isMain = isMain;
+        this.review = review;
+    }
 
     // 이미지 생성
-    public static ReviewImage createImage(String url, String fileKey, Review review) {
+    public static ReviewImage createImage(String url,Review review) {
         ReviewImage image = new ReviewImage();
         image.url = url;
-        image.fileKey = fileKey;
         image.setReview(review);
         return image;
     }
