@@ -23,10 +23,17 @@ public class UserController {
     private final UserService userService;
 
     @Operation(summary = "카카오 로그인")
-    @GetMapping("/login")
+    @GetMapping("/login/kakao")
     public Result<LoginDto> loginByKakao(@RequestParam("code") String code) {
         return Result.success(userService.loginByKakao(code));
     }
+
+    @Operation(summary = "네이버 로그인")
+    @GetMapping("/login/naver")
+    public Result<LoginDto> loginByNaver(@RequestParam("code") String code) {
+        return Result.success(userService.loginByNaver(code));
+    }
+
 
     @Operation(summary = "토큰으로 유저 정보 조회")
     @GetMapping("/info")
