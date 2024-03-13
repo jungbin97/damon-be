@@ -25,16 +25,29 @@ public class ReviewImageController {
     private final AwsS3Service awsS3Service;
 
     @PostMapping("/upload")
-    public String imageUpload(@RequestParam("image") MultipartFile image) {
-        try {
-            String result = awsS3Service.uploadImage(image);
-            Log.info(result);
-            return result;
-        } catch (IOException e) {
-            Log.info("ReviewImageController imageUpload에서 예외 발생");
-            throw new RuntimeException(e);
+    public List<String> imageUpload(@RequestParam("images") List<MultipartFile> images) {
+        List<String> imageUrls = new ArrayList<>();
+        if (images != null && !images.isEmpty()) {
+            for (MultipartFile image : images) {
+                try {
+                    String imageUrl = awsS3Service.uploadImage(image);
+                    imageUrls.add(imageUrl);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
         }
+        return imageUrls;
     }
+
+        //        try {
+//            String result = awsS3Service.uploadImage(image);
+//            Log.info(result);
+//            return result;
+//        } catch (IOException e) {
+//            Log.info("ReviewImageController imageUpload에서 예외 발생");
+//            throw new RuntimeException(e);
+//        }
 
 //        Map<String, Object> responseData = new HashMap<>();
 //

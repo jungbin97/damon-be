@@ -1,7 +1,6 @@
 package damon.backend.controller;
 
 
-import damon.backend.dto.request.ReviewAndImageRequest;
 import damon.backend.dto.request.ReviewRequest;
 import damon.backend.dto.response.ReviewListResponse;
 import damon.backend.dto.response.ReviewResponse;
@@ -32,22 +31,20 @@ import java.util.Optional;
 public class ReviewController {
     private final ReviewService reviewService;
 
-    //게시글 등록
-//    @PostMapping
-//    public ReviewResponse addReview(
-//            @RequestBody ReviewAndImageRequest form,
-//            @Parameter(description = "유저 식별자", required = true, hidden = true)
-//            @AuthToken String identifier
-//    ) {
-//        // 이미지 데이터 처리
-//        Log.info(form);
-//        Log.info(identifier);
-//
-//        return reviewService.addReview(form, identifier);
-//    }
+//    게시글 등록
+   @PostMapping
+    public ReviewResponse addReview(
+            @RequestBody ReviewRequest request,
+
+            @RequestParam("images") Optional<List<MultipartFile>> images,
+            @Parameter(description = "유저 식별자", required = true, hidden = true)
+            @AuthToken String identifier
+    ) {
+        return reviewService.addReview(request, images.orElse(new ArrayList<>()), identifier);
+    }
 
     //게시글 등록
-    @PostMapping
+    @PostMapping("/review")
     @Operation(summary = "내 리뷰 등록", description = "내 리뷰를 등록합니다.")
     @ApiResponse(responseCode = "200", description = "리뷰 등록 성공")
     public ReviewResponse postReview(

@@ -1,6 +1,5 @@
 package damon.backend.service;
 
-import damon.backend.dto.request.ReviewAndImageRequest;
 import damon.backend.dto.request.ReviewRequest;
 import damon.backend.dto.response.ReviewCommentResponse;
 import damon.backend.dto.response.ReviewListResponse;
@@ -39,31 +38,38 @@ public class ReviewService {
     private final ReviewImageService reviewImageService;
 
 //    //게시글 등록
-//    public ReviewResponse addReview(ReviewAndImageRequest form, String identifier) {
-//        User user = userRepository.findByIdentifier(identifier).orElseThrow(ReviewException::memberNotFound);
-//
-//        Review review = reviewRepository.save(new Review(
-//                form.getTitle(),
-//                form.getStartDate(),
-//                form.getEndDate(),
-//                form.getArea(),
-//                form.getCost(),
-//                form.getSuggests(),
-//                form.getFreeTags(),
-//                form.getContent(),
-//                user
-//            )
-//        );
-//
+    public ReviewResponse addReview(ReviewRequest request, List<MultipartFile> images, String identifier) {
+        User user = userRepository.findByIdentifier(identifier).orElseThrow(ReviewException::memberNotFound);
+
+        Review review = Review.create(request, user);
+        review = reviewRepository.save(review); // 리뷰 저장
+
+
+        // 여러 이미지 처리
+        if (request.getImages() != null && !request.getImages().isEmpty()) {
+            for (String imageUrl : request.getImages()) {
+                ReviewImage reviewImage = new ReviewImage(imageUrl, false, review);
+                reviewImageRepository.save(reviewImage);
+                review.addImage(reviewImage);
+            }
+        }
 //        // 이미지 정보 추가
-//        if (form.getImage() != null) {
+//        if (request.getImage() != null) {
 //            ReviewImage reviewImage =
-//                    reviewImageRepository.save(new ReviewImage(form.getImage(), true, review));
+//                    reviewImageRepository.save(new ReviewImage(request.getImage(), true, review));
 //            review.addImage(reviewImage);
 //        }
+
+
+//         이미지 정보 추가
+//        if (request.getImages() != null) {
+//            ReviewImage reviewImage =
+//                    reviewImageRepository.save(new ReviewImage(request.getImages(), true, review));
+//            review.addImage(reviewImage);
 //
-//        return new ReviewResponse(review);
-//    }
+//        }
+    return new ReviewResponse(review);
+    }
 
     //게시글 등록
     public ReviewResponse postReview(ReviewRequest request, List<MultipartFile> images, String identifier) {
@@ -99,13 +105,13 @@ public class ReviewService {
         }
     }
 
-//    // 내 게시글 전체 조회
-//    @Transactional(readOnly = true)
-//    public List<ReviewListResponse> searchMyReviewList(String identifier) {
-//        User user = userRepository.findByIdentifier(identifier).orElseThrow(ReviewException::memberNotFound);
-//        List<Review> myReviews = reviewRepository.findMyReviews(user.getId());
-//        return myReviews.stream().map(ReviewListResponse::from).toList();
-//    }
+    // 내 게시글 전체 조회
+    @Transactional(readOnly = true)
+    public List<ReviewListResponse> searchMyReviewList(String identifier) {
+        User user = userRepository.findByIdentifier(identifier).orElseThrow(ReviewException::memberNotFound);
+        List<Review> myReviews = reviewRepository.findMyReviews(user.getId());
+        return myReviews.stream().map(ReviewListResponse::from).toList();
+    }
 
     //게시글 상세 내용 조회 (댓글 포함)
     @Transactional(readOnly = true)

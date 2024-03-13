@@ -130,22 +130,23 @@ public class Review extends BaseEntity {
         }
     }
 
-    // 이미지 추가 메서드
-    public void addImage(String url) {
-        ReviewImage newImage = ReviewImage.createImage(url, this); // URL을 받아 ReviewImage 객체 생성
-        this.reviewImages.add(newImage); // 현재 리뷰의 이미지 목록에 추가
-    }
-//
-//    public Review(String title, LocalDate startDate, LocalDate endDate, Area area, Long cost, List<String> suggests, List<Tag> tags, String content, User user) {
-//        this.title = title;
-//        this.startDate = startDate;
-//        this.endDate = endDate;
-//        this.area = area;
-//        this.cost = cost;
-//        this.suggests = suggests;
-//        this.content = content;
-//        this.user = user;
+//    // 이미지 추가 메서드
+//    public void addImage(String url) {
+//        ReviewImage newImage = ReviewImage.createImage(url, this); // URL을 받아 ReviewImage 객체 생성
+//        this.reviewImages.add(newImage); // 현재 리뷰의 이미지 목록에 추가
 //    }
+
+    public Review(String title, LocalDate startDate, LocalDate endDate, Area area, Long cost, List<String> suggests, List<String> freeTages, String content, User user) {
+        this.title = title;
+        this.startDate = startDate;
+        this.endDate = endDate;
+        this.area = area;
+        this.cost = cost;
+        this.suggests = suggests;
+        this.tags = getTags();
+        this.content = content;
+        this.user = user;
+    }
 
     public void addImage(ReviewImage reviewImage) {
         this.reviewImages.add(reviewImage);
