@@ -17,6 +17,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -85,6 +86,25 @@ public class ReviewService {
 
         // 구조화된 댓글 목록을 포함하여 ReviewResponse 반환
         return ReviewResponse.from(review, organizedComments);
+    }
+
+    // 이미지 등록
+    public List<ReviewImage> postImage(Review review, List<MultipartFile> images) {
+        List<ReviewImage> savedImages = new ArrayList<>();
+        try {
+            if (images != null && !images.isEmpty()) {
+                for (MultipartFile file : images) {
+                    String url = awsS3Service.uploadImage(file); // S3에 이미지 업로드
+                    ReviewImage newImage = ReviewImage.createImage(url, review); // 이미지 생성
+                    savedImages.add(reviewImageRepository.save(newImage)); // DB에 저장
+                }
+            }
+            return savedImages; // 저장된 이미지 리스트 반환
+        } catch (IOException e) {
+            throw new ImageCountExceededException();
+        } catch (MaxUploadSizeExceededException e) {
+            throw new ImageSizeExceededException();
+        }
     }
 
     // 상세 조회 (댓글 포함)

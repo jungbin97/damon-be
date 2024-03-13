@@ -5,6 +5,7 @@ import damon.backend.dto.request.ReviewRequest;
 import damon.backend.dto.response.ReviewListResponse;
 import damon.backend.dto.response.ReviewResponse;
 import damon.backend.entity.Area;
+import damon.backend.service.AwsS3Service;
 import damon.backend.service.ReviewService;
 import damon.backend.util.Log;
 import damon.backend.util.login.AuthToken;
@@ -23,6 +24,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -35,6 +37,7 @@ import java.util.Optional;
 @CrossOrigin(origins = "*", allowedHeaders = "*")
 public class ReviewController {
     private final ReviewService reviewService;
+    private final AwsS3Service awsS3Service;
 
     @PostMapping
     @Operation(summary = "내 리뷰 등록", description = "내 리뷰를 등록합니다.")
@@ -50,6 +53,26 @@ public class ReviewController {
         return Result.success(review);
     }
 
+    @PostMapping("/upload")
+    @Operation(summary = "내 이미지 등록", description = "내 이미지를 등록합니다.")
+    @ApiResponse(responseCode = "200", description = "이미지 등록 성공")
+    public Result<List<String>> imageUpload(
+
+            @RequestParam("images") List<MultipartFile> images
+    ) {
+        List<String> imageUrls = new ArrayList<>();
+        if (images != null && !images.isEmpty()) {
+            for (MultipartFile image : images) {
+                try {
+                    String imageUrl = awsS3Service.uploadImage(image);
+                    imageUrls.add(imageUrl);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }
+        return  Result.success(imageUrls);
+    }
     @PutMapping("/{reviewId}")
     @Operation(summary = "내 리뷰 수정", description = "내 리뷰를 수정합니다.")
     @ApiResponse(responseCode = "200", description = "리뷰 수정 성공")
@@ -93,6 +116,11 @@ public class ReviewController {
     }
 
     private boolean hasViewed(Cookie[] cookies, String cookieName, Long reviewId) {
+//        if문 새로추가
+        if (cookies == null) {
+            return false;
+        }
+
         return Arrays.stream(cookies)
                 .filter(c -> cookieName.equals(c.getName()))
                 .anyMatch(c -> c.getValue().contains("|" + reviewId + "|"));
