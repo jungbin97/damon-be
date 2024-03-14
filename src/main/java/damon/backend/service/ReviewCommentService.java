@@ -13,6 +13,7 @@ import damon.backend.exception.custom.UserNotFoundException;
 import damon.backend.repository.ReviewCommentRepository;
 import damon.backend.repository.ReviewRepository;
 import damon.backend.repository.user.UserRepository;
+import damon.backend.util.Log;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -38,7 +39,7 @@ public class ReviewCommentService implements CommentStructureOrganizer {
         ReviewComment parentComment = null; // 초기화 변경
 
         // 부모 댓글 처리
-        if (request.getParentId() != null) {
+        if (request.getParentId() != null && request.getParentId() != 0) {
             parentComment = reviewCommentRepository.findById(request.getParentId())
                     .orElseThrow(CommentNotFoundException::new);
 
