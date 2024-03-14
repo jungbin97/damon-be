@@ -25,9 +25,11 @@ public class AwsS3Service {
 
     @Value("${cloud.aws.s3.bucket}")
     private String bucket;
-
     @Value("${cloud.aws.s3.review-prefix}")
     private String reviewPrefix;
+
+//    @Value("${cloud.aws.s3.region.static}")
+//    private String region;
 
     public class UploadResult {
         private final String fileKey;
@@ -119,14 +121,44 @@ public class AwsS3Service {
 
     // AwsS3Service 내 이미지 삭제 메서드
     public void deleteImageByUrl(String imageUrl) {
-        // 예를 들어, imageUrl이 "https://s3.region.amazonaws.com/bucket-name/file-key" 형태라고 가정합니다.
-        String fileKey = imageUrl.split(bucket + "/")[1]; // URL에서 파일 키 부분을 추출합니다.
+        // 이미지 URL 로깅
+        Log.info("Received image URL for deletion: " + imageUrl);
 
-        s3Client.deleteObject(DeleteObjectRequest.builder()
-                .bucket(bucket)
-                .key(fileKey)
-                .build());
+        // 파일 키 추출 및 로깅
+        String fileKey = imageUrl.substring(imageUrl.indexOf(reviewPrefix));
+        Log.info("Extracted file key for deletion: " + fileKey);
+
+        // S3 객체 삭제 요청 전송 및 로깅
+        try {
+            Log.info("Sending request to delete object from S3: " + fileKey);
+            s3Client.deleteObject(DeleteObjectRequest.builder()
+                    .bucket(bucket)
+                    .key(fileKey)
+                    .build());
+            Log.info("Successfully deleted object from S3: " + fileKey);
+        } catch (Exception e) {
+            Log.error("Error occurred while deleting object from S3: " + fileKey);
+            throw e;
+        }
     }
+//    public void deleteImageByUrl(String imageUrl) {
+//        // URL에서 객체의 키를 추출
+//        String fileKey = imageUrl.substring(imageUrl.indexOf(bucket) + bucket.length() + 1);
+//
+//        try {
+//            // AWS SDK의 deleteObject 메서드를 사용하여 객체 삭제
+//            s3Client.deleteObject(DeleteObjectRequest.builder()
+//                    .bucket(bucket)
+//                    .key(fileKey)
+//                    .build());
+//            Log.info("Object deleted successfully: " + fileKey);
+//        } catch (Exception e) {
+//            Log.error("Error occurred while deleting object: " + fileKey);
+//            throw new RuntimeException("Error deleting object from S3", e);
+//        }
+//    }
+
+
 
     private String extractFileKeyFromUrl(String imageUrl) {
         return imageUrl.substring(imageUrl.indexOf(bucket) + bucket.length() + 1);
