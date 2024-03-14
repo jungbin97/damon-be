@@ -37,11 +37,10 @@ public class ReviewCommentService implements CommentStructureOrganizer {
 
         ReviewComment parentComment = null; // 초기화 변경
 
-        // 부모 댓글 처리
-        if (request.getParentId() != null) {
+        // 부모 댓글 처리 - parentId가 null이 아니고 0이 아닐 경우에만 부모 댓글 찾기
+        if (request.getParentId() != null && request.getParentId() != 0) {
             parentComment = reviewCommentRepository.findById(request.getParentId())
                     .orElseThrow(CommentNotFoundException::new);
-
         }
 
         ReviewComment newComment = ReviewComment.createComment(review, user, request.getContent(), parentComment);

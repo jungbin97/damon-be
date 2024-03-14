@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -17,13 +18,17 @@ public class ReviewCommentResponse {
     private Long id;
     private String name;
     private String state;
-    private LocalDateTime createdDate;
+    private String createdDate;
     private Long reviewId; // 대댓글일 경우에는 부모 댓글의 Id
     private Long parentId;
     private String content;
 
     @JsonInclude(JsonInclude.Include.NON_EMPTY) // 빈 리스트일 경우 JSON에서 제외
     private List<ReviewCommentResponse> replies; // 대댓글 목록
+
+    // 날짜 포맷터 정의
+    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+    private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
 
     // 정적 메소드
@@ -45,7 +50,7 @@ public class ReviewCommentResponse {
                 reviewComment.getId(),
                 reviewComment.getUser() != null ? reviewComment.getUser().getNickname() : null,
                 state,
-                reviewComment.getCreatedDate(),
+                reviewComment.getCreatedDate().format(DATE_TIME_FORMATTER),
                 reviewComment.getReview() != null ? reviewComment.getReview().getId() : null, // 리뷰 ID
                 reviewComment.getParent() != null ? reviewComment.getParent().getId() : null, // 부모 댓글 ID
                 reviewComment.getContent(),
