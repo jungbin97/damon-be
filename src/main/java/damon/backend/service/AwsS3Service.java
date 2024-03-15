@@ -125,7 +125,9 @@ public class AwsS3Service {
         Log.info("Received image URL for deletion: " + imageUrl);
 
         // 파일 키 추출 및 로깅
-        String fileKey = imageUrl.substring(imageUrl.indexOf(reviewPrefix));
+        String[] parts = imageUrl.split("review/");
+        String fileKey = parts[1];
+//        String fileKey = imageUrl.substring(imageUrl.indexOf(reviewPrefix));
         Log.info("Extracted file key for deletion: " + fileKey);
 
         // S3 객체 삭제 요청 전송 및 로깅
