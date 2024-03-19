@@ -120,15 +120,22 @@ public class ReviewCommentService implements CommentStructureOrganizer {
         // 대댓글이 없는 독립된 댓글 (최상위 댓글)
         List<ReviewCommentResponse> topLevelComments = new ArrayList<>();
 
+        // 모든 댓글을 변환하고 맵에 저장
         for (ReviewComment comment : allComments) {
-            ReviewCommentResponse commentResponse = ReviewCommentResponse.from(comment);
-            commentMap.put(comment.getId(), commentResponse);
+            commentMap.put(comment.getId(), ReviewCommentResponse.from(comment));
+        }
 
+        // 대댓글을 부모의 replies 목록에 추가
+        for (ReviewComment comment : allComments) {
             if (comment.getParent() != null) {
-                ReviewCommentResponse parentResponse = commentMap.get(comment.getParent().getId());
-                parentResponse.getReplies().add(commentResponse);
+                ReviewCommentResponse child = commentMap.get(comment.getId());
+                ReviewCommentResponse parent = commentMap.get(comment.getParent().getId());
+                // 중복 추가 방지
+                if (!parent.getReplies().contains(child)) {
+                    parent.getReplies().add(child);
+                }
             } else {
-                topLevelComments.add(commentResponse);
+                topLevelComments.add(commentMap.get(comment.getId()));
             }
         }
         return topLevelComments;
