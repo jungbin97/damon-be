@@ -1,20 +1,39 @@
-version: '3'
+version: '3.3'
 services:
   backend:
     image: g6y116/damon-be
     ports:
       - "8080:8080"
+    volumes:
+      - "./logs:/app/logs" # 로그 파일을 호스트와 공유하기 위한 볼륨 마운트
     networks:
       - network
+
+  promtail:
+    image: grafana/promtail:latest
+    volumes:
+      - "./logs:/var/log/spring" # spring 앱 로그 디렉토리를 promtail이 읽을 수 있는 위치에 마운트
+      - "./promtail-local-config.yaml:/etc/promtail/config.yml" # promtail 설정 파일
+    command: -config.file=/etc/promtail/config.yml
+    networks:
+      - network
+    depends_on:
+      - backend
 
   frontend:
     image: g6y116/damon-fe
     ports:
       - "80:80"
+      - "443:443" # https를 사용하기 위한 포트
+    volumes:
+      - "/var/www/html:/var/www/html" # nginx가 사용하는 html 파일을 호스트와 공유하기 위한 볼륨 마운트
+      - "/etc/letsencrypt:/etc/letsencrypt" #letsencrypt폴더 위치
     depends_on:
       - backend
     networks:
       - network
+
+
 
 networks:
   network:
