@@ -11,6 +11,7 @@ import damon.backend.dto.response.CalendarsResponseDto;
 import damon.backend.entity.Calendar;
 import damon.backend.entity.Travel;
 import damon.backend.entity.user.User;
+import damon.backend.exception.custom.DataNotFoundException;
 import damon.backend.repository.CalendarRepository;
 import damon.backend.repository.TravelRepository;
 import damon.backend.repository.user.UserRepository;
@@ -35,6 +36,14 @@ public class CalendarService {
     private final TravelRepository travelRepository;
     private final UserRepository userRepository;
 
+    private User getUserEntity(String identifier) {
+        return userRepository.findByIdentifier(identifier).orElseThrow(DataNotFoundException::new);
+    }
+
+    private Calendar getCalendarEntityWithTravelsAndUser(Long calendarId, String identifier) {
+        return calendarRepository.findByIdWithTravelAndUser(calendarId, identifier).orElseThrow(DataNotFoundException::new);
+    }
+
     /**
      * 일정 글을 생성합니다.
      * @param identifier : 카카오에서 지정해 준 유저의 식별자
@@ -42,8 +51,7 @@ public class CalendarService {
      */
     @Transactional
     public CalendarCreateResponseDto createCalendar(String identifier, CalendarCreateRequestDto requestDto) {
-        User user = userRepository.findByIdentifier(identifier).orElseThrow(() -> new IllegalArgumentException("해당 사용자를 찾을 수 없습니다."));
-
+        User user = getUserEntity(identifier);
         // 일정 글 생성
         Calendar calendar = Calendar.builder()
                 .user(user)
@@ -71,28 +79,27 @@ public class CalendarService {
         return CalendarCreateResponseDto.from(savedCalendar.getId());
     }
 
+
     /**
      * 상위 5개의 일정 글 리스트를 조회합니다.
-//     * @param identifier : 카카오에서 지정해 준 유저의 식별자
      * @return : 상위 5개의 일정 목록을 반환
      */
     @Transactional(readOnly = true)
     public List<CalendarsResponseDto> getCalendarsTop5()  {
         List<Calendar> calendarList = calendarRepository.findTop5();
-
         return CalendarsResponseDto.listFrom(calendarList);
     }
 
     /**
      * 내 일정 글 리스트를 조회합니다.
-     //     * @param identifier : 카카오에서 지정해 준 유저의 식별자
+     * @param identifier : 카카오에서 지정해 준 유저의 식별자
      * @param page : 페이지 번호
      * @param size : 페이지 사이즈
      * @return : 요청한 페이징에 맞는 일정 목록을 반환
      */
     @Transactional(readOnly = true)
     public Page<CalendarsResponseDto> getCalendars(String identifier, int page, int size)  {
-        User user = userRepository.findByIdentifier(identifier).orElseThrow(() -> new IllegalArgumentException("해당 사용자를 찾을 수 없습니다."));
+        User user = getUserEntity(identifier);
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdDate"));
         Page<Calendar> calendarPage = calendarRepository.findPageByUser(user.getId(), pageable);
 
@@ -107,11 +114,7 @@ public class CalendarService {
      */
     @Transactional(readOnly = true)
     public CalendarResponseDto getCalendar(String identifier, Long calendarId) {
-
-        User user = userRepository.findByIdentifier(identifier).orElseThrow(() -> new IllegalArgumentException("해당 사용자를 찾을 수 없습니다."));
-
-        Calendar calendar = calendarRepository.findByIdWithTravel(calendarId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 일정을 찾을 수 없습니다."));
+        Calendar calendar = getCalendarEntityWithTravelsAndUser(calendarId, identifier);
 
         return CalendarResponseDto.from(calendar);
     }
@@ -124,10 +127,7 @@ public class CalendarService {
      */
     @Transactional
     public CalendarEditResponseDto updateCalendar(String identifier, Long calendarId, CalendarEditRequestDto requestDto) {
-        User user = userRepository.findByIdentifier(identifier).orElseThrow(() -> new IllegalArgumentException("해당 사용자를 찾을 수 없습니다."));
-
-        Calendar calendar = calendarRepository.findByIdWithTravel(calendarId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 일정을 찾을 수 없습니다."));
+        Calendar calendar = getCalendarEntityWithTravelsAndUser(calendarId, identifier);
 
         // 일정 글 업데이트 로직
         calendar.update(requestDto.getTitle(), requestDto.getStartDate(), requestDto.getEndDate(), requestDto.getArea());
@@ -168,6 +168,7 @@ public class CalendarService {
         return CalendarEditResponseDto.from(calendarId);
     }
 
+
     /**
      * 일정 글을 삭제합니다.
      * @param identifier : 카카오에서 지정해 준 유저의 식별자
@@ -175,7 +176,7 @@ public class CalendarService {
      */
     @Transactional
     public void deleteCalendar(String identifier, Long calendarId) {
-        User user = userRepository.findByIdentifier(identifier).orElseThrow(() -> new IllegalArgumentException("해당 사용자를 찾을 수 없습니다."));
+        User user = getUserEntity(identifier);
 
         Calendar calendar = calendarRepository.findById(calendarId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 일정을 찾을 수 없습니다."));
@@ -194,7 +195,7 @@ public class CalendarService {
      */
     @Transactional
     public void deleteCalendars(String identifier, CalendarsDeleteRequestDto requestDto) {
-        User user = userRepository.findByIdentifier(identifier).orElseThrow(() -> new IllegalArgumentException("해당 사용자를 찾을 수 없습니다."));
+        User user = getUserEntity(identifier);
 
         List<Calendar> calendars = calendarRepository.findAllById(requestDto.getCalendarIds());
 
