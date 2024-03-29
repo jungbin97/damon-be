@@ -22,8 +22,8 @@ public interface CalendarRepository extends JpaRepository<Calendar, Long> {
     @Query("SELECT c FROM Calendar c WHERE c.user.id = :userId")
     Page<Calendar> findPageByUser(@Param("userId") Long userId, Pageable pageable);
 
-    @Query("SELECT distinct c FROM Calendar c JOIN FETCH c.travels WHERE c.id = :calendarId")
-    Optional<Calendar> findByIdWithTravel(@Param("calendarId") Long calendarId);
+    @Query("SELECT distinct c FROM Calendar c LEFT JOIN FETCH c.travels t LEFT JOIN FETCH c.user u WHERE c.id = :calendarId AND u.identifier = :identifier")
+    Optional<Calendar> findByIdWithTravelAndUser(@Param("calendarId") Long calendarId, @Param("identifier") String identifier);
 
     @Modifying
     @Query("DELETE FROM Calendar c WHERE c.id IN :calendarIds")

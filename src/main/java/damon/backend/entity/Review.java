@@ -108,7 +108,7 @@ public class Review extends BaseEntity {
     public void incrementViewCount() {
         this.viewCount++;
     }
-
+  
     // 좋아요수
     public void increaseLikeCount() {
         this.likeCount++;
@@ -117,5 +117,6 @@ public class Review extends BaseEntity {
         if (this.likeCount > 0) {
             this.likeCount--;
         }
+
     }
 }

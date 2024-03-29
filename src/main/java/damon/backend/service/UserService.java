@@ -1,15 +1,19 @@
 package damon.backend.service;
 
-import damon.backend.dto.response.user.KakaoTokenDto;
+import damon.backend.dto.response.user.LoginTokenDto;
 import damon.backend.dto.response.user.LoginDto;
 import damon.backend.dto.response.user.UserDto;
 import damon.backend.entity.user.User;
+import damon.backend.exception.CustomException;
+import damon.backend.exception.Status;
 import damon.backend.exception.custom.*;
 import damon.backend.repository.user.UserRepository;
 import damon.backend.util.login.JwtUtil;
 import damon.backend.util.login.KakaoUtil;
+import damon.backend.util.login.NaverUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,10 +25,28 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final KakaoUtil kakaoUtil;
+    private final NaverUtil naverUtil;
+
 
     public LoginDto loginByKakao(String code) {
-        KakaoTokenDto token = kakaoUtil.getKakaoToken(code); // 인가 코드로 카카오 토큰 발급
+        LoginTokenDto token = kakaoUtil.getKakaoToken(code); // 인가 코드로 카카오 토큰 발급
         UserDto userDto = kakaoUtil.getKakaoUser(token.getAccess_token()); // 카카오 엑세스 토큰으로 유저 정보 조회
+
+        // DB에 없으면 회원가입
+        if (userRepository.findByIdentifier(userDto.getIdentifier()).isEmpty()) {
+            signUp(userDto);
+        }
+
+        String accessToken = JwtUtil.generateAccessToken(userDto.getIdentifier());
+        String refreshToken = JwtUtil.generateRefreshToken(userDto.getIdentifier());
+
+        return new LoginDto(accessToken, refreshToken);
+    }
+
+    public LoginDto loginByNaver(String code) {
+        LoginTokenDto token = naverUtil.getNaverToken(code); // 인가 코드로 네이버 토큰 발급
+        UserDto userDto = naverUtil.getNaverUser(token.getAccess_token()); // 네이버 엑세스 토큰으로 유저 정보 조회s
+
 
         // DB에 없으면 회원가입
         if (userRepository.findByIdentifier(userDto.getIdentifier()).isEmpty()) {
@@ -51,4 +73,21 @@ public class UserService {
         String newRefreshToken = JwtUtil.generateRefreshToken(identifier);
         return new LoginDto(newAccessToken, newRefreshToken);
     }
+
+
+    public UserDto updateNickname(String identifier, String newNickname) {
+        User user = userRepository.findByIdentifier(identifier)
+                .orElseThrow(() -> new CustomException(HttpStatus.NOT_FOUND.value(), Status.NOT_FOUND, "User not found with identifier: " + identifier));
+        user.setNickname(newNickname);
+        userRepository.save(user);
+        return new UserDto(user);
+    }
+
+
+    public void deleteUserAccount(String identifier) {
+        User user = userRepository.findByIdentifier(identifier)
+                .orElseThrow(() -> new CustomException(HttpStatus.NOT_FOUND.value(), Status.NOT_FOUND, "User not found with identifier: " + identifier));
+        userRepository.delete(user);
+    }
+
 }

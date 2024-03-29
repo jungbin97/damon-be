@@ -17,6 +17,5 @@ public class ReviewRequest {
     private List<String> suggests;
     private List<String> tags;
     private String content;
-
     private List<String> images;
 }
