@@ -20,9 +20,9 @@ public class Review extends BaseEntity {
     @Column(name = "review_id")
     private Long id;
 
-    private long viewCount;
+    private long viewCount = 0;
+    private long likeCount = 0;
 
-    private Long likeCount;
     private boolean isEdited = false; // 변경 여부를 추적하는 필드
 
     private String title;
@@ -40,26 +40,23 @@ public class Review extends BaseEntity {
     @Column(columnDefinition = "TEXT")
     private String content;
 
-    //멤버id 매핑
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
 
-    //리뷰태그 매핑
     @OneToMany(mappedBy = "review", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Tag> tags = new ArrayList<>();
 
-    //리뷰이미지 매핑
     @OneToMany(mappedBy = "review", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ReviewImage> reviewImages = new ArrayList<>();
 
-    //리뷰좋아요 매핑
     @OneToMany(mappedBy = "review", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<ReviewLike> reviewLikes = new HashSet<>();
 
-    //리뷰댓글 매핑
     @OneToMany(mappedBy = "review", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ReviewComment> reviewComments = new ArrayList<>();
+
 
     //연관관계 매핑 메서드
     public void setUser(User user) {
@@ -69,86 +66,57 @@ public class Review extends BaseEntity {
         }
     }
 
-    // 조회수 증가 메소드
-    public void incrementViewCount() {
-        this.viewCount++;
+    // 이미지 추가
+    public void addImage(ReviewImage reviewImage) {
+        this.reviewImages.add(reviewImage);
     }
 
-    // 리뷰 생성 메서드
-    public static Review create(ReviewRequest request, User user) {
-        Review review = new Review();
-        populateReviewFields(review, request);
-        review.user = user; // Member 설정은 create 시에만 수행
-        // 태그 설정
-        if (request.getTags() != null && !request.getTags().isEmpty()) {
-            for (String tagValue : request.getTags()) {
-                review.getTags().add(new Tag(tagValue, review));
-            }
-        }
-        return review;
-    }
 
-    // 리뷰 수정 메서드
-    public void update(ReviewRequest request) {
-        populateReviewFields(this, request);
-        this.isEdited = true; // 업데이트 시 isEdited를 true로 설정
-
-        // 기존 태그 모두 제거 후 새로운 태그 추가
-        this.tags.clear();
-        if (request.getTags() != null) {
-            for (String tagValue : request.getTags()) {
-                this.tags.add(new Tag(tagValue, this));
-            }
-        }
-    }
-
-    // 공통 필드 설정 메서드
-    private static void populateReviewFields(Review review, ReviewRequest request) {
-        review.title = request.getTitle();
-        review.startDate = request.getStartDate();
-        review.endDate = request.getEndDate();
-        review.area = request.getArea();
-        review.cost = request.getCost();
-        review.suggests = request.getSuggests();
-        review.content = request.getContent();
-
-    }
-
-    public void incrementLikeCount() {
-        if (this.likeCount == null) {
-            this.likeCount = 1L;
-        } else {
-            this.likeCount++;
-        }
-    }
-
-    public void decrementLikeCount() {
-        if (this.likeCount == null || this.likeCount <= 0) {
-            this.likeCount = 0L;
-        } else {
-            this.likeCount--;
-        }
-    }
-
-//    // 이미지 추가 메서드
-//    public void addImage(String url) {
-//        ReviewImage newImage = ReviewImage.createImage(url, this); // URL을 받아 ReviewImage 객체 생성
-//        this.reviewImages.add(newImage); // 현재 리뷰의 이미지 목록에 추가
-//    }
-
-    public Review(String title, LocalDate startDate, LocalDate endDate, Area area, Long cost, List<String> suggests, List<String> freeTages, String content, User user) {
+    // 리뷰 공통 필드 캡슐화
+    private void populateReviewFields(String title, LocalDate startDate, LocalDate endDate, Area area, Long cost, List<String> suggests, String content, List<String> tags) {
         this.title = title;
         this.startDate = startDate;
         this.endDate = endDate;
         this.area = area;
         this.cost = cost;
-        this.suggests = suggests;
-        this.tags = getTags();
+        this.suggests = new ArrayList<>(suggests);
         this.content = content;
-        this.user = user;
+        // 태그 정보 처리
+        this.tags.clear();
+        if (tags != null) {
+            for (String tagValue : tags) {
+                this.tags.add(new Tag(tagValue, this));
+            }
+        }
     }
 
-    public void addImage(ReviewImage reviewImage) {
-        this.reviewImages.add(reviewImage);
+    // 리뷰 생성
+    public static Review create(String title, LocalDate startDate, LocalDate endDate, Area area, Long cost, List<String> suggests, String content, List<String> tags, User user) {
+        Review review = new Review();
+        review.populateReviewFields(title, startDate, endDate, area, cost, suggests, content, tags);
+        review.setUser(user);
+        return review;
+    }
+
+    // 리뷰 수정
+    public void update(String title, LocalDate startDate, LocalDate endDate, Area area, Long cost, List<String> suggests, String content, List<String> tags) {
+        this.populateReviewFields(title, startDate, endDate, area, cost, suggests, content, tags);
+        this.isEdited = true;
+    }
+
+    // 조회수
+    public void incrementViewCount() {
+        this.viewCount++;
+    }
+  
+    // 좋아요수
+    public void increaseLikeCount() {
+        this.likeCount++;
+    }
+    public void decreaseLikeCount() {
+        if (this.likeCount > 0) {
+            this.likeCount--;
+        }
+
     }
 }

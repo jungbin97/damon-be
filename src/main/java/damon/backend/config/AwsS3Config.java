@@ -22,11 +22,9 @@ public class AwsS3Config {
 
     @Bean
     public S3Client s3Client() {
-        // 액세스 키 및 시크릿 키를 사용하여 자격 증명 제공자를 생성
         AwsBasicCredentials awsCredentials = AwsBasicCredentials.create(accessKey, secretKey);
         StaticCredentialsProvider credentialsProvider = StaticCredentialsProvider.create(awsCredentials);
 
-        // S3 클라이언트 생성 및 구성
         return S3Client.builder()
                 .region(Region.of(region))
                 .credentialsProvider(credentialsProvider)

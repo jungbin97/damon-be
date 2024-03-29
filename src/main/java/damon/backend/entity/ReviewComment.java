@@ -15,9 +15,10 @@ import java.util.List;
 @Table(name="review_comment")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
-public class ReviewComment extends BaseEntity{
+public class ReviewComment extends BaseEntity {
 
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "review_comment_id")
     private Long id;
     private boolean isEdited = false; // 변경 여부를 추적하는 필드
@@ -44,20 +45,28 @@ public class ReviewComment extends BaseEntity{
     @JoinColumn(name = "user_id")
     private User user;
 
-    public void setReview(Review review){
+
+    //연관관계 매핑 메서드
+
+    public void setReview(Review review) {
         this.review = review;
-        if (review != null ) {
+        if (review != null) {
             review.getReviewComments().add(this);
         }
     }
-    public void setUser(User user){
+
+    public void setUser(User user) {
         this.user = user;
-        if (user != null ) {
+        if (user != null) {
             user.getReviewComments().add(this);
         }
     }
-    //연관관계 매핑 메서드
-    public void setParent(ReviewComment parent){
+
+    public void setContent(String content) {
+        this.content = content;
+    }
+
+    public void setParent(ReviewComment parent) {
         this.parent = parent;
         // 대대댓글 생성 금지 로직
         if (parent != null && parent.getParent() != null) {
@@ -68,27 +77,22 @@ public class ReviewComment extends BaseEntity{
         }
     }
 
-    public void setContent(String content) {
-        this.content = content;
-    }
-
-
-    public void addReply(ReviewComment reply){
+    public void addReply(ReviewComment reply) {
         this.replies.add(reply);
         reply.setParent(this);
     }
 
-    // 내용과 부모 댓글 설정 메서드
-    public static ReviewComment createContent(String content, Review review, User user, ReviewComment parent) {
-        ReviewComment comment = new ReviewComment(); // 직접 인스턴스 생성을 위한 변경 필요
-        comment.setContent(content);
+    // 댓글 생성
+    public static ReviewComment createComment(Review review, User user, String content, ReviewComment parent) {
+        ReviewComment comment = new ReviewComment();
         comment.setReview(review);
         comment.setUser(user);
+        comment.setContent(content);
         comment.setParent(parent);
         return comment;
     }
 
-    // 내용 변경 시, isEdited를 true로 설정
+    // 댓글 수정
     public void updateContent(String content) {
         this.content = content;
         this.isEdited = true;

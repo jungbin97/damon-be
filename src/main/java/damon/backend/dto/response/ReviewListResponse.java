@@ -17,19 +17,17 @@ public class ReviewListResponse {
     private Long id;
     private String name;
     private String state;
-    private String createdDate;  // LocalDateTime -> String
+    private String createdDate;
 
-    private long viewCount; // 조회수
-    private long likeCount; // 좋아요 수
-    private long commentCount; // 댓글 수
+    private long viewCount;
+    private long likeCount;
+    private long commentCount;
 
     private String title;
     private Area area;
-
     private Long cost;
-    private List<String> suggests; // 장소 추천
-    private List<String> tags; // 자유 태그
-
+    private List<String> suggests;
+    private List<String> tags;
     private String mainImage;
 
     // 날짜 포맷터 정의
@@ -38,8 +36,6 @@ public class ReviewListResponse {
     //정적 메소드
     public static ReviewListResponse from(Review review) {
 
-        long viewCount = review.getViewCount(); // 조회수
-        long likeCount = review.getReviewLikes().size(); // 좋아요 수
         long commentCount = review.getReviewComments().size(); // 댓글수
 
         String state = review.isEdited() ? "편집됨" : ""; // isEdited 값에 따라 상태 설정
@@ -48,42 +44,23 @@ public class ReviewListResponse {
                 .map(Tag::getValue)
                 .collect(Collectors.toList());
 
+        String mainImage = !review.getReviewImages().isEmpty() ? review.getReviewImages().get(0).getUrl() : null;
 
-        if (review.getReviewImages().size() > 0) {
             return new ReviewListResponse(
 
                     review.getId(),
                     review.getUser() != null ? review.getUser().getNickname() : null,
                     state,
-                    review.getCreatedDate().format(DATE_TIME_FORMATTER),    // LocalDateTime -> String
+                    review.getCreatedDate().format(DATE_TIME_FORMATTER),
                     review.getViewCount(),
-                    likeCount,
+                    review.getLikeCount(),
                     commentCount,
                     review.getTitle(),
                     review.getArea(),
                     review.getCost(),
                     review.getSuggests(),
                     tagValues,
-                    review.getReviewImages().get(0).getUrl()
+                    mainImage
             );
-        } else {
-            return new ReviewListResponse(
-
-                    review.getId(),
-                    review.getUser() != null ? review.getUser().getNickname() : null,
-                    state,
-                    review.getCreatedDate().format(DATE_TIME_FORMATTER),    // LocalDateTime -> String
-                    review.getViewCount(),
-                    likeCount,
-                    commentCount,
-                    review.getTitle(),
-                    review.getArea(),
-                    review.getCost(),
-                    review.getSuggests(),
-                    tagValues,
-                    "");
-        }
-
     }
-
 }

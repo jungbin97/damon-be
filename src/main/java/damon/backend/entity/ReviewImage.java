@@ -15,17 +15,20 @@ public class ReviewImage {
 
     private Long id;
     private String url;
+
     private boolean isMain;
+//    private String fileKey;
 
     //리뷰id 매핑
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "review_id")
     private Review review;
 
+
     //연관관계 매핑 메서드
     public void setReview(Review review){
         this.review = review;
-        if (review != null ) {
+        if (review != null && !review.getReviewImages().contains(this)) {
             review.getReviewImages().add(this);
         }
     }
@@ -37,13 +40,11 @@ public class ReviewImage {
         this.review = review;
     }
 
-    // 또는 팩토리 메서드 수정
-    public static ReviewImage createImage(String url, Review review) {
+    // 이미지 생성
+    public static ReviewImage createImage(String url,Review review) {
         ReviewImage image = new ReviewImage();
         image.url = url;
-        image.review = review;
-        // isMain의 기본값 설정이 필요한 경우 여기서 설정
+        image.setReview(review);
         return image;
     }
-
 }
