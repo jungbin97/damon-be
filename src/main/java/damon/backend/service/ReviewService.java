@@ -11,6 +11,7 @@ import damon.backend.repository.ReviewLikeRepository;
 import damon.backend.repository.ReviewRepository;
 import damon.backend.repository.user.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -27,6 +28,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 @Transactional
 public class ReviewService {
@@ -39,7 +41,9 @@ public class ReviewService {
     private final CommentStructureOrganizer commentStructureOrganizer;
 
     // 등록
-    public ReviewResponse postReview(ReviewRequest request, List<MultipartFile> images, String identifier) {
+    @Transactional
+    public ReviewResponse postReview(ReviewRequest request, String identifier) {
+
         User user = userRepository.findByIdentifier(identifier).orElseThrow(UserNotFoundException::new);
 
         Review review = Review.create(request.getTitle(), request.getStartDate(), request.getEndDate(),
@@ -47,19 +51,22 @@ public class ReviewService {
                 request.getContent(), request.getTags(), user);
         review = reviewRepository.save(review);
 
-        // 여러 이미지 처리
-        if (request.getImages() != null && !request.getImages().isEmpty()) {
-            for (String imageUrl : request.getImages()) {
-                ReviewImage reviewImage = new ReviewImage(imageUrl, false, review);
+        if (request.getImageUrls() != null) {
+            for (String url : request.getImageUrls()) {
+                ReviewImage reviewImage = new ReviewImage(url, review);
                 reviewImageRepository.save(reviewImage);
                 review.addImage(reviewImage);
             }
         }
+
+        review = reviewRepository.save(review);  // 리뷰 엔티티 업데이트
+
         List<ReviewCommentResponse> emptyCommentsList = new ArrayList<>(); // 새 리뷰에는 댓글이 없으므로 빈 리스트 생성
         return ReviewResponse.from(review, emptyCommentsList); // 저장된 리뷰와 빈 댓글 목록을 전달
     }
 
     // 수정
+    @Transactional
     public ReviewResponse updateReview(Long reviewId, ReviewRequest request, List<String> deleteImageUrls, String identifier) {
 
         Review review = reviewRepository.findById(reviewId)
@@ -100,14 +107,42 @@ public class ReviewService {
 //            }
 //        }
         // Delete images
-        if (deleteImageUrls != null) {
-            for (String url : deleteImageUrls) {
-                reviewImageRepository.findByUrlAndReview(url, review).ifPresent(image -> {
-                    awsS3Service.deleteImageByUrl(image.getUrl());
-                    reviewImageRepository.delete(image);
-                });
+//        if (deleteImageUrls != null) {
+//            for (String url : deleteImageUrls) {
+//                reviewImageRepository.findByUrlAndReview(url, review).ifPresent(image -> {
+//                    awsS3Service.deleteImageByUrl(image.getUrl());
+//                    reviewImageRepository.delete(image);
+//                });
+//            }
+//        }
+        // 이미지 삭제
+        if (deleteImageUrls != null && !deleteImageUrls.isEmpty()) {
+            deleteImageUrls.forEach(url -> {
+                ReviewImage reviewImage = reviewImageRepository.findByUrlAndReview(url, review)
+                        .orElseThrow(ImageUploadFailedException::new);
+                awsS3Service.deleteImageByUrl(url);
+                reviewImageRepository.delete(reviewImage);
+            });
+        }
+
+//        if (newImages != null && !newImages.isEmpty()) {
+//            List<ReviewImage> addedImages = postImage(review, newImages);
+//            for (ReviewImage addedImage : addedImages) {
+//                review.addImage(addedImage);
+//                reviewImageRepository.save(addedImage); // 명시적으로 이미지 엔티티 저장
+//            }
+//        }
+
+        // 새로운 이미지 URL 처리
+        List<String> newImageUrls = request.getNewImageUrls();
+        if (newImageUrls != null) {
+            for (String url : newImageUrls) {
+                ReviewImage newImage = ReviewImage.createImage(url, review);
+                review.addImage(newImage); // 리뷰 객체에 이미지 추가
             }
         }
+
+        reviewRepository.save(review); // 변경사항 저장
 
 //        // Add new images
 //        if (newImages != null && !newImages.isEmpty()) {
@@ -132,23 +167,72 @@ public class ReviewService {
     }
 
     // 이미지 등록
-    public List<ReviewImage> postImage(Review review, List<MultipartFile> images) {
-        List<ReviewImage> savedImages = new ArrayList<>();
-        try {
-            if (images!= null && !images.isEmpty()) {
-                for (MultipartFile file : images) {
-                    String url = awsS3Service.uploadImage(file); // S3에 이미지 업로드
-                    ReviewImage newImage = ReviewImage.createImage(url, review); // 이미지 생성
-                    savedImages.add(reviewImageRepository.save(newImage)); // DB에 저장
+    @Transactional
+    public List<String> postImage(List<MultipartFile> images) {
+        List<String> imageUrls = new ArrayList<>();
+        if (images != null && !images.isEmpty()) {
+            log.info("Processing {} images", images.size());
+
+            for (MultipartFile file : images) {
+                try {
+                    String imageUrl = awsS3Service.uploadImage(file);
+                    imageUrls.add(imageUrl);
+                } catch (IOException e) {
+                    throw new ImageCountExceededException();
+                } catch (MaxUploadSizeExceededException e) {
+                    throw new ImageSizeExceededException();
                 }
             }
-            return savedImages; // 저장된 이미지 리스트 반환
-        } catch (IOException e) {
-            throw new ImageCountExceededException();
-        } catch (MaxUploadSizeExceededException e) {
-            throw new ImageSizeExceededException();
         }
+        return imageUrls;
     }
+//    public List<ReviewImage> postImage(Review review, List<MultipartFile> images) {
+//        List<ReviewImage> savedImages = new ArrayList<>();
+//        try {
+//            if (images!= null && !images.isEmpty()) {
+//                for (MultipartFile file : images) {
+//                    String url = awsS3Service.uploadImage(file); // S3에 이미지 업로드
+//                    ReviewImage newImage = ReviewImage.createImage(url, review); // 이미지 생성
+//                    savedImages.add(reviewImageRepository.save(newImage)); // DB에 저장
+//                }
+//            }
+//            return savedImages; // 저장된 이미지 리스트 반환
+//        } catch (IOException e) {
+//            throw new ImageCountExceededException();
+//        } catch (MaxUploadSizeExceededException e) {
+//            throw new ImageSizeExceededException();
+//        }
+//    }
+
+
+//    이미지 등록
+//    public List<ReviewImage> postImage(Review review, List<MultipartFile> images) {
+//        List<ReviewImage> savedImages = new ArrayList<>();
+//        if (images != null && !images.isEmpty()) {
+//            log.info("Processing {} images for review ID: {}", images.size(), review.getId());
+//
+//            for (MultipartFile file : images) {
+//                try {
+//                    String url = awsS3Service.uploadImage(file); // S3에 이미지 업로드
+//                    log.info("Image uploaded to S3 with URL: {}", url);
+//
+//                    ReviewImage newImage = ReviewImage.createImage(url, review); // 이미지 생성 및 리뷰에 추가
+//                    savedImages.add(newImage); // 생성된 이미지를 리스트에 추가
+//                    review.addImage(newImage); // 리뷰 엔티티에 이미지 추가
+//                    reviewImageRepository.save(newImage); // 이미지 엔티티 저장
+//                    log.info("ReviewImage saved with ID: {} for Review ID: {}", newImage.getId(), review.getId());
+//
+//                } catch (IOException e) {
+//                    throw new ImageCountExceededException();
+//                } catch (MaxUploadSizeExceededException e) {
+//                    throw new ImageSizeExceededException();
+//                }
+//            }
+//        }
+//        return savedImages; // 저장된 이미지 리스트 반환
+//    }
+
+
 
 
     // 상세 조회 (댓글 포함)
@@ -248,48 +332,16 @@ public class ReviewService {
                 .collect(Collectors.toList());
     }
 
-    // 이미지 삭제
-//    private void deleteImages(List<Long> deleteImageIds, Review review) {
-//        review.getReviewImages().forEach(image -> {
-//            if (review.getReviewImages().contains(image)) {
-//                awsS3Service.deleteImage(image.getFileKey());  // 파일 키를 사용하여 S3 파일 삭제
-//                reviewImageRepository.delete(image);
-//            }
-//        });
-//    }
+    // 내 리뷰 조회
+    /*@Transactional(readOnly = true)
+    public Page<ReviewListResponse> searchMyReview(String identifier) {
+        User user = userRepository.findByIdentifier(identifier).orElseThrow(UserNotFoundException::new);
+        Pageable pageable = PageRequest.of(page, pageSize, Sort.by(Sort.Direction.DESC, "id"));
+        Page<Review> myReviews = reviewLikeRepository.findMyReviews(user, pageable);
 
-    // 이미지 추가
-//    private void addImages (List < MultipartFile > images, Review review){
-//        validateImages(images);
-//
-//        images.forEach(image -> {
-//            try {
-//                AwsS3Service.UploadResult uploadResult = awsS3Service.uploadImage(image);
-//                ReviewImage reviewImage = ReviewImage.createImage(uploadResult.getFileUrl(), uploadResult.getFileKey(), review);
-//                review.addImage(reviewImage);
-//                reviewImageRepository.save(reviewImage);
-//            }
-//
-//            // 이미지 업로드 후 예외
-//            catch (IOException e) {
-//                throw new ImageUploadFailedException();
-//            }
-//        });
-//    }
+        List<Review> myReviews = reviewRepository.findMyReviews(user.getId());
+        return myReviews.map(ReviewListResponse::from);
+    }
 
-    // 이미지 업로드 직전 검증 로직
-//    private void validateImages(List<MultipartFile> images) {
-//        final int MAX_IMAGE_COUNT = 10;
-//        final long MAX_IMAGE_SIZE = 10 * 1024 * 1024; // 10MB
-//
-//        if (images.size() > MAX_IMAGE_COUNT) {
-//            throw new ImageCountExceededException();
-//        }
-//
-//        for (MultipartFile image : images) {
-//            if (image.getSize() > MAX_IMAGE_SIZE) {
-//                throw new ImageSizeExceededException();
-//            }
-//        }
-
+     */
 }

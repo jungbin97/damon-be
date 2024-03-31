@@ -1,3 +1,4 @@
+
 package damon.backend.service;
 
 import damon.backend.exception.custom.ImageCountExceededException;
@@ -19,7 +20,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Service
-@RequiredArgsConstructor
+//@RequiredArgsConstructor
 public class AwsS3Service {
     private final S3Client s3Client; // S3Client 주입
 
@@ -30,6 +31,12 @@ public class AwsS3Service {
 
 //    @Value("${cloud.aws.s3.region.static}")
 //    private String region;
+
+    public AwsS3Service(S3Client s3Client, @Value("${cloud.aws.s3.review-prefix}") String reviewPrefix) {
+        this.s3Client = s3Client;
+        this.reviewPrefix = reviewPrefix;
+        Log.info("Review Prefix: " + reviewPrefix);
+    }
 
     public class UploadResult {
         private final String fileKey;

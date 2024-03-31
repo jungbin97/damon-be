@@ -17,5 +17,6 @@ public class ReviewRequest {
     private List<String> suggests;
     private List<String> tags;
     private String content;
-    private List<String> images;
+    private List<String> imageUrls;
+    private List<String> newImageUrls;  // 새 이미지 URL 리스트
 }

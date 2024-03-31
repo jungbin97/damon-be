@@ -16,7 +16,7 @@ public class ReviewImage {
     private Long id;
     private String url;
 
-    private boolean isMain;
+//    private boolean isMain;
 //    private String fileKey;
 
     //리뷰id 매핑
@@ -34,9 +34,9 @@ public class ReviewImage {
     }
 
     // 기존 생성자를 유지하면서 Review 객체를 함께 설정할 수 있는 생성자 추가
-    public ReviewImage(String url, boolean isMain, Review review) {
+    public ReviewImage(String url, Review review) {
         this.url = url;
-        this.isMain = isMain;
+//        this.isMain = isMain;
         this.review = review;
     }
 
