@@ -67,7 +67,7 @@ public class ReviewService {
 
     // 수정
     @Transactional
-    public ReviewResponse updateReview(Long reviewId, ReviewRequest request, List<String> deleteImageUrls, String identifier) {
+    public ReviewResponse updateReview(Long reviewId, ReviewRequest request, String identifier) {
 
         Review review = reviewRepository.findById(reviewId)
                 .orElseThrow(ReviewNotFoundException::new);
@@ -83,81 +83,35 @@ public class ReviewService {
         review.update(request.getTitle(), request.getStartDate(), request.getEndDate(), request.getArea(),
                 request.getCost(), request.getSuggests(), request.getContent(), request.getTags());
 
-        // 이미지 추가 및 삭제
-//        deleteImages(deleteImageIds, review);
-//        addImages(images, review);
-//        review = reviewRepository.save(review);
-
-//        // 이미지 삭제
-//        if (!deleteImageUrls.isEmpty()) {
-//            deleteImageUrls.forEach(awsS3Service::deleteImageByUrl);
-//        }
-//
-//        // 이미지 추가
-//        if (newImages != null && !newImages.isEmpty()) {
-//            for (MultipartFile file : newImages) {
-//                try {
-//                    String url = awsS3Service.uploadImage(file);
-//                    ReviewImage image = new ReviewImage(url, false, review);
-//                    reviewImageRepository.save(image);
-//                } catch (IOException e) {
-//                    // 예외 처리
-//
-//                }
-//            }
-//        }
-        // Delete images
-//        if (deleteImageUrls != null) {
-//            for (String url : deleteImageUrls) {
-//                reviewImageRepository.findByUrlAndReview(url, review).ifPresent(image -> {
-//                    awsS3Service.deleteImageByUrl(image.getUrl());
-//                    reviewImageRepository.delete(image);
-//                });
-//            }
-//        }
-        // 이미지 삭제
+        // 이미지 삭제 로직
+        List<String> deleteImageUrls = request.getDeleteImageUrls();
         if (deleteImageUrls != null && !deleteImageUrls.isEmpty()) {
-            deleteImageUrls.forEach(url -> {
-                ReviewImage reviewImage = reviewImageRepository.findByUrlAndReview(url, review)
-                        .orElseThrow(ImageUploadFailedException::new);
-                awsS3Service.deleteImageByUrl(url);
-                reviewImageRepository.delete(reviewImage);
-            });
+            log.info("리뷰 이미지 삭제: {}", deleteImageUrls);
+            for (String url : deleteImageUrls) {
+                reviewImageRepository.findByUrlAndReview(url, review).ifPresent(image -> {
+                    log.info("데이터베이스에서 이미지 {} 삭제 중", url);
+                    reviewImageRepository.delete(image);
+                    reviewImageRepository.flush(); // 변경 사항 즉시 반영
+                    log.info("데이터베이스에서 이미지 {} 삭제 완료, S3에서 삭제 요청 중", url);
+                    awsS3Service.deleteImageByUrl(url);
+                    log.info("S3에서 이미지 {} 삭제 요청 완료", url);
+                });
+            }
         }
-
-//        if (newImages != null && !newImages.isEmpty()) {
-//            List<ReviewImage> addedImages = postImage(review, newImages);
-//            for (ReviewImage addedImage : addedImages) {
-//                review.addImage(addedImage);
-//                reviewImageRepository.save(addedImage); // 명시적으로 이미지 엔티티 저장
-//            }
-//        }
 
         // 새로운 이미지 URL 처리
         List<String> newImageUrls = request.getNewImageUrls();
-        if (newImageUrls != null) {
+        if (newImageUrls != null && !newImageUrls.isEmpty()) {
+            log.info("새 이미지 추가 중: {}", newImageUrls);
             for (String url : newImageUrls) {
                 ReviewImage newImage = ReviewImage.createImage(url, review);
                 review.addImage(newImage); // 리뷰 객체에 이미지 추가
+                reviewImageRepository.save(newImage);
+                log.info("새 이미지 추가됨: {}", url);
             }
         }
 
         reviewRepository.save(review); // 변경사항 저장
-
-//        // Add new images
-//        if (newImages != null && !newImages.isEmpty()) {
-//            for (MultipartFile file : newImages) {
-//                try {
-//                    String url = awsS3Service.uploadImage(file);
-//                    ReviewImage newImage = new ReviewImage(url, false, review);
-//                    reviewImageRepository.save(newImage);
-//                } catch (IOException e) {
-//                    throw new ImageCountExceededException();
-//                } catch (MaxUploadSizeExceededException e) {
-//                    throw new ImageSizeExceededException();
-//                }
-//            }
-//        }
 
         // 댓글 구조를 다시 조직화
         List<ReviewCommentResponse> organizedComments = commentStructureOrganizer.organizeCommentStructure(reviewId);
@@ -186,54 +140,6 @@ public class ReviewService {
         }
         return imageUrls;
     }
-//    public List<ReviewImage> postImage(Review review, List<MultipartFile> images) {
-//        List<ReviewImage> savedImages = new ArrayList<>();
-//        try {
-//            if (images!= null && !images.isEmpty()) {
-//                for (MultipartFile file : images) {
-//                    String url = awsS3Service.uploadImage(file); // S3에 이미지 업로드
-//                    ReviewImage newImage = ReviewImage.createImage(url, review); // 이미지 생성
-//                    savedImages.add(reviewImageRepository.save(newImage)); // DB에 저장
-//                }
-//            }
-//            return savedImages; // 저장된 이미지 리스트 반환
-//        } catch (IOException e) {
-//            throw new ImageCountExceededException();
-//        } catch (MaxUploadSizeExceededException e) {
-//            throw new ImageSizeExceededException();
-//        }
-//    }
-
-
-//    이미지 등록
-//    public List<ReviewImage> postImage(Review review, List<MultipartFile> images) {
-//        List<ReviewImage> savedImages = new ArrayList<>();
-//        if (images != null && !images.isEmpty()) {
-//            log.info("Processing {} images for review ID: {}", images.size(), review.getId());
-//
-//            for (MultipartFile file : images) {
-//                try {
-//                    String url = awsS3Service.uploadImage(file); // S3에 이미지 업로드
-//                    log.info("Image uploaded to S3 with URL: {}", url);
-//
-//                    ReviewImage newImage = ReviewImage.createImage(url, review); // 이미지 생성 및 리뷰에 추가
-//                    savedImages.add(newImage); // 생성된 이미지를 리스트에 추가
-//                    review.addImage(newImage); // 리뷰 엔티티에 이미지 추가
-//                    reviewImageRepository.save(newImage); // 이미지 엔티티 저장
-//                    log.info("ReviewImage saved with ID: {} for Review ID: {}", newImage.getId(), review.getId());
-//
-//                } catch (IOException e) {
-//                    throw new ImageCountExceededException();
-//                } catch (MaxUploadSizeExceededException e) {
-//                    throw new ImageSizeExceededException();
-//                }
-//            }
-//        }
-//        return savedImages; // 저장된 이미지 리스트 반환
-//    }
-
-
-
 
     // 상세 조회 (댓글 포함)
     @Transactional(readOnly = true)
@@ -285,9 +191,6 @@ public class ReviewService {
             awsS3Service.deleteImageByUrl(reviewImage.getUrl());
             reviewImageRepository.delete(reviewImage);
         }
-
-        // 리뷰와 연관된 모든 이미지를 S3에서 삭제
-//        review.getReviewImages().forEach(image -> awsS3Service.deleteImage(image.getFileKey()));
 
         reviewRepository.delete(review);
     }

@@ -29,9 +29,6 @@ public class AwsS3Service {
     @Value("${cloud.aws.s3.review-prefix}")
     private String reviewPrefix;
 
-//    @Value("${cloud.aws.s3.region.static}")
-//    private String region;
-
     public AwsS3Service(S3Client s3Client, @Value("${cloud.aws.s3.review-prefix}") String reviewPrefix) {
         this.s3Client = s3Client;
         this.reviewPrefix = reviewPrefix;
@@ -56,36 +53,10 @@ public class AwsS3Service {
         }
     }
 
-//    public UploadResult uploadImage(MultipartFile multipartFile) throws IOException {
-//        String fileName = multipartFile.getOriginalFilename();
-//        String extension = fileName.substring(fileName.lastIndexOf("."));
-//        String fileKey = reviewPrefix + UUID.randomUUID().toString() + extension;
-//
-//        s3Client.putObject(PutObjectRequest.builder()
-//                        .bucket(bucket)
-//                        .key(fileKey)
-//                        .build(),
-//                RequestBody.fromInputStream(multipartFile.getInputStream(), multipartFile.getSize()));
-//
-//        String fileUrl = s3Client.utilities().getUrl(builder -> builder.bucket(bucket).key(fileKey)).toString();
-//
-//        return new UploadResult(fileKey, fileUrl);
-//    }
-//
-//    // 3S 내 이미지 삭제
-//    public void deleteImage(String fileKey) {
-//        s3Client.deleteObject(DeleteObjectRequest.builder()
-//                .bucket(bucket)
-//                .key(fileKey)
-//                .build());
-//    }
-
-
     public String uploadImage(MultipartFile file) throws IOException {
         if (file.isEmpty()) {
             throw new IllegalStateException("Cannot upload empty file");
         }
-
 
         String fileName = file.getOriginalFilename();
         String ext = fileName.substring(fileName.lastIndexOf("."));
@@ -150,24 +121,6 @@ public class AwsS3Service {
             throw e;
         }
     }
-//    public void deleteImageByUrl(String imageUrl) {
-//        // URL에서 객체의 키를 추출
-//        String fileKey = imageUrl.substring(imageUrl.indexOf(bucket) + bucket.length() + 1);
-//
-//        try {
-//            // AWS SDK의 deleteObject 메서드를 사용하여 객체 삭제
-//            s3Client.deleteObject(DeleteObjectRequest.builder()
-//                    .bucket(bucket)
-//                    .key(fileKey)
-//                    .build());
-//            Log.info("Object deleted successfully: " + fileKey);
-//        } catch (Exception e) {
-//            Log.error("Error occurred while deleting object: " + fileKey);
-//            throw new RuntimeException("Error deleting object from S3", e);
-//        }
-//    }
-
-
 
     private String extractFileKeyFromUrl(String imageUrl) {
         return imageUrl.substring(imageUrl.indexOf(bucket) + bucket.length() + 1);

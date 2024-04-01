@@ -18,5 +18,6 @@ public class ReviewRequest {
     private List<String> tags;
     private String content;
     private List<String> imageUrls;
-    private List<String> newImageUrls;  // 새 이미지 URL 리스트
+    private List<String> newImageUrls;
+    private List<String> deleteImageUrls;
 }

@@ -74,15 +74,11 @@ public class ReviewController {
             @Schema(description = "리뷰 인덱스", example="1")
             @Valid
             @PathVariable Long reviewId,
-//            @RequestParam("images") Optional<List<MultipartFile>> images,
-//            @RequestParam("deleteImages") Optional<List<Long>> deleteImageIds,
             @RequestBody ReviewRequest reviewRequest,
-            @RequestParam(value = "deleteImageUrls", required = false) List<String> deleteImageUrls,
             @Parameter(description = "유저 식별자", required = true, hidden = true)
             @AuthToken String identifier){
         ReviewResponse updatedReview = reviewService.updateReview(
                 reviewId, reviewRequest,
-                deleteImageUrls,
                 identifier);
 
         return Result.success(updatedReview);
