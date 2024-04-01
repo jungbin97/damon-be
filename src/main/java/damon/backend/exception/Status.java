@@ -26,6 +26,9 @@ public class Status {
     // 404 - Not Found: 리소스를 찾을 수 없음
     public static final String NOT_FOUND = "404 Not Found";
 
+    // 413 - Payload Too Large: 요청 본문이 너무 큼
+    public static final String PAYLOAD_TOO_LARGE = "413 Payload Too Large";
+
     // 500 - Internal Server Error: 서버 내부 오류
     public static final String INTERNAL_SERVER_ERROR = "500 Internal Server Error";
 

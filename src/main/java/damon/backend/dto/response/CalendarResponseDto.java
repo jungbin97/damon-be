@@ -14,6 +14,7 @@ import java.util.List;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Getter
 public class CalendarResponseDto {
+    private UserResponseDTO user;
     private String title;
     private String startDate;
     private String endDate;
@@ -24,11 +25,12 @@ public class CalendarResponseDto {
     public static CalendarResponseDto from(Calendar calendar){
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         return new CalendarResponseDto(
+                UserResponseDTO.from(calendar.getUser()),
                 calendar.getTitle(),
                 calendar.getStartDate().format(formatter),
                 calendar.getEndDate().format(formatter),
                 calendar.getArea(),
                 TravelDetailDto.listFrom(calendar.getTravels())
-        );
+                );
     }
 }

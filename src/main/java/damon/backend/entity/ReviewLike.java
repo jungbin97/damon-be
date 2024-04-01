@@ -14,26 +14,19 @@ import java.lang.annotation.Target;
 @Getter
 @Setter
 public class ReviewLike {
-    //not null 이 너무 많아서 기본값을 not null로 설정
-    @Retention(RetentionPolicy.RUNTIME)
-    @Target(ElementType.FIELD)
-    public @interface NotNull {
-        boolean nullable() default false;
-    }
-
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "review_like_id")
     private Long id;
 
-    //리뷰id 매핑
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "review_id")
     private Review review;
 
-    //멤버id 매핑
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
+
 
     //연관관계 매핑 메서드
     public void setReview(Review review) {
@@ -48,10 +41,14 @@ public class ReviewLike {
         }
     }
 
-    public static ReviewLike addLike(Review review, User user) {
+    // 좋아요
+    public static ReviewLike createLike(Review review, User user) {
         ReviewLike reviewLike = new ReviewLike();
         reviewLike.setReview(review);
         reviewLike.setUser(user);
+        review.getReviewLikes().add(reviewLike);
+        user.getReviewLikes().add(reviewLike);
         return reviewLike;
     }
+
 }

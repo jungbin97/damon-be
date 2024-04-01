@@ -19,28 +19,28 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 
 /**
- * 카카오 API와 통신하여 토큰 및 사용자 정보를 가져오는 유틸리티 클래스입니다.
+ * 네이버 API와 통신하여 토큰 및 사용자 정보를 가져오는 유틸리티 클래스입니다.
  */
 @Component
 @RequiredArgsConstructor
-public class KakaoUtil {
+public class NaverUtil {
 
     private final Environment env;
 
     // 인가 코드로 카카오 토큰 발급
-    public LoginTokenDto getKakaoToken(String code) {
+    public LoginTokenDto getNaverToken(String code) {
         try {
-            String kakaoTokenUrl = "https://kauth.kakao.com/oauth/token";
-            String grantType = "authorization_code";
-            String kakaoClientId = env.getProperty("kakao.client-id");
-            String kakaoClientSecret = env.getProperty("kakao.client-secret");
-            String kakaoRedirectUri = env.getProperty("kakao.redirect-uri");
+            String naverTokenUrl = "https://nid.naver.com/oauth2.0/token";
+            String grant_type = "authorization_code";
+            String naverClientId = env.getProperty("naver.client-id");
+            String naverClientSecret = env.getProperty("naver.client-secret");
+            String naverRedirectUri = env.getProperty("naver.redirect-uri");
 
-            UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(kakaoTokenUrl)
-                    .queryParam("grant_type", grantType)
-                    .queryParam("client_id", kakaoClientId)
-                    .queryParam("client_secret", kakaoClientSecret)
-                    .queryParam("redirect_uri", kakaoRedirectUri)
+            UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(naverTokenUrl)
+                    .queryParam("grant_type", grant_type)
+                    .queryParam("client_id", naverClientId)
+                    .queryParam("client_secret", naverClientSecret)
+                    .queryParam("redirect_uri", naverRedirectUri)
                     .queryParam("code", code);
 
             RestTemplate restTemplate = new RestTemplate();
@@ -50,22 +50,21 @@ public class KakaoUtil {
         }
     }
 
-    public UserDto getKakaoUser(String accessToken) {
+    public UserDto getNaverUser(String accessToken) {
         try {
-            String reqURL = "https://kapi.kakao.com/v2/user/me";
+            String reqURL = "https://openapi.naver.com/v1/nid/me";
 
             JsonObject jsonObject = getJsonObject(accessToken, reqURL);
-            String identifier = jsonObject.get("id").getAsString();
 
-            JsonObject properties = jsonObject.getAsJsonObject("properties");
-            String nickname = properties.get("nickname").getAsString();
-            String profile = properties.get("profile_image").getAsString();
+            JsonObject response = jsonObject.getAsJsonObject("response");
+            String identifier = response.get("id").getAsString();
+            String nickname = response.get("name").getAsString();
+            String profile = response.get("profile_image").getAsString();
 
             // 이메일 허용 x 시 빈 문자열 받도록 처리
-            JsonObject kakaoAccount = jsonObject.getAsJsonObject("kakao_account");
             String email = "";
-            if (kakaoAccount.has("email")) {
-                email = kakaoAccount.get("email").getAsString();
+            if (response.has("email")) {
+                email = response.get("email").getAsString();
             }
 
             return new UserDto(identifier, nickname, email, profile);
